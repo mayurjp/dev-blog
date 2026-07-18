@@ -25,3 +25,17 @@ $grey-color-dark:  #c9d1d9;
   vertical-align: -4px;
   margin-right: 6px;
 }
+
+// minima's code/pre boxes keep their own light background (#eef/#fff,
+// hardcoded in the theme, not tied to the variables above) and were never
+// given an explicit text color -- they relied on minima's original
+// near-black body text being inherited. Now that $text-color above is a
+// light color, inline `code` and the plain (non-highlighted) text inside
+// fenced blocks were inheriting light-on-light and disappearing. Pin the
+// text color back to dark so code stays a legible light island, matching
+// rouge's syntax-highlighting token colors (already designed for a light
+// background and left untouched).
+pre,
+code {
+  color: #111;
+}
