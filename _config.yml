@@ -1,8 +1,8 @@
 # --- Site settings -----------------------------------------------------------
-title: "Kubernetes, from Real Repos"
+title: "Real Repos, Real Ops"
 description: >-
-  In-depth Kubernetes concepts learned from actual production repositories —
-  not hello-world YAML.
+  In-depth Kubernetes, Docker, and Microservices concepts learned from actual
+  production repositories — not hello-world YAML.
 author: Mayur
 
 # IMPORTANT: set these two to match your GitHub before publishing.
