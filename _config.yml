@@ -21,9 +21,9 @@ permalink: /:categories/:title/
 # GitHub Pages builds with minima 2.5.1 (pinned by the github-pages gem,
 # regardless of what Gemfile says), which predates minima's skin: and
 # minima.social_links: config keys -- both are silently ignored on 2.5.1.
-# Dark theme is instead hand-rolled via assets/main.scss (Sass variable
-# overrides), and the GitHub footer icon uses the plain top-level key below,
-# which IS supported by minima 2.5.1's _includes/social.html.
+# The site uses minima's stock (light) styling with no color overrides.
+# The GitHub footer icon uses the plain top-level key below, which IS
+# supported by minima 2.5.1's _includes/social.html.
 github_username: mayurjp
 logo: /assets/logo.svg
 

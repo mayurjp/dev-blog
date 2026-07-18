@@ -3,16 +3,6 @@
 
 @charset "utf-8";
 
-// Dark theme: minima 2.5.1 (the version GitHub Pages actually builds with)
-// has no built-in skin support, so this hand-rolls one by overriding the
-// theme's !default Sass variables before importing it.
-$text-color:       #e6edf3;
-$background-color: #0d1117;
-$brand-color:      #58a6ff;
-$grey-color:       #8b949e;
-$grey-color-light: #30363d;
-$grey-color-dark:  #c9d1d9;
-
 @import "minima";
 
 .site-header {
@@ -24,18 +14,4 @@ $grey-color-dark:  #c9d1d9;
   width: 22px;
   vertical-align: -4px;
   margin-right: 6px;
-}
-
-// minima's code/pre boxes keep their own light background (#eef/#fff,
-// hardcoded in the theme, not tied to the variables above) and were never
-// given an explicit text color -- they relied on minima's original
-// near-black body text being inherited. Now that $text-color above is a
-// light color, inline `code` and the plain (non-highlighted) text inside
-// fenced blocks were inheriting light-on-light and disappearing. Pin the
-// text color back to dark so code stays a legible light island, matching
-// rouge's syntax-highlighting token colors (already designed for a light
-// background and left untouched).
-pre,
-code {
-  color: #111;
 }

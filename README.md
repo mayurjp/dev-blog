@@ -53,6 +53,10 @@ bundle exec jekyll serve
 ```
 
 ## Change the look
-`_config.yml` → `minima.skin:` accepts `classic`, `dark`, `solarized`,
-`solarized-dark`, or `auto`. For a fancier theme later, look at
-`jekyll-theme-chirpy` (needs a GitHub Actions build instead of the native one).
+GitHub Pages builds with minima 2.5.1, which predates minima's `skin:`
+config key, so that setting is silently ignored — the site just uses
+minima's stock (light) styling. To customize colors, override minima's
+`!default` Sass variables (`$text-color`, `$background-color`,
+`$brand-color`, `$grey-color*`) in `assets/main.scss` before `@import
+"minima";`. For a fancier theme, look at `jekyll-theme-chirpy` (needs a
+GitHub Actions build instead of the native one).
