@@ -31,6 +31,12 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
 
+# Render posts even if their front-matter `date` is later than the build
+# clock. Legacy GitHub Pages builds only rebuild on push (no scheduled
+# rebuild), so without this, forward-dated posts stay invisible until
+# someone pushes again on/after their date.
+future: true
+
 # --- Housekeeping ------------------------------------------------------------
 exclude:
   - Gemfile
