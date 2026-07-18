@@ -6,13 +6,6 @@ categories: kubernetes
 tags: [kubernetes, services, dns, kube-proxy, endpointslices]
 ---
 
-
-> **Concept:** Kubernetes `Service`, service discovery, and the networking control plane.
-> **Real repo used:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → `kubernetes-manifests/frontend.yaml` (Google's "Online Boutique", an 11-microservice reference app).
-> **Format:** problem → solution → clean YAML → **production reality (real repo)** → question bank.
-
----
-
 ## 1. The Engineering Problem: the volatile IP address
 
 You have a **Frontend** web app that needs to call a **Backend** API over HTTP.
@@ -217,13 +210,8 @@ For a **headless Service**, DNS returns the **individual pod IPs** instead of on
 
 ---
 
-## 6. What changed vs. the plain example (my tweak, summarized)
+## Source
 
-- Anchored the exact same concept to a **real 11-service app** so you see discovery-by-DNS at scale (9 backends, 0 IPs), not a single toy backend.
-- Added **Service types** and the **two-Services-one-pod-set** pattern from the real manifest.
-- Made **readiness → endpoint gating** explicit — the production fact most tutorials skip.
-- Upgraded the question bank to current control-plane reality: **EndpointSlices** (not just Endpoints), **kube-proxy iptables/IPVS/nftables** distribution truth, **CoreDNS + `ndots:5`** latency trap, and **headless Services**.
-
----
-
-*Source manifest: [GoogleCloudPlatform/microservices-demo — kubernetes-manifests/frontend.yaml](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/frontend.yaml).*
+- **Concept:** Kubernetes `Service`, service discovery, and the networking control plane
+- **Domain:** kubernetes
+- **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`kubernetes-manifests/frontend.yaml`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/frontend.yaml) — Google's "Online Boutique," an 11-microservice reference app
