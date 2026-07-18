@@ -1,0 +1,27 @@
+---
+---
+
+@charset "utf-8";
+
+// Dark theme: minima 2.5.1 (the version GitHub Pages actually builds with)
+// has no built-in skin support, so this hand-rolls one by overriding the
+// theme's !default Sass variables before importing it.
+$text-color:       #e6edf3;
+$background-color: #0d1117;
+$brand-color:      #58a6ff;
+$grey-color:       #8b949e;
+$grey-color-light: #30363d;
+$grey-color-dark:  #c9d1d9;
+
+@import "minima";
+
+.site-header {
+  border-top: none;
+}
+
+.site-logo {
+  height: 32px;
+  width: 32px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
