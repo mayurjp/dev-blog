@@ -1,0 +1,35 @@
+# --- Site settings -----------------------------------------------------------
+title: "Kubernetes, from Real Repos"
+description: >-
+  In-depth Kubernetes concepts learned from actual production repositories —
+  not hello-world YAML.
+author: Mayur
+
+# IMPORTANT: set these two to match your GitHub before publishing.
+# If your repo is  https://github.com/<username>/<repo>  then:
+#   - url      = https://<username>.github.io
+#   - baseurl  = /<repo>     (leave EMPTY "" if the repo is named <username>.github.io)
+url: "https://mayurjp.github.io"
+baseurl: "/k8s-blog"
+
+# --- Theme & build -----------------------------------------------------------
+theme: minima
+markdown: kramdown
+highlighter: rouge
+permalink: /:year/:month/:day/:title/
+
+minima:
+  skin: dark            # options: classic, dark, solarized, solarized-dark, auto
+  social_links:
+    github: mayurjp
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# --- Housekeeping ------------------------------------------------------------
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
