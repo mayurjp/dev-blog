@@ -1,43 +1,26 @@
 # Kubernetes-from-real-repos — Jekyll blog
 
-A free GitHub Pages + Jekyll blog. Your first post (the Services lesson) is
-already in `_posts/`.
+A free GitHub Pages + Jekyll blog. Live at https://mayurjp.github.io/k8s-blog/,
+publishing from `github.com/mayurjp/k8s-blog` (branch `main`, root). One-time
+setup is done — new posts just need to land in `_posts/` and get pushed.
 
-## One-time setup (about 5 minutes)
+## Content pipeline (how new posts get made)
 
-### 1. Create the GitHub repo
-- Go to github.com → New repository.
-- Name it `k8s-blog` (or anything). Make it **Public**.
-- Do NOT add a README (this folder already has everything).
+Posts come from the `kubernetes-repo-lesson` Claude Code skill, and progress
+through its curriculum is tracked in `../content-tracker.md` (one level up,
+outside this repo, so pipeline bookkeeping never gets pushed publicly).
 
-> Naming tip: if you name the repo exactly `YOUR-USERNAME.github.io`, the site
-> lives at the clean root URL `https://YOUR-USERNAME.github.io` and you should
-> set `baseurl: ""` in `_config.yml`. Any other repo name serves at
-> `https://YOUR-USERNAME.github.io/<repo>` and needs `baseurl: "/<repo>"`.
+The loop, driven on-demand — no scheduled automation:
 
-### 2. Edit `_config.yml`
-Replace the placeholders:
-- `url:` → `https://YOUR-USERNAME.github.io`
-- `baseurl:` → `/k8s-blog` (or `""` if you used the `<username>.github.io` name)
-- `social_links.github:` → your GitHub username
-
-### 3. Push this folder to the repo
-From inside this `k8s-blog` folder:
-
-```bash
-git init
-git add .
-git commit -m "Initial blog + Services lesson"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/k8s-blog.git
-git push -u origin main
-```
-
-### 4. Turn on GitHub Pages
-- Repo → **Settings** → **Pages**.
-- Under "Build and deployment", Source = **Deploy from a branch**.
-- Branch = **main**, folder = **/ (root)**. Save.
-- Wait ~1 minute; your site is live at the URL from step 2.
+1. Ask for the next post (e.g. "generate the next kubernetes lesson post").
+2. Claude reads `content-tracker.md` for the next pending topic and the most
+   recently used source repo, runs the `kubernetes-repo-lesson` skill, and
+   saves the result into `_posts/YYYY-MM-DD-<slug>.md` with front matter
+   matching the schema below.
+3. Claude updates `content-tracker.md`, marking that topic `done` with the
+   post filename, repo used, and date.
+4. Claude stops there — **no auto commit/push**. Review the draft, then
+   commit and push (or ask Claude to) when you're ready to publish.
 
 ## Publishing a new post
 Drop a markdown file into `_posts/` named `YYYY-MM-DD-title.md` with this
