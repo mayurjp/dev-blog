@@ -10,7 +10,7 @@ author: Mayur
 #   - url      = https://<username>.github.io
 #   - baseurl  = /<repo>     (leave EMPTY "" if the repo is named <username>.github.io)
 url: "https://mayurjp.github.io"
-baseurl: "/k8s-blog"
+baseurl: "/dev-blog"
 
 # --- Theme & build -----------------------------------------------------------
 theme: minima

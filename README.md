@@ -1,22 +1,25 @@
-# Kubernetes-from-real-repos — Jekyll blog
+# Real Repos, Real Ops — Jekyll blog
 
-A free GitHub Pages + Jekyll blog. Live at https://mayurjp.github.io/k8s-blog/,
-publishing from `github.com/mayurjp/k8s-blog` (branch `main`, root). One-time
+A free GitHub Pages + Jekyll blog. Live at https://mayurjp.github.io/dev-blog/,
+publishing from `github.com/mayurjp/dev-blog` (branch `main`, root). One-time
 setup is done — new posts just need to land in `_posts/` and get pushed.
 
 ## Content pipeline (how new posts get made)
 
-Posts come from the `kubernetes-repo-lesson` Claude Code skill, and progress
-through its curriculum is tracked in `../content-tracker.md` (one level up,
-outside this repo, so pipeline bookkeeping never gets pushed publicly).
+Posts come from the `tech-repo-lesson` Claude Code skill (Kubernetes, Docker,
+Microservices, and more — one `domains/<name>.md` file per topic area), and
+progress through each domain's curriculum is tracked in `../content-tracker.md`
+(one level up, outside this repo, so pipeline bookkeeping never gets pushed
+publicly).
 
 The loop, driven on-demand — no scheduled automation:
 
-1. Ask for the next post (e.g. "generate the next kubernetes lesson post").
+1. Ask for the next post (e.g. "generate the next kubernetes/docker/
+   microservices lesson post").
 2. Claude reads `content-tracker.md` for the next pending topic and the most
-   recently used source repo, runs the `kubernetes-repo-lesson` skill, and
-   saves the result into `_posts/YYYY-MM-DD-<slug>.md` with front matter
-   matching the schema below.
+   recently used source repo in that domain, runs the `tech-repo-lesson`
+   skill, and saves the result into `_posts/YYYY-MM-DD-<slug>.md` with front
+   matter matching the schema below.
 3. Claude updates `content-tracker.md`, marking that topic `done` with the
    post filename, repo used, and date.
 4. Claude stops there — **no auto commit/push**. Review the draft, then
