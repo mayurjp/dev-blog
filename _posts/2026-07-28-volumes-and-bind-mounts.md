@@ -4,6 +4,7 @@ title: "Where does a container's data go when the container dies?"
 date: 2026-07-28 09:00:00 +0530
 categories: docker
 tags: [docker, volumes, bind-mounts, compose, storage]
+published: false
 ---
 
 ## 1. The Engineering Problem: a container's filesystem is disposable by design

@@ -4,6 +4,7 @@ title: "How does one container find another when IPs change on every restart?"
 date: 2026-07-31 09:00:00 +0530
 categories: docker
 tags: [docker, networking, bridge, dns, service-discovery, traefik]
+published: false
 ---
 
 ## 1. The Engineering Problem: the address book is out of date the moment you write it

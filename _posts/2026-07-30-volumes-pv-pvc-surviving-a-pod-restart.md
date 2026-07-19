@@ -4,6 +4,7 @@ title: "If a Pod is disposable, how does its data ever survive a restart?"
 date: 2026-07-30 09:00:00 +0530
 categories: kubernetes
 tags: [kubernetes, volumes, persistentvolumes, storage]
+published: false
 ---
 
 ## 1. The Engineering Problem: a container's filesystem dies with the container

@@ -4,6 +4,7 @@ title: "How do you start twenty dependent containers in the right order, reliabl
 date: 2026-08-03 09:00:00 +0530
 categories: docker
 tags: [docker, compose, orchestration, yaml-anchors, depends-on]
+published: false
 ---
 
 ## 1. The Engineering Problem: one service is easy, a system of services is not

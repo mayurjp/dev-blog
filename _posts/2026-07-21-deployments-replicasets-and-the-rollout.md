@@ -4,6 +4,7 @@ title: "Who actually recreates a crashed Pod, and how do you update one without 
 date: 2026-07-21 09:00:00 +0530
 categories: kubernetes
 tags: [kubernetes, deployments, replicasets, rollouts]
+published: false
 ---
 
 ## 1. The Engineering Problem: Pods can't heal themselves, and can't be upgraded in place

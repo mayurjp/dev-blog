@@ -4,6 +4,7 @@ title: "How do you guarantee a Pod runs on every node, not just somewhere in the
 date: 2026-08-05 09:00:00 +0530
 categories: kubernetes
 tags: [kubernetes, daemonsets, scheduler, node-agents]
+published: false
 ---
 
 ## 1. The Engineering Problem: some workloads are per-node, not per-application

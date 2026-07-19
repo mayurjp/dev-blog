@@ -4,6 +4,7 @@ title: "When you run docker run, what actually creates the container?"
 date: 2026-07-25 09:00:00 +0530
 categories: docker
 tags: [docker, containerd, runc, oci, runtime]
+published: false
 ---
 
 ## 1. The Engineering Problem: "the Docker daemon does it" isn't an answer

@@ -4,6 +4,7 @@ title: "Should a mobile client know that catalog and ordering are different serv
 date: 2026-07-26 09:00:00 +0530
 categories: microservices
 tags: [microservices, api-gateway, yarp, reverse-proxy, bff]
+published: false
 ---
 
 ## 1. The Engineering Problem

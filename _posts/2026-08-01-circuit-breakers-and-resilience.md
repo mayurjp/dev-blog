@@ -4,6 +4,7 @@ title: "If a dependency is dying, should your own code have to notice?"
 date: 2026-08-01 09:00:00 +0530
 categories: microservices
 tags: [microservices, circuit-breaker, istio, service-mesh, resilience]
+published: false
 ---
 
 ## 1. The Engineering Problem

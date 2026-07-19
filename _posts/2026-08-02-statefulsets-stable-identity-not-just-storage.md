@@ -4,6 +4,7 @@ title: "What do you do when your replicas can't be interchangeable?"
 date: 2026-08-02 09:00:00 +0530
 categories: kubernetes
 tags: [kubernetes, statefulsets, sharding, controller]
+published: false
 ---
 
 ## 1. The Engineering Problem: Deployment replicas are anonymous, on purpose

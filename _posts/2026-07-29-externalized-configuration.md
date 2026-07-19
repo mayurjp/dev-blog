@@ -4,6 +4,7 @@ title: "Why shouldn't changing a timeout require rebuilding the service?"
 date: 2026-07-29 09:00:00 +0530
 categories: microservices
 tags: [microservices, spring-cloud-config, configuration, twelve-factor]
+published: false
 ---
 
 ## 1. The Engineering Problem
