@@ -76,6 +76,20 @@ public void SetShippedStatus()
 
 ## 4. Production reality (from dotnet/eShop's Ordering domain)
 
+The three artifacts below live in two different folders of the same project — the
+vocabulary staying identical across that folder boundary is part of the evidence:
+
+```
+src/Ordering.Domain/
+├── AggregatesModel/OrderAggregate/
+│   ├── Order.cs                        ← OrderStatus enum + Set*Status() methods
+│   └── OrderStatus.cs
+└── Events/
+    ├── OrderStartedDomainEvent.cs       ← same words as the enum/methods, past tense
+    ├── OrderShippedDomainEvent.cs
+    └── OrderCancelledDomainEvent.cs
+```
+
 This is the real `Order` aggregate from `dotnet/eShop`. Three separate artifacts —
 written at different points, by different methods on this class — use the *identical*
 vocabulary, which is the actual evidence the ubiquitous language held across the

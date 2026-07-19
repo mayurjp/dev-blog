@@ -83,6 +83,19 @@ services.AddScoped<IOrderRepository, EfOrderRepository>();
 
 ## 4. Production reality (from dotnet/eShop's Ordering service)
 
+Where these three projects actually sit in the repo, before looking at what's inside each:
+
+```
+src/
+├── Ordering.Domain/                              (zero references to anything else)
+│   └── AggregatesModel/OrderAggregate/
+│       └── IOrderRepository.cs                   ← the contract is declared HERE
+├── Ordering.Infrastructure/                       (references ONLY Ordering.Domain)
+│   └── Repositories/
+│       └── OrderRepository.cs                     ← the implementation lives HERE instead
+└── Ordering.API/                                  (references Domain AND Infrastructure)
+```
+
 These are the real, current `.csproj` files from `dotnet/eShop` — the actual compiled
 dependency graph, not a diagram of one. Trimmed to the `ProjectReference` entries that
 matter here:
