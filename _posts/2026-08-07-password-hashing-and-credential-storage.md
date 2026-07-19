@@ -218,6 +218,17 @@ What this teaches that a hello-world "just call bcrypt" example can't:
   currently defaulting to 100,000 in this codebase) precisely so an operator can raise
   it as hardware gets faster, without changing a line of application code.
 
+One stale fact worth correcting here: PBKDF2 is a real, still-safe KDF when tuned
+correctly, but it's no longer OWASP's top recommendation — that's now Argon2id, a
+*memory-hard* function that resists GPU/ASIC parallelization in a way PBKDF2 (which
+only costs CPU time, not memory) doesn't. ASP.NET Core Identity's built-in hasher uses
+PBKDF2 because it predates Argon2id's standardization and ships with zero external
+dependencies via .NET's own cryptography APIs — a real, deliberate engineering
+tradeoff, not an oversight. If you're building new auth from scratch today, reach for
+an Argon2id library first; if you're maintaining a system already on
+`PasswordHasher<TUser>`, the versioned envelope above is exactly what would let you
+migrate to a new algorithm later without a forced password reset.
+
 ---
 
 ## Source
