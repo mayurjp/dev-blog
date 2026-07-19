@@ -101,16 +101,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: productcatalogservice
-  labels:
-    app: productcatalogservice
+  # ... labels and the selector are elided; unremarkable Deployment boilerplate ...
 spec:
-  selector:
-    matchLabels:
-      app: productcatalogservice
   template:                                # <-- THIS block is the actual Pod spec.
-    metadata:
-      labels:
-        app: productcatalogservice
+    # ... template metadata elided ...
     spec:
       serviceAccountName: productcatalogservice   # Pod-level identity: ALL containers
                                                      # in this Pod authenticate to the
@@ -135,19 +129,11 @@ spec:
           privileged: false
           readOnlyRootFilesystem: true
         image: productcatalogservice
-        ports:
-        - containerPort: 3550
-        env:
-        - name: PORT
-          value: "3550"
-        - name: DISABLE_PROFILER
-          value: "1"
+        # ... ports and env vars elided; not central to the Pod-vs-container scoping point ...
         readinessProbe:                       # Container-level, but the Pod's overall
           grpc:                               # "Ready" condition is the AND of every
             port: 3550                        # container's readiness.
-        livenessProbe:
-          grpc:
-            port: 3550
+        # ... livenessProbe elided; same shape as readinessProbe above ...
         resources:                            # Per-container. A Pod's total resource
           requests:                           # footprint is the SUM across containers —
             cpu: 100m                         # there's no single "Pod resources" field.

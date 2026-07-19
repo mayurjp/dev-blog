@@ -99,21 +99,12 @@ namespace Orleans.Runtime.Placement;
 // See: https://www.ledjonbehluli.com/posts/orleans_resource_placement_kalman/
 internal sealed class ResourceOptimizedPlacementDirector : IPlacementDirector, ISiloStatisticsChangeListener
 {
-    private readonly ConcurrentDictionary<SiloAddress, ResourceStatistics> _siloStatistics = [];
-
     public Task<SiloAddress> OnAddActivation(PlacementStrategy strategy, PlacementTarget target, IPlacementContext context)
     {
         var compatibleSilos = context.GetCompatibleSilos(target);
 
-        if (compatibleSilos.Length == 1)
-        {
-            return Task.FromResult(compatibleSilos[0]);
-        }
-
-        if (_siloStatistics.IsEmpty)
-        {
-            return Task.FromResult(compatibleSilos[Random.Shared.Next(compatibleSilos.Length)]);
-        }
+        // ... trivial-case guards elided: a single compatible silo, or no stats
+        // collected yet for this cluster, both short-circuit to a direct/random pick ...
 
         (int Index, float Score, float? LocalSiloScore) pick;
         pick = MakePick(/* ...stack-allocated span of candidate stats... */);
