@@ -38,6 +38,8 @@ service mesh is in the picture. A sidecar proxy (Envoy, via Istio) sits
 next to every service instance and intercepts every outbound call, for
 every service, in every language, without any application code involved.
 
+**Macro view — where circuit breaking sits (this section's boundary):**
+
 ```
    caller's pod                          callee's pod
 ┌────────────────┐                    ┌────────────────┐
@@ -51,6 +53,27 @@ every service, in every language, without any application code involved.
 └────────────────┘  outlierDetection   └────────────────┘
                      applied HERE, before
                      the request even leaves
+```
+
+**Zoom in — the timeline of a failing request** (the value here is *when*
+Envoy stops trying, not just that it eventually does; numbers match the
+`consecutive5xxErrors: 5` / `baseEjectionTime: 30s` DestinationRule in
+section 3):
+
+```
+t=0    caller ──req 1──▶ payments-pod-A  ──▶ 500          (1st consecutive 5xx)
+t=1s   caller ──req 2──▶ payments-pod-A  ──▶ 500          (2nd)
+t=2s   caller ──req 3──▶ payments-pod-A  ──▶ 500          (3rd)
+t=3s   caller ──req 4──▶ payments-pod-A  ──▶ 500          (4th)
+t=4s   caller ──req 5──▶ payments-pod-A  ──▶ 500          (5th — threshold hit)
+       ▼
+       Envoy ejects payments-pod-A from the load-balancing pool for
+       baseEjectionTime = 30s ("circuit open" — sidecar's own state,
+       not the app's)
+t=4s…34s  caller ──req N──▶ Envoy ──▶ FAILS FAST, never reaches pod-A
+                            (other healthy pods in the pool still served)
+t=34s  ejection timer expires ──▶ pod-A back in the pool ("half-open" —
+       next request is a real probe, not a guaranteed pass)
 ```
 
 Core truths to hold:
