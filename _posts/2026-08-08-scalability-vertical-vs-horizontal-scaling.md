@@ -36,21 +36,12 @@ The fix used by real distributed runtimes (Microsoft Orleans is one) is **load-a
 placement**: score a handful of candidate nodes on their actual current resource usage,
 and place the new unit of work on the best-scoring one.
 
-```
-New unit of work arrives (e.g. a new Orleans "grain" activation)
-        │
-        ▼
-Cluster of N nodes, each publishing live stats (CPU %, memory, active work count)
-        │
-        ▼
-Sample K candidate nodes (K ≈ √N — not all N, not just 1)
-        │
-        ▼
-Score each candidate: weighted combination of CPU usage, memory pressure,
-                       and current work count
-        │
-        ▼
-Place the new work on whichever candidate scores best
+```mermaid
+flowchart TD
+    A["New unit of work arrives<br/>(e.g. a new Orleans grain activation)"] --> B["Cluster of N nodes, each publishing live stats<br/>(CPU %, memory, active work count)"]
+    B --> C["Sample K candidate nodes (K ≈ √N — not all N, not just 1)"]
+    C --> D["Score each candidate: weighted combination of<br/>CPU usage, memory pressure, and current work count"]
+    D --> E["Place the new work on whichever candidate scores best"]
 ```
 
 Three truths to hold:

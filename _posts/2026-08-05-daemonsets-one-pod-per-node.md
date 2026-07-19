@@ -24,22 +24,20 @@ You need a controller whose entire job is "one Pod, on every node that matches t
 
 A **DaemonSet** doesn't take a `replicas` count at all — it takes a Pod template and a node-matching criterion, and ensures exactly one matching Pod exists on every eligible node, continuously.
 
-```
-DaemonSet "node-exporter"
-        │  DaemonSet controller reconciles against the CURRENT node list:
-        │  for each eligible node, does a Pod already exist there?
-        ▼
-   node-A          node-B          node-C          (new) node-D
-   ┌────────┐     ┌────────┐     ┌────────┐        ┌────────┐
-   │ Pod     │     │ Pod     │     │ Pod     │  ──▶  │ Pod     │ ← auto-created
-   │ (host-  │     │ (host-  │     │ (host-  │        │  the moment node-D
-   │  scoped)│     │  scoped)│     │  scoped)│        │  joins the cluster
-   └────────┘     └────────┘     └────────┘        └────────┘
+```mermaid
+flowchart TD
+    DS["DaemonSet node-exporter<br/>controller reconciles against the CURRENT node list:<br/>for each eligible node, does a Pod already exist there?"]
+    DS --> PA["node-A: Pod (host-scoped)"]
+    DS --> PB["node-B: Pod (host-scoped)"]
+    DS --> PC["node-C: Pod (host-scoped)"]
+    ND["(new) node-D joins the cluster"] -.->|"auto-created the moment it joins"| PD["node-D: Pod (host-scoped)"]
+    DS --> PD
 
-   Node cordoned/tainted without a matching toleration → its Pod is
-   evicted, and no replacement is scheduled elsewhere (there's nowhere
-   "elsewhere" to go — DaemonSet Pods are tied to a specific node).
+    classDef newnode fill:#fff3cd,stroke:#b8860b,color:#5c4400;
+    class ND,PD newnode;
 ```
+
+A node cordoned/tainted without a matching toleration has its Pod evicted, and no replacement is scheduled elsewhere — there's nowhere "elsewhere" to go, since DaemonSet Pods are tied to a specific node.
 
 Three things to hold onto:
 

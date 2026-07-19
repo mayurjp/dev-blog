@@ -22,22 +22,12 @@ what they happened to remember to run first.
 
 ## 2. The Technical Solution: an ephemeral, identical environment, triggered automatically
 
-```
-git push / open a Pull Request
-        │
-        ▼
-GitHub Actions matches the event against a workflow's trigger
-        │
-        ▼
-A fresh, ephemeral runner is provisioned (a clean VM, every single time —
-nothing left over from any previous run)
-        │
-        ▼
-Steps execute in order: checkout the exact commit → install the pinned
-toolchain → build → test
-        │
-        ▼
-Pass/fail is reported back onto that commit/PR as a status check
+```mermaid
+flowchart TD
+    A["git push / open a Pull Request"] --> B["GitHub Actions matches the event against a workflow's trigger"]
+    B --> C["A fresh, ephemeral runner is provisioned<br/>(a clean VM, every single time — nothing left over from any previous run)"]
+    C --> D["Steps execute in order:<br/>checkout the exact commit → install the pinned toolchain → build → test"]
+    D --> E["Pass/fail is reported back onto that commit/PR as a status check"]
 ```
 
 Three truths to hold:

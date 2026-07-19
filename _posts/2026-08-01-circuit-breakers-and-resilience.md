@@ -39,19 +39,15 @@ every service, in every language, without any application code involved.
 
 **Macro view — where circuit breaking sits (this section's boundary):**
 
-```
-   caller's pod                          callee's pod
-┌────────────────┐                    ┌────────────────┐
-│  app container  │                    │  app container  │
-│       │          │                   │       ▲          │
-│       ▼          │                    │       │          │
-│  ┌───────────┐  │   HTTP/gRPC call   │  ┌───────────┐  │
-│  │  sidecar  │──┼────────────────────┼─▶│  sidecar  │  │
-│  │  (Envoy)  │  │  connectionPool    │  │  (Envoy)  │  │
-│  └───────────┘  │  limits +          │  └───────────┘  │
-└────────────────┘  outlierDetection   └────────────────┘
-                     applied HERE, before
-                     the request even leaves
+```mermaid
+flowchart LR
+    subgraph Caller["caller's pod"]
+        AppC["app container"] --> SidecarC["sidecar (Envoy)"]
+    end
+    subgraph Callee["callee's pod"]
+        SidecarE["sidecar (Envoy)"] --> AppE["app container"]
+    end
+    SidecarC -- "HTTP/gRPC call<br/>connectionPool limits + outlierDetection<br/>applied HERE, before the request even leaves" --> SidecarE
 ```
 
 **Zoom in — the timeline of a failing request** (the value here is *when*
@@ -59,20 +55,25 @@ Envoy stops trying, not just that it eventually does; numbers match the
 `consecutive5xxErrors: 5` / `baseEjectionTime: 30s` DestinationRule in
 section 3):
 
-```
-t=0    caller ──req 1──▶ payments-pod-A  ──▶ 500          (1st consecutive 5xx)
-t=1s   caller ──req 2──▶ payments-pod-A  ──▶ 500          (2nd)
-t=2s   caller ──req 3──▶ payments-pod-A  ──▶ 500          (3rd)
-t=3s   caller ──req 4──▶ payments-pod-A  ──▶ 500          (4th)
-t=4s   caller ──req 5──▶ payments-pod-A  ──▶ 500          (5th — threshold hit)
-       ▼
-       Envoy ejects payments-pod-A from the load-balancing pool for
-       baseEjectionTime = 30s ("circuit open" — sidecar's own state,
-       not the app's)
-t=4s…34s  caller ──req N──▶ Envoy ──▶ FAILS FAST, never reaches pod-A
-                            (other healthy pods in the pool still served)
-t=34s  ejection timer expires ──▶ pod-A back in the pool ("half-open" —
-       next request is a real probe, not a guaranteed pass)
+```mermaid
+sequenceDiagram
+    participant Caller as caller
+    participant Envoy as Envoy sidecar
+    participant PodA as payments-pod-A
+
+    loop 5 consecutive requests (t=0 to t=4s)
+        Caller->>PodA: request
+        PodA-->>Caller: 500
+    end
+    Note over Envoy,PodA: threshold hit — Envoy ejects payments-pod-A from the pool<br/>for baseEjectionTime = 30s ("circuit open" — sidecar's own state, not the app's)
+
+    loop t=4s to t=34s
+        Caller->>Envoy: request
+        Envoy-->>Caller: FAILS FAST, never reaches pod-A
+    end
+    Note over Envoy,PodA: other healthy pods in the pool still served
+
+    Note over Envoy,PodA: t=34s — ejection timer expires, pod-A back in the pool<br/>("half-open" — next request is a real probe, not a guaranteed pass)
 ```
 
 Core truths to hold:

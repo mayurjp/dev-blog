@@ -21,21 +21,10 @@ You need one file that declares the whole system — every service, how they dep
 
 **Stale-fact correction up front:** `docker-compose` (the standalone Python binary, V1) is legacy. The current implementation is `docker compose` (no hyphen) — a CLI plugin built into Docker Engine/Desktop, implementing the [Compose Specification](https://docs.docker.com/reference/compose-file/). It's a different binary with different performance characteristics, not just a renamed alias — tutorials still teaching `docker-compose up` are teaching the legacy tool.
 
-```
-compose.yaml (or docker-compose.yml)
-        │  docker compose up
-        ▼
-┌───────────────────────────────────────────────────────┐
-│ Compose CLI: parses the file into a dependency graph      │
-│  - resolves `depends_on` ordering                          │
-│  - creates one shared default network (unless overridden)  │
-│  - creates/attaches declared volumes                        │
-└───────────────────────────────────────────────────────┘
-        │
-        ▼
-   starts services whose dependencies are already
-   "ready" (per depends_on condition), waits on the rest,
-   in parallel where the graph allows it
+```mermaid
+flowchart TD
+    A["compose.yaml (or docker-compose.yml)"] -- "docker compose up" --> B["Compose CLI: parses the file into a dependency graph<br/>- resolves depends_on ordering<br/>- creates one shared default network (unless overridden)<br/>- creates/attaches declared volumes"]
+    B --> C["starts services whose dependencies are already ready<br/>(per depends_on condition), waits on the rest,<br/>in parallel where the graph allows it"]
 ```
 
 Three things to hold onto:

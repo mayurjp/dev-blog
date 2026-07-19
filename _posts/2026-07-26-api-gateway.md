@@ -35,17 +35,18 @@ is a single edge process that owns routing, path rewriting, and
 cross-cutting policy, so the client sees one stable surface instead of N
 internal services.
 
-```
-  Mobile client                  mobile-bff (YARP)              Backend services
-┌────────────┐   /catalog-api/*  ┌──────────────────┐  cluster  ┌──────────────┐
-│            │──────────────────▶│  route match  ────┼─────────▶│  catalog-api │
-│            │   /api/orders/*   │  + path rewrite   │           └──────────────┘
-│            │──────────────────▶│  + api-version    │  cluster  ┌──────────────┐
-│            │   /identity/*     │    query match     │─────────▶│ ordering-api │
-└────────────┘──────────────────▶│                    │           └──────────────┘
-                                  └──────────────────┘  cluster  ┌──────────────┐
-                                                          ───────▶│ identity-api │
-                                                                  └──────────────┘
+```mermaid
+flowchart LR
+    MC["Mobile client"]
+    subgraph BFF["mobile-bff (YARP)"]
+        RM["route match + path rewrite + api-version query match"]
+    end
+    MC -- "/catalog-api/*" --> RM
+    MC -- "/api/orders/*" --> RM
+    MC -- "/identity/*" --> RM
+    RM -- "cluster" --> Catalog["catalog-api"]
+    RM -- "cluster" --> Ordering["ordering-api"]
+    RM -- "cluster" --> Identity["identity-api"]
 ```
 
 Core truths to hold:

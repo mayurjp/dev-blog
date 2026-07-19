@@ -19,33 +19,22 @@ Historically Docker *was* one big daemon process that did image management, netw
 
 Modern Docker Engine is not one process — it's a chain, and each link exists to isolate a failure domain from the one above it.
 
-```
-docker run nginx
-      │
-      ▼
-┌────────────┐   image pull, CLI/API, build,
-│   dockerd    │   networking, volumes — the
-└────────────┘   Docker-specific layer
-      │  gRPC
-      ▼
-┌────────────┐   container lifecycle, image
-│ containerd   │   storage (content store +
-└────────────┘   snapshotter), OCI orchestration
-      │  spawns one per container
-      ▼
-┌────────────────────────┐  holds stdin/stdout/stderr,
-│ containerd-shim-runc-v2  │  reports exit status,
-└────────────────────────┘  reparents to become the
-      │  execs, then EXITS      container's real parent
-      ▼
-┌────────────┐
-│    runc      │  creates namespaces + cgroups per
-└────────────┘  the OCI runtime spec, execs the
-      │  container's PID 1, then exits
-      ▼
-┌──────────────────────┐
-│ container process (PID 1) │  ← now supervised by the shim, not by runc
-└──────────────────────┘
+```mermaid
+sequenceDiagram
+    participant U as docker run nginx
+    participant D as dockerd
+    participant C as containerd
+    participant S as containerd-shim-runc-v2
+    participant R as runc
+    participant P as container process (PID 1)
+
+    U->>D: image pull, CLI/API, build, networking, volumes (Docker-specific layer)
+    D->>C: gRPC
+    C->>S: spawns one shim per container
+    S->>R: creates namespaces + cgroups per the OCI runtime spec
+    R->>P: execs the container's PID 1
+    Note over R: runc then exits
+    Note over S,P: P is now supervised by the shim, not by runc
 ```
 
 Three things to hold onto:

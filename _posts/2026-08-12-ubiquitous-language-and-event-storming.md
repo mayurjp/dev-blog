@@ -30,17 +30,11 @@ developers and domain experts stand at a board and name every business-significa
 occurrence as a sticky note, written in **past tense**, because that's how a domain
 expert actually narrates a process ("the order *shipped*," not "we *ship* the order").
 
-```
-Event Storming workshop (before any code exists):
-   domain expert + developer, together, at a board
-                    │
-                    ▼
-   one sticky note per business-significant occurrence, PAST TENSE:
-      "Order Started"    "Order Shipped"    "Order Cancelled"
-                    │
-                    ▼
-   becomes code, wording UNCHANGED:
-      OrderStartedDomainEvent   OrderShippedDomainEvent   OrderCancelledDomainEvent
+```mermaid
+flowchart TD
+    A["Event Storming workshop (before any code exists):<br/>domain expert + developer, together, at a board"]
+    A --> B["one sticky note per business-significant occurrence, PAST TENSE:<br/>Order Started · Order Shipped · Order Cancelled"]
+    B --> C["becomes code, wording UNCHANGED:<br/>OrderStartedDomainEvent · OrderShippedDomainEvent · OrderCancelledDomainEvent"]
 ```
 
 Three truths to hold:

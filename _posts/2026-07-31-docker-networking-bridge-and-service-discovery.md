@@ -21,31 +21,19 @@ You need containers to find each other by a stable **name**, resolved fresh ever
 
 Every Docker network of type `bridge` gets a private, isolated Layer-2-ish segment on the host, and — critically — every **user-defined** bridge network (as opposed to the single default `bridge` network every host has out of the box) comes with Docker's built-in DNS server wired in automatically.
 
-```
-docker network create app-net          (or: compose creates one implicitly per project)
-                │
-                ▼
-┌──────────────────────────────────────────────────────────┐
-│ app-net (user-defined bridge)                                │
-│                                                                │
-│  ┌──────────┐        DNS query "db"         ┌──────────┐     │
-│  │ container: │  ───────────────────────►    │ embedded   │     │
-│  │   web       │  ◄───────────────────────    │ DNS server │     │
-│  └──────────┘   resolves to db's CURRENT IP  │ 127.0.0.11 │     │
-│        │                                       └──────────┘     │
-│        │  connects directly, container-to-container            │
-│        ▼                                                        │
-│  ┌──────────┐                                                  │
-│  │ container: │                                                  │
-│  │    db       │                                                  │
-│  └──────────┘                                                  │
-└──────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Web as container: web
+    participant DNS as embedded DNS server (127.0.0.11)
+    participant DB as container: db
 
-Single host  →  bridge network   (what's above)
-Multiple hosts (Swarm) → overlay network: same DNS-by-name model,
-                          but traffic is encapsulated (VXLAN) and
-                          routed between the Docker daemons on each host
+    Note over Web,DB: app-net (user-defined bridge)<br/>docker network create app-net (or compose creates one implicitly per project)
+    Web->>DNS: DNS query "db"
+    DNS-->>Web: resolves to db's CURRENT IP
+    Web->>DB: connects directly, container-to-container
 ```
+
+Single host → bridge network (what's above). Multiple hosts (Swarm) → overlay network: same DNS-by-name model, but traffic is encapsulated (VXLAN) and routed between the Docker daemons on each host.
 
 Three things to hold onto:
 

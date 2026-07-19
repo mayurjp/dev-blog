@@ -24,44 +24,45 @@ Kubernetes inserts a permanent routing layer *in front of* the volatile pods. Th
 
 **Macro view — the routing layer in front of volatile pods:**
 
-```
-[ Frontend Pod ]
-       │  http://backend:80   (DNS name, never changes)
-       ▼
-┌───────────────────────────────────────────────┐
-│  Service: backend                              │
-│  ClusterIP: 10.96.0.10   (virtual, stable)     │
-│  selector: app=my-backend                      │
-└───────────────────────────────────────────────┘
-       │  kube-proxy rewrites dest IP → a live pod
-       ├─► 10.244.1.5   (backend pod, Ready)
-       └─► 10.244.2.82  (backend pod, Ready)
-             ▲
-             └─ a NOT-Ready pod is NOT in this list — it receives no traffic
+```mermaid
+flowchart TD
+    FE["Frontend Pod"] -- "http://backend:80 (DNS name, never changes)" --> Svc
+    subgraph Svc["Service: backend"]
+        ClusterIP["ClusterIP: 10.96.0.10 (virtual, stable)<br/>selector: app=my-backend"]
+    end
+    ClusterIP -- "kube-proxy rewrites dest IP" --> P1["10.244.1.5 (backend pod, Ready)"]
+    ClusterIP -- "kube-proxy rewrites dest IP" --> P2["10.244.2.82 (backend pod, Ready)"]
+    NotReady["a NOT-Ready pod"] -. "excluded from this list — receives no traffic" .-> ClusterIP
+
+    classDef excluded fill:#f8d7da,stroke:#c0392b,color:#611a15;
+    class NotReady excluded;
 ```
 
 **Zoom in — the exact timeline this lesson opened with** (a backend pod
 crashing mid-traffic; this is what Q1/Q7 below are actually describing):
 
-```
-t=0s     EndpointSlice for "backend": [10.244.1.5 (Ready), 10.244.2.82 (Ready)]
-         kube-proxy's iptables/IPVS rules route to both.
+```mermaid
+sequenceDiagram
+    participant RC as ReplicaSet
+    participant EPS as EndpointSlice controller
+    participant KP as kube-proxy
 
-t=1s     backend pod 10.244.1.5 crashes / is OOM-killed.
-         EndpointSlice controller notices the pod is gone almost immediately:
-         EndpointSlice for "backend": [10.244.2.82 (Ready)]
-         kube-proxy reprograms rules within milliseconds — 10.244.1.5 is
-         no longer a DNAT target, so in-flight retries land only on .82.
+    Note over EPS: t=0s — backend: [.1.5 (Ready), .2.82 (Ready)]
+    Note over KP: iptables/IPVS rules route to both
 
-t=2s     Deployment's ReplicaSet creates a REPLACEMENT pod: 10.244.1.9
-         (new IP, new UID — the crashed pod is never "restarted in place")
+    Note over RC: t=1s — pod .1.5 crashes / OOM-killed
+    EPS->>EPS: notices almost immediately, drops .1.5
+    Note over EPS: backend: [.2.82 (Ready)]
+    EPS->>KP: reprogram rules
+    Note over KP: .1.5 no longer a DNAT target, in-flight retries land only on .2.82
 
-t=2s..   new pod is NOT yet in the EndpointSlice — it's excluded until its
-         readinessProbe passes at least once, same gate as any other pod.
+    Note over RC: t=2s — creates REPLACEMENT pod .1.9 (new IP, new UID)
+    Note over EPS: .1.9 excluded until its readinessProbe passes once
 
-t=12s    10.244.1.9 passes its readinessProbe.
-         EndpointSlice for "backend": [10.244.2.82 (Ready), 10.244.1.9 (Ready)]
-         kube-proxy adds it back to the routing set — traffic resumes to it.
+    Note over RC: t=12s — .1.9 passes readinessProbe
+    Note over EPS: backend: [.2.82 (Ready), .1.9 (Ready)]
+    EPS->>KP: add .1.9 back to the routing set
+    Note over KP: traffic resumes to .1.9
 ```
 
 The three things to hold onto:

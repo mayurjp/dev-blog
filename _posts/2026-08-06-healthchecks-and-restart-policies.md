@@ -22,49 +22,42 @@ You need the container runtime itself to know the difference between "process al
 
 **Macro view — the two independent mechanisms:**
 
-```
-                    every `interval`
-                          │
-                          ▼
-              ┌─────────────────────┐
-              │  HEALTHCHECK command   │  exit 0 → healthy
-              │  (runs INSIDE the       │  exit 1 → unhealthy
-              │   container's namespace)│  (after `retries` consecutive failures)
-              └─────────────────────┘
-                          │
-     health state feeds `depends_on: condition: service_healthy`
-     in OTHER services — this is what makes startup ordering real
+```mermaid
+flowchart TD
+    HC["HEALTHCHECK command (every interval)<br/>runs INSIDE the container's namespace<br/>exit 0 → healthy, exit 1 → unhealthy<br/>(after retries consecutive failures)"]
+    HC -- "health state feeds depends_on: condition: service_healthy<br/>in OTHER services — this is what makes startup ordering real" --> Other["other services"]
 
-
-   container's PID 1 process exits
-                          │
-                          ▼
-              ┌─────────────────────┐
-              │   restart policy       │  no / always / on-failure / unless-stopped
-              └─────────────────────┘
-                          │
-              dockerd (via containerd) decides whether
-              to start a fresh container from the same
-              image+config, and how aggressively to retry
+    Exit["container's PID 1 process exits"] --> RP["restart policy<br/>no / always / on-failure / unless-stopped"]
+    RP -- "dockerd (via containerd) decides whether to start a fresh<br/>container from the same image+config, and how aggressively to retry" --> Fresh["fresh container"]
 ```
 
 **Zoom in — the timeline of `api` flipping unhealthy**, using this lesson's
 own `interval: 10s` / `retries: 3` / `start_period: 15s` (the `api` service
 in section 3):
 
-```
-t=0s     container starts. start_period grace window begins (15s) —
-         failures in this window do NOT count toward `retries`.
-t=10s    probe runs → fails (still inside start_period, doesn't count)
-t=15s    start_period ends. Ordinary counting begins from here.
-t=20s    probe runs → fails                                    [1/3]
-t=30s    probe runs → fails                                    [2/3]
-t=40s    probe runs → fails a 3rd consecutive time              [3/3]
-         → health state flips to "unhealthy"
-         → any OTHER service with depends_on: api: condition: service_healthy
-           is now blocked/held, and `docker inspect` reports unhealthy
-t=50s    probe runs → succeeds → health state flips back to "healthy" immediately
-         (recovery isn't gated by a separate threshold — one success clears it)
+```mermaid
+sequenceDiagram
+    participant D as dockerd
+    participant A as api container
+    participant Dep as other services (depends_on: service_healthy)
+
+    Note over D,A: t=0s — container starts, start_period grace window begins (15s)<br/>failures in this window do NOT count toward retries
+    D->>A: probe (t=10s)
+    A-->>D: fails (still inside start_period, doesn't count)
+    Note over D,A: t=15s — start_period ends, ordinary counting begins
+
+    D->>A: probe (t=20s)
+    A-->>D: fails (1 of 3)
+    D->>A: probe (t=30s)
+    A-->>D: fails (2 of 3)
+    D->>A: probe (t=40s)
+    A-->>D: fails (3 of 3, threshold hit)
+    Note over D: health state flips to "unhealthy"
+    D->>Dep: block/hold (docker inspect reports unhealthy)
+
+    D->>A: probe (t=50s)
+    A-->>D: succeeds
+    Note over D: health state flips back to "healthy" immediately<br/>(recovery isn't gated by a separate threshold, one success clears it)
 ```
 
 Three things to hold onto:

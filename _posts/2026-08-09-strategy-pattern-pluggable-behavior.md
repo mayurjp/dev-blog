@@ -25,18 +25,14 @@ This is the Strategy pattern: define a minimal common contract, put each algorit
 behind its own class that implements it, and have the calling ("context") code hold
 only a reference to the *abstraction* — never to a concrete type.
 
-```
-Caller code:
-    pipeline.Execute(() => CallDownstreamService());
-                │
-                ▼
-    ResiliencePipeline (the "context" — knows nothing about WHICH strategy)
-                │
-                ▼
-    ResilienceStrategy (abstract contract — ExecuteCore(...))
-        │            │            │              │
-        ▼            ▼            ▼              ▼
-   RetryStrategy  CircuitBreaker  TimeoutStrategy  FallbackStrategy
+```mermaid
+flowchart TD
+    Caller["Caller code:<br/>pipeline.Execute(() => CallDownstreamService())"] --> Pipeline["ResiliencePipeline<br/>(the context — knows nothing about WHICH strategy)"]
+    Pipeline --> Strategy["ResilienceStrategy (abstract contract — ExecuteCore(...))"]
+    Strategy --> Retry["RetryStrategy"]
+    Strategy --> Breaker["CircuitBreaker"]
+    Strategy --> Timeout["TimeoutStrategy"]
+    Strategy --> Fallback["FallbackStrategy"]
 ```
 
 Three truths to hold:

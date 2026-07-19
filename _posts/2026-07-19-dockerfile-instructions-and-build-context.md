@@ -21,29 +21,11 @@ You need the setup ritual itself to be a file: checked into git, diffable in a P
 
 A Dockerfile is an ordered list of instructions. Each one is executed against the current image state and (for filesystem-touching instructions) produces a new layer on top of it — the layer mechanics themselves are their own lesson; this one is about the instruction set and how the build actually runs.
 
-```
-docker build .
-        │
-        ▼
-┌───────────────────────────────────────────────────────┐
-│ Docker CLI: reads the Dockerfile + build context (".") │
-│ sends both to the BUILDER, not to dockerd directly     │
-└───────────────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────────────┐
-│ BuildKit (default builder since Docker Engine 23.0)    │
-│  - parses the Dockerfile into a dependency graph        │
-│  - executes independent instructions in parallel         │
-│  - resolves FROM images, runs RUN/COPY steps in          │
-│    isolated build containers                             │
-└───────────────────────────────────────────────────────┘
-        │
-        ▼
-┌───────────────────────────────────────────────────────┐
-│ containerd content store: new layers written, tagged    │
-│ as an image → this is the artifact `docker run` starts   │
-└───────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["docker build ."] --> B["Docker CLI: reads the Dockerfile + build context (.)<br/>sends both to the BUILDER, not to dockerd directly"]
+    B --> C["BuildKit (default builder since Docker Engine 23.0)<br/>- parses the Dockerfile into a dependency graph<br/>- executes independent instructions in parallel<br/>- resolves FROM images, runs RUN/COPY steps in isolated build containers"]
+    C --> D["containerd content store: new layers written, tagged as an image<br/>this is the artifact docker run starts"]
 ```
 
 Three things to hold onto:

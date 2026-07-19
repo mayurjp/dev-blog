@@ -22,25 +22,22 @@ A Docker image isn't one big filesystem blob. It's a **stack of read-only layers
 
 Every Dockerfile instruction that touches the filesystem — `RUN`, `COPY`, `ADD` — produces exactly one new layer: an immutable, content-addressed diff of what that instruction changed. Instructions that only touch image *metadata* (`ENV`, `CMD`, `LABEL`, `EXPOSE`) don't add a filesystem layer at all.
 
-```
-Image (read-only layers, stacked bottom-up):
-┌────────────────────────────────────┐
-│ Layer 4: COPY . /app                │  ← invalidated on ANY source file change
-├────────────────────────────────────┤
-│ Layer 3: RUN pip install -r ...     │  ← cache HIT only if Layer 2's input is unchanged
-├────────────────────────────────────┤
-│ Layer 2: COPY requirements.txt      │  ← cache HIT only if requirements.txt content is unchanged
-├────────────────────────────────────┤
-│ Layer 1: FROM python:3.11-slim      │  ← base image layers, pulled once, reused by every image built on it
-└────────────────────────────────────┘
-                 │  overlay2 merges these into one view
-                 ▼
-Running container:
-┌────────────────────────────────────┐
-│ thin WRITABLE layer                 │  ← only layer that changes at runtime; deleted when the container is removed
-├────────────────────────────────────┤
-│ (all image layers above, read-only) │
-└────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Image["Image (read-only layers, stacked bottom-up)"]
+        direction TD
+        L1["Layer 1: FROM python:3.11-slim<br/>base image, pulled once, reused by every image built on it"]
+        L2["Layer 2: COPY requirements.txt<br/>cache HIT only if requirements.txt content is unchanged"]
+        L3["Layer 3: RUN pip install -r ...<br/>cache HIT only if Layer 2's input is unchanged"]
+        L4["Layer 4: COPY . /app<br/>invalidated on ANY source file change"]
+        L1 --> L2 --> L3 --> L4
+    end
+    Image -- "overlay2 merges these into one view" --> RO
+    subgraph Container["Running container"]
+        RO["all image layers above (read-only)"]
+        WR["thin WRITABLE layer<br/>only layer that changes at runtime,<br/>deleted when the container is removed"]
+        RO --> WR
+    end
 ```
 
 `dockerd` doesn't manage layers itself — it delegates to **containerd**, which owns the *content store* (the actual layer blobs, each addressed by a SHA-256 digest) and the *snapshotter* that mounts those layers into a live `overlay2` filesystem. When a container actually starts, containerd hands off to **runc**, the low-level OCI runtime that creates the Linux namespaces/cgroups and execs the process inside them. By the time `runc` runs, it doesn't know or care about layers — it just sees one merged root filesystem. Layers are purely a build-and-storage concern, handled below that.

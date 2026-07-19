@@ -25,22 +25,30 @@ A Deployment has no concept of "replica #0" as a durable fact. You need a contro
 
 A **StatefulSet** manages Pods with a fixed, ordered identity: `<statefulset-name>-0`, `-1`, `-2`, ... Each ordinal keeps its name, its stable DNS entry, and (optionally) its own persistent volume, across every reschedule.
 
+```mermaid
+flowchart TD
+    SS["StatefulSet app, replicas: 3<br/>requires a Headless Service (clusterIP: None) —<br/>YOU create this, the StatefulSet does not create it for you"]
+    SS --> P0["app-0<br/>stable DNS: app-0.app.ns.svc.cluster.local<br/>optional PVC: data-app-0"]
+    SS --> P1["app-1<br/>stable DNS: app-1.app.ns.svc.cluster.local<br/>optional PVC: data-app-1"]
+    SS --> P2["app-2<br/>stable DNS: app-2.app.ns.svc.cluster.local<br/>optional PVC: data-app-2"]
 ```
-StatefulSet "app"  replicas: 3
-        │  requires a Headless Service (clusterIP: None) — YOU create this,
-        │  the StatefulSet does not create it for you.
-        ▼
-   app-0            app-1            app-2
-   stable DNS:      stable DNS:      stable DNS:
-   app-0.app.ns.    app-1.app.ns.    app-2.app.ns.
-   svc.cluster.local svc.cluster.local svc.cluster.local
 
-   (optional) volumeClaimTemplates → one PVC PER ordinal, e.g.
-   data-app-0, data-app-1, data-app-2 — each follows ITS pod, not shared
+Default `podManagementPolicy: OrderedReady`, scaling up 0 → 3:
 
-Default podManagementPolicy: OrderedReady
-   scale up:   app-0 created → must be Running+Ready → THEN app-1 → THEN app-2
-   scale down: reverse order, one at a time
+```mermaid
+sequenceDiagram
+    participant SC as StatefulSet controller
+    participant P0 as app-0
+    participant P1 as app-1
+    participant P2 as app-2
+
+    SC->>P0: create
+    P0-->>SC: Running + Ready
+    SC->>P1: create (only after app-0 is Ready)
+    P1-->>SC: Running + Ready
+    SC->>P2: create (only after app-1 is Ready)
+    P2-->>SC: Running + Ready
+    Note over SC,P2: scale down happens in reverse order, one at a time
 ```
 
 Three things to hold onto:

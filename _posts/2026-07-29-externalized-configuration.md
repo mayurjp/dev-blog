@@ -39,19 +39,16 @@ a secret store — keyed by application name and active profile; every other
 service fetches its config over the network at startup instead of shipping
 it inside the build.
 
-```
-   ┌───────────────┐  GET /customers-service/docker   ┌───────────────┐
-   │ customers-svc │──────────────────────────────────▶│ config-server │
-   │ (boots, then  │◀────────────────────────────────── │               │
-   │  fetches cfg) │      yaml/properties response      └───────┬───────┘
-   └───────────────┘                                            │
-                                                          reads from
-                                                                 ▼
-                                                    ┌─────────────────────┐
-                                                    │  git repo (source   │
-                                                    │  of truth, its own  │
-                                                    │  review/deploy loop)│
-                                                    └─────────────────────┘
+```mermaid
+sequenceDiagram
+    participant CS as customers-svc (boots, then fetches cfg)
+    participant Cfg as config-server
+    participant Git as git repo (source of truth, its own review/deploy loop)
+
+    CS->>Cfg: GET /customers-service/docker
+    Cfg->>Git: reads from
+    Git-->>Cfg: yaml/properties
+    Cfg-->>CS: yaml/properties response
 ```
 
 Core truths to hold:

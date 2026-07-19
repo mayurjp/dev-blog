@@ -21,21 +21,16 @@ You need storage that is decoupled from any single container **and** any single 
 
 Kubernetes actually has two different problems bundled under "volumes," and conflating them is the single most common source of confusion:
 
-```
-                         Pod lifetime                    Beyond the Pod
-                    ┌──────────────────────┐      ┌────────────────────────────┐
-container fs        │ emptyDir, configMap,  │      │  PersistentVolumeClaim      │
-(dies w/ container) │ secret volumes        │      │  (PVC) — a namespaced        │
-                     │ (dies w/ the Pod)      │      │  REQUEST for storage         │
-                     └──────────────────────┘      │        │                     │
-                                                     │        ▼ bound to             │
-                                                     │  PersistentVolume (PV)        │
-                                                     │  — the actual storage         │
-                                                     │  resource, cluster-scoped,    │
-                                                     │  usually created ON DEMAND    │
-                                                     │  by a StorageClass's          │
-                                                     │  provisioner (a CSI driver)   │
-                                                     └────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph PodLife["Pod lifetime"]
+        E["container fs (dies w/ container)<br/>emptyDir, configMap, secret volumes<br/>(dies w/ the Pod)"]
+    end
+    subgraph Beyond["Beyond the Pod"]
+        PVC["PersistentVolumeClaim (PVC)<br/>a namespaced REQUEST for storage"]
+        PV["PersistentVolume (PV)<br/>the actual storage resource, cluster-scoped,<br/>usually created ON DEMAND by a StorageClass's<br/>provisioner (a CSI driver)"]
+        PVC -- "bound to" --> PV
+    end
 ```
 
 Three things to hold onto:

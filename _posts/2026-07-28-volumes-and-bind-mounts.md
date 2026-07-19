@@ -21,21 +21,14 @@ You need a way to say "this specific directory inside the container is not dispo
 
 Docker gives you two mechanisms that both attach host storage into a container's filesystem, and the distinction between them is the whole lesson:
 
-```
-┌───────────────────────────────────────────────────────────┐
-│ NAMED VOLUME                                                 │
-│  docker manages the location on disk (under                 │
-│  /var/lib/docker/volumes/<name>/_data on Linux)               │
-│  referenced by NAME, not a host path                          │
-│  container →  /var/lib/mysql  ──────►  managed volume storage │
-└───────────────────────────────────────────────────────────┘
-
-┌───────────────────────────────────────────────────────────┐
-│ BIND MOUNT                                                    │
-│  YOU choose the exact host path                               │
-│  container →  /etc/nginx/conf.d/default.conf  ───►  ./proxy/nginx.conf (host)│
-│  changes on either side are visible on the other IMMEDIATELY  │
-└───────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph NV["NAMED VOLUME — docker manages the location on disk<br/>(under /var/lib/docker/volumes/ on Linux), referenced by NAME, not a host path"]
+        C1["container: /var/lib/mysql"] --> MV["managed volume storage"]
+    end
+    subgraph BM["BIND MOUNT — YOU choose the exact host path<br/>changes on either side are visible on the other IMMEDIATELY"]
+        C2["container: /etc/nginx/conf.d/default.conf"] <--> Host["./proxy/nginx.conf (host)"]
+    end
 ```
 
 Three things to hold onto:

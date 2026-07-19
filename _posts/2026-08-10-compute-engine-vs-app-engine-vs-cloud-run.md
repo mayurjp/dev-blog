@@ -21,22 +21,12 @@ traffic, and how does it get a cold request served when it does that?**
 
 ## 2. The Technical Solution: where the "always something running" assumption actually breaks
 
-```
-Compute Engine (IaaS)          GKE Autopilot (managed PaaS)        Cloud Run (serverless)
-─────────────────────          ─────────────────────────────       ───────────────────────
-You provision the VM.          Google provisions/patches the       No cluster concept at all.
-It runs 24/7 whether or        underlying nodes; you still         Zero instances can mean
-not it's serving traffic.      define Pods/HPA — a baseline         literally zero running
-You patch, scale, and pay      of pods is still always              containers, and zero cost,
-for uptime, not usage.         scheduled and running.                until a request arrives.
-                                                                          │
-                                                                          ▼
-                                                          An "activator" component sits in
-                                                          front of your (possibly zero)
-                                                          instances, intercepts the request,
-                                                          triggers a cold start if needed,
-                                                          then routes traffic in — billed
-                                                          per-request, not per-uptime.
+```mermaid
+flowchart LR
+    CE["Compute Engine (IaaS)<br/>You provision the VM. It runs 24/7 whether or not<br/>it's serving traffic. You patch, scale, and pay for uptime, not usage."]
+    GKE["GKE Autopilot (managed PaaS)<br/>Google provisions/patches the underlying nodes,<br/>you still define Pods/HPA — a baseline of pods<br/>is still always scheduled and running."]
+    CR["Cloud Run (serverless)<br/>No cluster concept at all. Zero instances can mean<br/>literally zero running containers, and zero cost,<br/>until a request arrives."]
+    CR --> Act["the activator component sits in front of your (possibly zero)<br/>instances, intercepts the request, triggers a cold start if needed,<br/>then routes traffic in — billed per-request, not per-uptime"]
 ```
 
 Three truths to hold:

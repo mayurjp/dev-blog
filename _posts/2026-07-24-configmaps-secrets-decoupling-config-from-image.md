@@ -26,26 +26,18 @@ Kubernetes stores configuration as its own API objects — **ConfigMap** for ord
 
 **Macro view — where the kubelet injects each object:**
 
-```
-API server / etcd
-┌─────────────────────┐      ┌─────────────────────┐
-│ ConfigMap            │      │ Secret               │
-│ data:                │      │ data: (base64)       │
-│   log-level: "info"  │      │   db-password: "***" │
-└──────────┬────────────┘      └──────────┬────────────┘
-           │                              │
-           │ kubelet reads both when      │
-           │ starting the Pod's containers│
-           ▼                              ▼
-┌──────────────────────────────────────────────────┐
-│  Pod                                              │
-│  container env:                                    │
-│    LOG_LEVEL=info            ← from ConfigMap       │
-│    DB_PASSWORD=hunter2       ← from Secret          │
-│  OR mounted as files:                               │
-│    /etc/config/log-level                            │
-│    /etc/secret/db-password   ← tmpfs, not disk       │
-└──────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph API["API server / etcd"]
+        CM["ConfigMap<br/>data: log-level: info"]
+        Sec["Secret<br/>data: (base64) db-password: ***"]
+    end
+    CM -- "kubelet reads both when starting the Pod's containers" --> Pod
+    Sec -- "kubelet reads both when starting the Pod's containers" --> Pod
+    subgraph Pod["Pod"]
+        Env["container env:<br/>LOG_LEVEL=info (from ConfigMap)<br/>DB_PASSWORD=hunter2 (from Secret)"]
+        Files["OR mounted as files:<br/>/etc/config/log-level<br/>/etc/secret/db-password (tmpfs, not disk)"]
+    end
 ```
 
 **Zoom in — the same ConfigMap edit, two different outcomes over time**
@@ -53,21 +45,22 @@ API server / etcd
 mounts don't just differ in mechanism, they diverge in *when* a change
 actually lands):
 
-```
-t=0     app-config: LOG_LEVEL=info      Pod starts, kubelet injects both ways:
-                                          - env var LOG_LEVEL=info        (frozen copy)
-                                          - /etc/config/LOG_LEVEL → "info" (live file)
+```mermaid
+sequenceDiagram
+    participant U as kubectl
+    participant CM as app-config ConfigMap
+    participant Env as env var (in container)
+    participant File as /etc/config/LOG_LEVEL (mounted file)
 
-t=10m   kubectl edit configmap app-config
-        LOG_LEVEL: "info" → "debug"
+    Note over CM,File: t=0 — Pod starts, kubelet injects both ways
+    CM->>Env: LOG_LEVEL=info (frozen copy)
+    CM->>File: LOG_LEVEL → "info" (live file)
 
-t=10m   env var LOG_LEVEL inside the running container: still "info"
-        (nothing re-reads it — would need a Pod restart to pick up "debug")
+    U->>CM: t=10m — kubectl edit configmap app-config
+    Note over CM: LOG_LEVEL: "info" → "debug"
 
-t=~11m  /etc/config/LOG_LEVEL on disk: now reads "debug"
-        (kubelet's periodic sync interval updated the mounted file —
-         no restart needed — but the APP must itself notice the file
-         changed; most apps don't hot-reload automatically)
+    Note over Env: t=10m — still "info"<br/>(nothing re-reads it, needs a Pod restart to pick up "debug")
+    Note over File: t=~11m — now reads "debug"<br/>(kubelet's periodic sync updated the file, no restart needed,<br/>but the APP must itself notice the change, most don't hot-reload)
 ```
 
 Three things to hold onto:

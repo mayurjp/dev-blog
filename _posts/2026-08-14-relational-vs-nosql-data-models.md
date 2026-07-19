@@ -25,21 +25,12 @@ distributes load and one that quietly funnels every write onto a single node.
 
 ## 2. The Technical Solution: the shard key drives a real range-assignment, not a label
 
-```
-A document is inserted
-        │
-        ▼
-extractShardKeyFromDoc(doc) pulls the shard key's value out of that document
-        │
-        ▼
-That value falls within some chunk's key range: [ min, max )
-        │
-        ▼
-Every chunk is explicitly owned by one shard (config.chunks: { min, max, shard })
-        │
-        ▼
-A background balancer migrates whole chunks between shards — reassigning
-which shard owns a key range — to keep load even as data grows unevenly
+```mermaid
+flowchart TD
+    A["A document is inserted"] --> B["extractShardKeyFromDoc(doc) pulls the shard key's<br/>value out of that document"]
+    B --> C["That value falls within some chunk's key range: [min, max)"]
+    C --> D["Every chunk is explicitly owned by one shard<br/>(config.chunks: {min, max, shard})"]
+    D --> E["A background balancer migrates whole chunks between shards —<br/>reassigning which shard owns a key range —<br/>to keep load even as data grows unevenly"]
 ```
 
 Three truths to hold:

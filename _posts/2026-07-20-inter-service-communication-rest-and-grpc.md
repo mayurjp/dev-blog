@@ -49,16 +49,15 @@ needs to read the payload without generated code. **gRPC takes over for
 internal service-to-service calls**, where both ends are code you control
 and you'd rather have a compiler catch a mismatched field than a customer.
 
-```
-   Browser                 Edge service              Internal services
-┌───────────┐   REST/JSON   ┌───────────┐    gRPC     ┌───────────┐
-│  fetch()  │ ─────────────▶│ frontend  │────────────▶│   cart    │
-│  curl     │◀───────────── │           │◀──────────── │  catalog  │
-└───────────┘   human-      └───────────┘  binary,      │  currency │
-                readable                    HTTP/2,      │  shipping │
-                                             one .proto   │  payment  │
-                                             per service  │  email    │
-                                                          └───────────┘
+```mermaid
+flowchart LR
+    Browser["Browser<br/>fetch() / curl"] -- "REST/JSON, human-readable" --> FE["frontend"]
+    FE -- "gRPC, binary, HTTP/2,<br/>one .proto per service" --> Cart["cart"]
+    FE --> Catalog["catalog"]
+    FE --> Currency["currency"]
+    FE --> Shipping["shipping"]
+    FE --> Payment["payment"]
+    FE --> Email["email"]
 ```
 
 Core truths to hold:

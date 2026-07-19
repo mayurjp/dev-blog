@@ -22,16 +22,12 @@ Kubernetes splits this into two controllers, stacked:
 
 **Macro view — the two stacked reconcile loops:**
 
-```
-Deployment "checkoutservice"  (spec.template = pod template, spec.replicas = 3)
-        │  Deployment controller reconciles: "does a ReplicaSet exist matching
-        │  the CURRENT pod template? if not, create one."
-        ▼
-ReplicaSet "checkoutservice-7d9f6b8c9"          pod-template-hash: 7d9f6b8c9
-        │  ReplicaSet controller reconciles: "are there exactly `replicas`
-        │  Pods carrying MY selector (which includes pod-template-hash)?"
-        ▼
-   Pod   Pod   Pod        ← ordinary Pods, each owned by the ReplicaSet above
+```mermaid
+flowchart TD
+    D["Deployment checkoutservice<br/>spec.template = pod template, spec.replicas = 3"]
+    D -- "Deployment controller reconciles:<br/>does a ReplicaSet exist matching the CURRENT pod template? if not, create one." --> RS
+    RS["ReplicaSet checkoutservice-7d9f6b8c9<br/>pod-template-hash: 7d9f6b8c9"]
+    RS -- "ReplicaSet controller reconciles:<br/>are there exactly replicas Pods carrying MY selector<br/>(which includes pod-template-hash)?" --> Pods["Pod, Pod, Pod<br/>ordinary Pods, each owned by the ReplicaSet above"]
 ```
 
 **Zoom in — the rollout advancing step by step**, using this lesson's own
@@ -39,26 +35,26 @@ ReplicaSet "checkoutservice-7d9f6b8c9"          pod-template-hash: 7d9f6b8c9
 `maxSurge: 1`, so the reconcile loop must keep total Pods ≤ 5 and Ready Pods
 ≥ 3 at every step — never a single jump from all-v1 to all-v2):
 
-```
-step 0  RS-v1(hash a1b2c3): 4/4 Ready     RS-v2(hash 9f2a1): 0/4
-        (steady state before `kubectl set image`)
+```mermaid
+sequenceDiagram
+    participant DC as Deployment controller
+    participant V1 as RS-v1 (hash a1b2c3)
+    participant V2 as RS-v2 (hash 9f2a1)
 
-step 1  Deployment controller creates RS-v2 (0 replicas so far)
-        RS-v1: 4/4 Ready                  RS-v2: 0/4
-
-step 2  surge by 1 (maxSurge: 1 → total may reach 5): RS-v2 scales to 1
-        RS-v1: 4/4 Ready                  RS-v2: 1/4 (1 pending readinessProbe)
-
-step 3  RS-v2's new Pod passes readinessProbe → counts as Ready
-        RS-v1 scales down by 1 (maxUnavailable: 1 allows this)
-        RS-v1: 3/3 Ready                  RS-v2: 1/1 Ready
-
-        ... repeats: surge RS-v2 by 1, wait for readinessProbe, drain
-        RS-v1 by 1 ...
-
-step N  RS-v1: 0/0                        RS-v2: 4/4 Ready
-        (old ReplicaSet scaled to 0, kept around — not deleted — so
-        `kubectl rollout undo` has something to scale back up to)
+    Note over V1,V2: step 0 — steady state before kubectl set image<br/>RS-v1: 4/4 Ready, RS-v2: 0/4
+    DC->>V2: create (0 replicas so far)
+    Note over V1,V2: step 1 — RS-v1: 4/4 Ready, RS-v2: 0/4
+    DC->>V2: surge by 1 (maxSurge: 1, total may reach 5)
+    Note over V1,V2: step 2 — RS-v1: 4/4 Ready, RS-v2: 1/4 (1 pending readinessProbe)
+    V2->>V2: new Pod passes readinessProbe, counts as Ready
+    DC->>V1: scale down by 1 (maxUnavailable: 1 allows this)
+    Note over V1,V2: step 3 — RS-v1: 3/3 Ready, RS-v2: 1/1 Ready
+    loop repeats: surge RS-v2 by 1, wait for readinessProbe, drain RS-v1 by 1
+        DC->>V2: surge by 1
+        DC->>V1: drain by 1
+    end
+    Note over V1,V2: step N — RS-v1: 0/0, RS-v2: 4/4 Ready
+    Note over V1: old ReplicaSet scaled to 0, kept around (not deleted)<br/>so kubectl rollout undo has something to scale back up to
 ```
 
 The pace of every step above is gated by the readinessProbe on the *new*

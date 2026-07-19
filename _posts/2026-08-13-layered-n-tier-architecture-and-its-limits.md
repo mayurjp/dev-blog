@@ -30,17 +30,17 @@ it. The runtime call still flows Domain → persistence, but the compile-time re
 now points Infrastructure → Domain — the correct direction, because Domain owns the
 contract, not the implementation.
 
-```
-Naive picture (dependency strictly downward, layer by layer):
-  API ──▶ Application ──▶ Domain ──▶ Infrastructure
-                                       (Domain now knows about EF Core/RabbitMQ —
-                                        the exact coupling layering exists to avoid)
-
-What a real layered codebase actually compiles to:
-  API ──▶ Domain            Infrastructure ──▶ Domain
-           ▲                        │
-           └───────implements───────┘
-       (Domain declares IOrderRepository; Infrastructure provides OrderRepository)
+```mermaid
+flowchart LR
+    subgraph Naive["Naive picture (dependency strictly downward, layer by layer)"]
+        direction LR
+        NA["API"] --> NApp["Application"] --> ND["Domain"] --> NI["Infrastructure<br/>(Domain now knows about EF Core/RabbitMQ —<br/>the exact coupling layering exists to avoid)"]
+    end
+    subgraph Real["What a real layered codebase actually compiles to"]
+        direction LR
+        RA["API"] --> RD["Domain<br/>(declares IOrderRepository)"]
+        RI["Infrastructure<br/>(provides OrderRepository)"] -- implements --> RD
+    end
 ```
 
 Three truths to hold:

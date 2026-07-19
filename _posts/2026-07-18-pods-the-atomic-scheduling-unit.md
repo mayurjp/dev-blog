@@ -24,23 +24,20 @@ You need a boundary that is smaller than "a whole application" but bigger than "
 
 Kubernetes' scheduler never places a container. It places a **Pod** — one or more containers that share a network namespace (one IP, `localhost` between them), can share volumes, and share a lifecycle. The **kubelet** (the per-node agent) is the thing that actually keeps a Pod's containers running, restarting the ones that crash according to `restartPolicy`.
 
-```
-Node
-┌───────────────────────────────────────────────────┐
-│  kubelet  ──talks via CRI──▶  containerd / CRI-O   │
-│                                                      │
-│  Pod: productcatalogservice-7d9f-xk2p1              │
-│  ┌─────────────────────────────────────────────┐   │
-│  │  Pod sandbox ("pause" container)             │   │
-│  │  owns: network namespace (1 Pod IP), IPC     │   │
-│  │                                                │   │
-│  │  ┌─────────────┐        ┌─────────────────┐  │   │
-│  │  │ app: server │        │ sidecar (opt.)  │  │   │
-│  │  │ joins netns │◀──────▶│ joins same netns│  │   │
-│  │  └─────────────┘ localhost └───────────────┘  │   │
-│  │        both can mount the same Volume          │   │
-│  └─────────────────────────────────────────────┘   │
-└───────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Node
+        kubelet(["kubelet"]) -- "talks via CRI" --> CRI["containerd / CRI-O"]
+        subgraph Pod["Pod: productcatalogservice-7d9f-xk2p1"]
+            Sandbox["Pod sandbox (pause container)<br/>owns: network namespace (1 Pod IP), IPC"]
+            App["app: server<br/>joins netns"]
+            Sidecar["sidecar (opt.)<br/>joins same netns"]
+            App <-->|localhost| Sidecar
+            App -.->|"mounts same Volume"| Vol[("shared Volume")]
+            Sidecar -.->|"mounts same Volume"| Vol
+        end
+        CRI --> Sandbox
+    end
 ```
 
 Three things to hold onto:

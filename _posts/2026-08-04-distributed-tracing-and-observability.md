@@ -34,32 +34,40 @@ parent/child relationships intact.
 
 **Macro view — the span tree a collector reassembles:**
 
-```
-  frontend  ──▶ span A (trace: 7f3c...)
-     │
-     ├──▶ checkout ──▶ span B (trace: 7f3c..., parent: A)
-     │        │
-     │        ├──▶ cart      span C (parent: B)
-     │        ├──▶ catalog   span D (parent: B)
-     │        ├──▶ currency  span E (parent: B)
-     │        └──▶ shipping  span F (parent: B)
-     │
-     ▼
-  collector reassembles A→B→{C,D,E,F} as ONE trace
+```mermaid
+flowchart TD
+    A["frontend<br/>span A (trace: 7f3c...)"] --> B["checkout<br/>span B (trace: 7f3c..., parent: A)"]
+    B --> C["cart<br/>span C (parent: B)"]
+    B --> D["catalog<br/>span D (parent: B)"]
+    B --> E["currency<br/>span E (parent: B)"]
+    B --> F["shipping<br/>span F (parent: B)"]
+    C & D & E & F --> Collector["collector reassembles A→B→{C,D,E,F} as ONE trace"]
 ```
 
 **Zoom in — the same trace, with the numbers that actually matter.** Span
 nesting alone doesn't tell you which of the six calls was the slow one; a
 real trace does, because every span carries a start time and duration:
 
-```
-span A  frontend                                     [0ms ─────────────── 340ms]
-span B  checkout.PlaceOrder                          [ 5ms ────────────── 335ms]
-span C   ├─ cart.GetCart              40ms            [ 10ms──50ms]
-span D   ├─ catalog.ListProducts      25ms                    [ 55ms──80ms]
-span E   ├─ currency.Convert          15ms                            [ 85ms──100ms]
-span F   └─ shipping.GetQuote        220ms                                  [105ms──325ms] ◀ BOTTLENECK
-                                                       total: 340ms, shipping = 65% of it
+```mermaid
+sequenceDiagram
+    participant FE as frontend (span A)
+    participant CO as checkout.PlaceOrder (span B)
+    participant Cart as cart.GetCart (span C)
+    participant Cat as catalog.ListProducts (span D)
+    participant Cur as currency.Convert (span E)
+    participant Ship as shipping.GetQuote (span F)
+
+    FE->>CO: enter PlaceOrder (t=5ms)
+    CO->>Cart: GetCart
+    Cart-->>CO: 40ms
+    CO->>Cat: ListProducts
+    Cat-->>CO: 25ms
+    CO->>Cur: Convert
+    Cur-->>CO: 15ms
+    CO->>Ship: GetQuote
+    Ship-->>CO: 220ms
+    Note over Ship: BOTTLENECK — 220ms of the 340ms total (65%)
+    CO-->>FE: done (t=335ms)
 ```
 
 `shipping.GetQuote` being 220ms of a 340ms request is exactly the fact a

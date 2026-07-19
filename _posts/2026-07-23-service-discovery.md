@@ -35,21 +35,19 @@ instance registers itself on startup and keeps re-announcing "I'm still
 here" on an interval; callers ask the registry for the current instance
 list instead of reading it from a config file.
 
-```
-   ┌──────────────┐   register + heartbeat    ┌────────────────┐
-   │ customers-svc │ ─────────────────────────▶│ discovery-server│
-   │ (random port) │◀───────────────────────── │  (registry)     │
-   └──────────────┘   evict if heartbeat stops └────────────────┘
-                                                       ▲
-                                              query: "where is       │
-                                              customers-service?"    │
-                                                       │
-                                                ┌──────────────┐
-                                                │  api-gateway  │
-                                                │ (caller, does │
-                                                │ client-side   │
-                                                │ load balancing│
-                                                └──────────────┘
+```mermaid
+sequenceDiagram
+    participant CS as customers-svc (random port)
+    participant DS as discovery-server (registry)
+    participant GW as api-gateway (client-side load balancing)
+
+    CS->>DS: register
+    loop heartbeat interval
+        CS->>DS: heartbeat
+    end
+    Note over DS: evict if heartbeat stops
+    GW->>DS: query - where is customers-service?
+    DS-->>GW: current instance list
 ```
 
 Core truths to hold:

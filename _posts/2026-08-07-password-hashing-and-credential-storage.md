@@ -37,18 +37,13 @@ The fix has two independent parts:
   attacker's — gets proportionally more expensive, while the legitimate login (which
   only pays that cost once) stays imperceptible to the user.
 
-```
-Verifying a login attempt:
-
-   stored value = [ format marker | salt | expensive-hash(password, salt) ]
-                                             │
-   login attempt: password ──────────────────┤
-                                             ▼
-                          re-run the SAME expensive-hash
-                          with the SAME stored salt
-                                             │
-                                             ▼
-                     constant-time compare with stored subkey
+```mermaid
+flowchart TD
+    Stored["stored value = [format marker | salt | expensive-hash(password, salt)]"]
+    Attempt["login attempt: password"]
+    Stored --> Rehash
+    Attempt --> Rehash["re-run the SAME expensive-hash with the SAME stored salt"]
+    Rehash --> Compare["constant-time compare with stored subkey"]
 ```
 
 Three truths to hold:

@@ -21,23 +21,14 @@ The cost isn't hypothetical: a compiler toolchain and dev headers routinely add 
 
 Multi-stage builds let a single Dockerfile declare more than one `FROM`. Each `FROM` starts a brand-new build stage with its own base image and its own layer cache — nothing carries over from a previous stage automatically. The only way to pull something from an earlier stage into a later one is an explicit `COPY --from=<stage>`.
 
+```mermaid
+flowchart TD
+    B["Stage: builder (FROM golang)<br/>- apt/apk toolchain<br/>- go build → /app/bin/server"]
+    F["Stage: final (FROM alpine)<br/>only this stage produces the shipped image<br/>- /app/bin/server<br/>- no compiler, no headers, no source tree"]
+    B -- "COPY --from=builder /app/bin/server ." --> F
 ```
-┌─────────────────────────────┐
-│ Stage: builder (FROM golang) │
-│  - apt/apk toolchain          │
-│  - go build → /app/bin/server │
-└─────────────────────────────┘
-              │  COPY --from=builder /app/bin/server .
-              ▼
-┌─────────────────────────────┐
-│ Stage: final (FROM alpine)    │  ← only this stage produces the shipped image
-│  - /app/bin/server             │
-│  - no compiler, no headers,    │
-│    no source tree               │
-└─────────────────────────────┘
 
-docker build (no --target) → builds every stage needed to produce the LAST one, discards intermediate stages' layers from the final image (they stay cached on disk for reuse, but aren't part of the image you ship)
-```
+`docker build` with no `--target` builds every stage needed to produce the LAST one, and discards intermediate stages' layers from the final image — they stay cached on disk for reuse, but aren't part of the image you ship.
 
 Three things to hold onto:
 
@@ -76,18 +67,32 @@ Grafana's actual production `Dockerfile` takes this idea much further than a two
 
 **Macro view — the ten-stage graph** (base images and JS/Go builders feed three shared "assets" stages, which every final variant copies from):
 
-```
-alpine-base ─┬─▶ tgz-builder                    go-builder-base ─▶ go-builder ─┐
-             ├─▶ grafana-assets ◀────────────────────────────────── (COPY from)┤
-             ├─▶ grafana-plugins ◀───────────────────────────────── (COPY from)┤
-             └─▶ distroless-prep ◀───────────────────────────────── (COPY from)┘
-                        │                    js-builder-base ─▶ js-builder ────┘
-     alpine-base ─▶ final-alpine   ◀── COPY --link from grafana-assets/-plugins
-     ubuntu-base ─▶ final-ubuntu   ◀── COPY --link from grafana-assets/-plugins
-  distroless-base ─▶ final-distroless ◀── COPY --from distroless-prep (no shell)
+```mermaid
+flowchart LR
+    goB["go-builder-base"] --> goBuilder["go-builder"]
+    jsB["js-builder-base"] --> jsBuilder["js-builder"]
+    alpineBase["alpine-base"] --> tgz["tgz-builder"]
+    alpineBase --> assets["grafana-assets"]
+    alpineBase --> plugins["grafana-plugins"]
+    alpineBase --> prep["distroless-prep"]
+    goBuilder -. "COPY --from" .-> assets
+    goBuilder -. "COPY --from" .-> plugins
+    goBuilder -. "COPY --from" .-> prep
+    jsBuilder -. "COPY --from" .-> assets
 
-  --target=final-alpine|final-ubuntu|final-distroless selects which one ships
+    alpineBase --> finalAlpine["final-alpine"]
+    ubuntuBase["ubuntu-base"] --> finalUbuntu["final-ubuntu"]
+    distrolessBase["distroless-base"] --> finalDistroless["final-distroless (no shell)"]
+    assets -. "COPY --link" .-> finalAlpine
+    plugins -. "COPY --link" .-> finalAlpine
+    assets -. "COPY --link" .-> finalUbuntu
+    plugins -. "COPY --link" .-> finalUbuntu
+    prep -. "COPY --from" .-> finalDistroless
+    assets -. "COPY --link" .-> finalDistroless
+    plugins -. "COPY --link" .-> finalDistroless
 ```
+
+`--target=final-alpine|final-ubuntu|final-distroless` selects which one ships.
 
 ```dockerfile
 # syntax=docker/dockerfile:1.7-labs
