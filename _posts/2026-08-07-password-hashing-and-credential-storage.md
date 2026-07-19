@@ -112,32 +112,11 @@ public class PasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
      * (All UInt32s are stored big-endian.)
      */
 
-    private readonly PasswordHasherCompatibilityMode _compatibilityMode;
     private readonly int _iterCount;
-    private readonly RandomNumberGenerator _rng;
 
-    public virtual string HashPassword(TUser user, string password)
-    {
-        ArgumentNullThrowHelper.ThrowIfNull(password);
-
-        if (_compatibilityMode == PasswordHasherCompatibilityMode.IdentityV2)
-        {
-            return Convert.ToBase64String(HashPasswordV2(password, _rng));
-        }
-        else
-        {
-            return Convert.ToBase64String(HashPasswordV3(password, _rng));
-        }
-    }
-
-    private byte[] HashPasswordV3(string password, RandomNumberGenerator rng)
-    {
-        return HashPasswordV3(password, rng,
-            prf: KeyDerivationPrf.HMACSHA512,
-            iterCount: _iterCount,
-            saltSize: 128 / 8,
-            numBytesRequested: 256 / 8);
-    }
+    // ... HashPassword(), the constructor, and the two-argument overload of
+    // HashPasswordV3 are elided here — they just route to the method below
+    // with this instance's configured PRF/iteration count/salt size ...
 
     private static byte[] HashPasswordV3(string password, RandomNumberGenerator rng, KeyDerivationPrf prf, int iterCount, int saltSize, int numBytesRequested)
     {
