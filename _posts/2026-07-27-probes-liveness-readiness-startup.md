@@ -22,26 +22,25 @@ You need Kubernetes to ask the *application* three separate questions — "have 
 
 Probes aren't run by the API server or a controller — they're run by the **kubelet**, directly, on each node, polling each container on a schedule you configure.
 
-**Macro view — the kubelet's decision tree:**
+**Macro view — the kubelet's decision tree**, running as one local polling loop on the node:
 
-```
-Node
-┌────────────────────────────────────────────────────────┐
-│ kubelet — polls each container's declared probes        │
-│                                                          │
-│   startupProbe   ──fails repeatedly──▶  kubelet kills   │
-│   (if defined)                          + restarts the   │
-│        │ succeeds once                  CONTAINER        │
-│        ▼                                (Pod identity,   │
-│   liveness + readiness checks now begin  IP, UID unchanged)
-│        │                                      ▲          │
-│        ├─ livenessProbe fails ────────────────┘          │
-│        │  (kubelet restarts just this container)         │
-│        │                                                  │
-│        └─ readinessProbe fails                            │
-│           (container keeps running — NOT restarted —      │
-│            but Pod is pulled from Service EndpointSlices) │
-└────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["kubelet polls this container's declared probes"] --> B{"startupProbe defined?"}
+    B -- "yes, hasn't succeeded yet" --> C["startupProbe polling"]
+    C -- "fails repeatedly" --> R
+    C -- "succeeds once" --> D["liveness + readiness checks begin"]
+    B -- "no" --> D
+    D --> L["livenessProbe polling"]
+    D --> Rd["readinessProbe polling"]
+    L -- "fails" --> R["kubelet kills + restarts the CONTAINER<br/>(Pod identity, IP, UID unchanged)"]
+    Rd -- "fails" --> E["Pod pulled from Service EndpointSlices<br/>(container keeps running, NOT restarted)"]
+    E -- "passes again" --> Rd
+
+    classDef crimson fill:#f8d7da,stroke:#c0392b,color:#611a15;
+    classDef amber fill:#fff3cd,stroke:#b8860b,color:#5c4400;
+    class R crimson;
+    class E amber;
 ```
 
 **Zoom in — the same container's first few minutes**, using this lesson's
@@ -49,22 +48,16 @@ own `cache-warmer-app` numbers (`startupProbe`: `periodSeconds: 5` ×
 `failureThreshold: 30`; `livenessProbe`: `periodSeconds: 10` ×
 `failureThreshold: 3`):
 
-```
-t=0s     container starts. ONLY startupProbe runs; liveness/readiness held off entirely.
-t=5s     startupProbe hits /startupz → fails (still booting)     [1/30]
-t=10s    startupProbe fails again                                [2/30]
-  ...    (repeats every 5s, up to 30 failures = 150s of runway before
-          the kubelet would give up and restart the container)
-t=45s    startupProbe hits /startupz → succeeds
-         → startupProbe stops polling forever; liveness + readiness begin NOW
-t=55s    first livenessProbe /livez → success
-t=50s    first readinessProbe /readyz → success → Pod added to Service endpoints
-  ...
-t=130s   a dependency wedges; /livez starts failing               [1/3]
-t=140s   /livez fails again                                       [2/3]
-t=150s   /livez fails a 3rd consecutive time
-         → kubelet restarts the CONTAINER (same Pod, same IP, restart count++)
-         → startupProbe runs again on the fresh container instance
+```mermaid
+gantt
+    dateFormat X
+    axisFormat %Ss
+    section startupProbe
+    Polling /startupz every 5s, up to 30 failures allowed (150s runway) :active, startup, 0, 45
+    section liveness/readiness (begin once startup succeeds at t=45s)
+    livenessProbe polls /livez every 10s :live, 45, 150
+    readinessProbe polls /readyz every 5s, gates Service traffic :ready, 45, 150
+    3rd consecutive /livez failure -> kubelet restarts container :crit, milestone, 150, 0
 ```
 
 Three things to hold onto:
