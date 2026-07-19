@@ -49,15 +49,31 @@ own `cache-warmer-app` numbers (`startupProbe`: `periodSeconds: 5` ×
 `failureThreshold: 3`):
 
 ```mermaid
-gantt
-    dateFormat X
-    axisFormat %M:%S
-    section startupProbe
-    Polling /startupz every 5s, up to 30 failures allowed (150s runway) :active, startup, 0, 45
-    section liveness/readiness (begin once startup succeeds at t=45s)
-    livenessProbe polls /livez every 10s :live, 45, 150
-    readinessProbe polls /readyz every 5s, gates Service traffic :ready, 45, 150
-    3rd consecutive /livez failure -> kubelet restarts container :crit, milestone, 150, 0
+sequenceDiagram
+    participant K as kubelet
+    participant C as container
+
+    Note over K,C: t=0s — container starts; only startupProbe runs
+    loop every 5s, up to 30 attempts (150s runway)
+        K->>C: GET /startupz
+        C-->>K: fails (still booting)
+    end
+    Note over K,C: t=45s — /startupz succeeds; startupProbe stops forever
+    Note over K,C: liveness + readiness begin now
+
+    par livenessProbe, every 10s
+        K->>C: GET /livez
+        C-->>K: success
+    and readinessProbe, every 5s
+        K->>C: GET /readyz
+        C-->>K: success — Pod added to Service endpoints
+    end
+
+    Note over K,C: t=130s — a dependency wedges
+    K->>C: GET /livez (1 of 3 failures)
+    K->>C: GET /livez (2 of 3 failures)
+    K->>C: GET /livez (3 of 3 — threshold hit)
+    Note over K: kubelet restarts the CONTAINER (same Pod, same IP)<br/>startupProbe runs again on the fresh instance
 ```
 
 Three things to hold onto:
