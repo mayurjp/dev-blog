@@ -4,7 +4,6 @@ title: "Why is a container marked running while the process inside it is stuck?"
 date: 2026-08-06 09:00:00 +0530
 categories: docker
 tags: [docker, healthcheck, restart-policy, compose, reliability]
-published: false
 ---
 
 ## 1. The Engineering Problem: "running" and "working" are not the same fact

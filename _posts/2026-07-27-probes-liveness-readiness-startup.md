@@ -4,7 +4,6 @@ title: "How does Kubernetes know a running container is actually broken?"
 date: 2026-07-27 09:00:00 +0530
 categories: kubernetes
 tags: [kubernetes, probes, kubelet, health-checks]
-published: false
 ---
 
 ## 1. The Engineering Problem: "running" is not the same as "working"
