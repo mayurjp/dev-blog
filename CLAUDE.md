@@ -97,3 +97,44 @@ GitHub Pages builds with minima **2.5.1** (pinned by the `github-pages` gem rega
 The site currently uses minima's stock (light) styling with no color overrides. To customize colors, override minima's `!default` Sass variables (`$text-color`, `$background-color`, `$brand-color`, `$grey-color*`) in `assets/main.scss` *before* the `@import "minima";` line — that's the only way color theming works on this pinned version. (A prior dark theme was implemented and later reverted this way; see git history on `assets/main.scss` for a worked example of the override pattern if re-adding one.)
 
 `github_username` and `logo` in `_config.yml` are unrelated to the skin issue — they're read directly by minima 2.5.1's `_includes/social.html` and are unaffected by the `skin:` limitation.
+
+## Mermaid.js diagram rendering (added 2026-07-19)
+
+Every lesson diagram is now a fenced `` ```mermaid `` code block (`flowchart` or
+`sequenceDiagram` — see `../blog-pipeline`'s SKILL.md for the generation rules),
+rendered into a real graphic client-side. There is no Jekyll plugin for this — the
+`github-pages` gem pin doesn't allow custom plugins — so it's done entirely in
+`_includes/head.html`:
+
+- **The HTML shape kramdown/Rouge produces depends on whether the language is
+  recognized.** A known language (`yaml`, `dockerfile`, ...) gets wrapped as
+  `<div class="language-X highlighter-rouge"><div class="highlight"><pre
+  class="highlight"><code>...</code></pre></div></div>`. Rouge has no "mermaid"
+  lexer, so an unrecognized language falls back to a bare `<pre><code
+  class="language-mermaid">escaped text</code></pre>` — **no wrapping div at all**.
+  This was verified against this site's own build output, not assumed from docs; the
+  `head.html` script handles both shapes (`el.tagName === "CODE" ? el :
+  el.querySelector("code")`, then `el.closest("div.language-mermaid") ||
+  el.closest("pre") || el`) since a future kramdown/Rouge version could change which
+  shape applies.
+- **Mermaid loads as a classic global `<script src=".../mermaid.min.js">`, not an ES
+  module `import`.** The ES-module version was tried first and silently failed to
+  render on the live site for reasons never fully isolated; the plain UMD
+  global-script pattern is what's actually deployed and confirmed working.
+  `securityLevel: "loose"` (not `"strict"`) is used so `<br/>` inside node labels
+  renders reliably.
+- **`.mermaid` container styling** lives in `assets/main.scss` (bordered card,
+  centered, `overflow-x: auto`, responsive `svg { max-width: 100%; height: auto; }`)
+  — same override pattern as the rest of this file's Sass customizations.
+- **Two confirmed Mermaid syntax gotchas** that will silently break a diagram if a
+  future edit reintroduces them: a bare semicolon (`;`) inside any label/note/message
+  text is parsed as a statement separator, not literal punctuation; and a
+  backslash-escaped quote (`\"word\"`) inside a label is invalid — Mermaid has no
+  JS/JSON-style escape for an embedded `"`. Both are documented as permanent rules in
+  `../blog-pipeline`'s SKILL.md, and both were found by actually rendering diagrams
+  with `mermaid-cli` (`npx @mermaid-js/mermaid-cli`), not by reading Mermaid's docs —
+  verify new diagrams the same way before assuming they're correct.
+- **`gantt` is deprecated for anything sub-minute.** It was tried for a probe-polling
+  timeline and produced garbled, overlapping axis labels live — `gantt`'s
+  tick-density math is tuned for day/week spans. `sequenceDiagram` with
+  `loop`/`par`/`Note` replaced it with no axis/tick computation involved at all.
