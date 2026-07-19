@@ -9,7 +9,7 @@ layout: default
 
   {{ content }}
 
-  {%- assign topics = "kubernetes|Kubernetes,docker|Docker,microservices|Microservices,security|Security,system-design|System Design,design-patterns|Design Patterns,gcp|Google Cloud,cicd|CI/CD,ddd|Domain-Driven Design,architecture|Software Architecture,databases|Databases" | split: "," -%}
+  {%- assign topics = "kubernetes|Kubernetes,docker|Docker,microservices|Microservices,security|Security,system-design|System Design,design-patterns|Design Patterns,gcp|Google Cloud,cicd|CI/CD,ddd|Domain-Driven Design,architecture|Software Architecture,databases|Databases,observability|Observability" | split: "," -%}
   {%- for topic in topics -%}
     {%- assign parts = topic | split: "|" -%}
     {%- assign cat_slug = parts[0] -%}
