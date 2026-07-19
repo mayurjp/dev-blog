@@ -32,6 +32,8 @@ part of the request itself (an HTTP header, gRPC metadata). A collector
 later reassembles every span sharing a trace ID into one call graph, with
 parent/child relationships intact.
 
+**Macro view — the span tree a collector reassembles:**
+
 ```
   frontend  ──▶ span A (trace: 7f3c...)
      │
@@ -45,6 +47,25 @@ parent/child relationships intact.
      ▼
   collector reassembles A→B→{C,D,E,F} as ONE trace
 ```
+
+**Zoom in — the same trace, with the numbers that actually matter.** Span
+nesting alone doesn't tell you which of the six calls was the slow one; a
+real trace does, because every span carries a start time and duration:
+
+```
+span A  frontend                                     [0ms ─────────────── 340ms]
+span B  checkout.PlaceOrder                          [ 5ms ────────────── 335ms]
+span C   ├─ cart.GetCart              40ms            [ 10ms──50ms]
+span D   ├─ catalog.ListProducts      25ms                    [ 55ms──80ms]
+span E   ├─ currency.Convert          15ms                            [ 85ms──100ms]
+span F   └─ shipping.GetQuote        220ms                                  [105ms──325ms] ◀ BOTTLENECK
+                                                       total: 340ms, shipping = 65% of it
+```
+
+`shipping.GetQuote` being 220ms of a 340ms request is exactly the fact a
+span-tree diagram with no numbers can't surface — it's why this specific
+downstream call, not the other five, is where an on-call engineer should
+look first.
 
 There are two places this propagation can live, and both show up in real
 systems:

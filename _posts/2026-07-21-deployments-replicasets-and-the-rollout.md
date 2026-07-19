@@ -119,8 +119,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkoutservice
-  labels:
-    app: checkoutservice
 spec:
   selector:
     matchLabels:
@@ -129,43 +127,24 @@ spec:
   # That is NOT an oversight — it's relying on Kubernetes' defaults:
   #   replicas:  1 (if unset, apps/v1 defaults to a single Pod)
   #   strategy:  RollingUpdate, maxUnavailable: 25%, maxSurge: 25%
-  # Reading a manifest correctly means knowing what's implied, not just
-  # what's written.
   template:
     metadata:
       labels:
         app: checkoutservice     # must equal spec.selector.matchLabels — the
                                   # ReplicaSet's selector is derived from this pair
     spec:
-      serviceAccountName: checkoutservice
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
+      # ... serviceAccountName and securityContext elided — not central to
+      # the rollout/replica-defaults point of this lesson ...
       containers:
         - name: server
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            privileged: false
-            readOnlyRootFilesystem: true
           image: checkoutservice
-          ports:
-          - containerPort: 5050
           readinessProbe:                # gates rollout pace AND Service traffic
-            grpc:
-              port: 5050
+            grpc: { port: 5050 }
           livenessProbe:
-            grpc:
-              port: 5050
-          env:
-          - name: PORT
-            value: "5050"
-          - name: PRODUCT_CATALOG_SERVICE_ADDR
-            value: "productcatalogservice:3550"
+            grpc: { port: 5050 }
+          env:                           # six hardcoded dependency addresses —
+          - name: PRODUCT_CATALOG_SERVICE_ADDR    # six edges this single-replica
+            value: "productcatalogservice:3550"    # Pod fans out to on every request
           - name: SHIPPING_SERVICE_ADDR
             value: "shippingservice:50051"
           - name: PAYMENT_SERVICE_ADDR
@@ -176,13 +155,7 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
-          resources:
-            requests:
-              cpu: 100m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 128Mi
+          # ... resources.requests/limits elided ...
 ```
 
 **What this teaches that a hello-world can't:**

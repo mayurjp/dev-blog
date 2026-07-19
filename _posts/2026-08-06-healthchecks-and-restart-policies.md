@@ -107,11 +107,7 @@ Sentry's self-hosted stack applies a *shared* healthcheck timing default across 
 
 ```yaml
 x-healthcheck-defaults: &healthcheck_defaults
-  # Avoid setting the interval too small, as docker uses much more CPU than one would expect.
-  # Related issues:
-  # https://github.com/moby/moby/issues/39102
-  # https://github.com/moby/moby/issues/39388
-  # https://github.com/getsentry/self-hosted/issues/1000
+  # Avoid setting the interval too small — docker uses more CPU than expected (moby#39102)
   interval: "$HEALTHCHECK_INTERVAL"
   timeout: "$HEALTHCHECK_TIMEOUT"
   retries: $HEALTHCHECK_RETRIES

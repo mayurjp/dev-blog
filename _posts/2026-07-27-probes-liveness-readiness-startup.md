@@ -133,28 +133,14 @@ spec:
                                     # autoscaling cluster-wide.
   template:
     spec:
-      serviceAccountName: metrics-server
-      volumes:
-      - name: tmp-dir
-        emptyDir: {}
-      priorityClassName: system-cluster-critical
+      # ... serviceAccountName, volumes, priorityClassName elided ...
       containers:
       - name: metrics-server
         image: gcr.io/k8s-staging-metrics-server/metrics-server:master
-        args:
-          - --cert-dir=/tmp
-          - --secure-port=10250
-          - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-          - --kubelet-use-node-status-port
-          - --metric-resolution=15s
-        resources:
-          requests:
-            cpu: 100m
-            memory: 200Mi
+        # ... args, resources elided ...
         ports:
-        - name: https
-          containerPort: 10250
-          protocol: TCP
+        - name: https                 # named port — probes below reference
+          containerPort: 10250          # it by NAME, not the number 10250
         readinessProbe:
           httpGet:
             path: /readyz          # <-- distinct endpoint from liveness, deliberately
@@ -172,15 +158,7 @@ spec:
           periodSeconds: 10
           failureThreshold: 3      # no initialDelaySeconds — evaluated almost
                                     # immediately, but see below for why that's safe
-        securityContext:
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1000
-        volumeMounts:
-        - name: tmp-dir
-          mountPath: /tmp
-      nodeSelector:
-        kubernetes.io/os: linux
+        # ... securityContext, volumeMounts elided ...
 ```
 
 **What this teaches that a hello-world can't:**

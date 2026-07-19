@@ -109,13 +109,8 @@ spec:
         args:
         - --web.listen-address=127.0.0.1:9101   # bound to LOCALHOST only —
         - --path.sysfs=/host/sys                 # not reachable off-node directly
-        - --path.rootfs=/host/root
-        - --path.procfs=/host/root/proc
         image: quay.io/prometheus/node-exporter:v1.12.0
-        securityContext:
-          capabilities:
-            add: ["SYS_TIME"]     # narrow, specific extra kernel capability —
-            drop: ["ALL"]          # NOT privileged: true, just what's actually needed
+        # ... securityContext elided: narrow capabilities added, NOT privileged: true ...
         volumeMounts:
         - mountPath: /host/sys
           mountPropagation: HostToContainer   # host mount changes propagate live
