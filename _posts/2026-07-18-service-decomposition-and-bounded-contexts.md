@@ -49,14 +49,15 @@ cosmetic:
    model freely as long as its published contract (API shape, event schema)
    doesn't change.
 
-```
-        synchronous read                    async, fire-and-forget
-   ┌──────────────┐   REST/gRPC    ┌──────────────┐   event    ┌──────────────┐
-   │  Catalog      │ ─────────────▶│  Ordering     │──────────▶│  Shipping     │
-   │  (owns        │                │  (owns        │  bus      │  (owns        │
-   │  product DB)  │◀───────────── │  order DB)    │◀──────────│  shipment DB) │
-   └──────────────┘   never reads   └──────────────┘  never reads └──────────────┘
-                       Ordering's DB                    Ordering's DB
+```mermaid
+flowchart LR
+    Catalog["Catalog (owns product DB)"]
+    Ordering["Ordering (owns order DB)"]
+    Shipping["Shipping (owns shipment DB)"]
+    Catalog -- "synchronous read: REST/gRPC" --> Ordering
+    Ordering -- "never reads Catalog's DB" --> Catalog
+    Ordering -. "async, fire-and-forget: event bus" .-> Shipping
+    Shipping -. "never reads Ordering's DB" .-> Ordering
 ```
 
 Core truths to hold:
