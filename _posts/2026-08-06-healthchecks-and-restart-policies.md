@@ -21,6 +21,8 @@ You need the container runtime itself to know the difference between "process al
 
 `HEALTHCHECK` (in a Dockerfile or a compose file's `healthcheck:` key) declares a command Docker runs *inside* the container on an interval — its exit code, not the main process's liveness, decides the container's health state. A **restart policy** separately declares what the daemon does when the container's main process actually exits.
 
+**Macro view — the two independent mechanisms:**
+
 ```
                     every `interval`
                           │
@@ -45,6 +47,25 @@ You need the container runtime itself to know the difference between "process al
               dockerd (via containerd) decides whether
               to start a fresh container from the same
               image+config, and how aggressively to retry
+```
+
+**Zoom in — the timeline of `api` flipping unhealthy**, using this lesson's
+own `interval: 10s` / `retries: 3` / `start_period: 15s` (the `api` service
+in section 3):
+
+```
+t=0s     container starts. start_period grace window begins (15s) —
+         failures in this window do NOT count toward `retries`.
+t=10s    probe runs → fails (still inside start_period, doesn't count)
+t=15s    start_period ends. Ordinary counting begins from here.
+t=20s    probe runs → fails                                    [1/3]
+t=30s    probe runs → fails                                    [2/3]
+t=40s    probe runs → fails a 3rd consecutive time              [3/3]
+         → health state flips to "unhealthy"
+         → any OTHER service with depends_on: api: condition: service_healthy
+           is now blocked/held, and `docker inspect` reports unhealthy
+t=50s    probe runs → succeeds → health state flips back to "healthy" immediately
+         (recovery isn't gated by a separate threshold — one success clears it)
 ```
 
 Three things to hold onto:

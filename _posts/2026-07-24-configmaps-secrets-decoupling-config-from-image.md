@@ -25,6 +25,8 @@ You need config and secrets to be **data**, injected into a container at *runtim
 
 Kubernetes stores configuration as its own API objects — **ConfigMap** for ordinary config, **Secret** for sensitive data — separate from any Pod. The kubelet injects their contents into a container either as environment variables or as files, at Pod start.
 
+**Macro view — where the kubelet injects each object:**
+
 ```
 API server / etcd
 ┌─────────────────────┐      ┌─────────────────────┐
@@ -45,6 +47,28 @@ API server / etcd
 │    /etc/config/log-level                            │
 │    /etc/secret/db-password   ← tmpfs, not disk       │
 └──────────────────────────────────────────────────┘
+```
+
+**Zoom in — the same ConfigMap edit, two different outcomes over time**
+(this is the part a static diagram can't show: env injection and volume
+mounts don't just differ in mechanism, they diverge in *when* a change
+actually lands):
+
+```
+t=0     app-config: LOG_LEVEL=info      Pod starts, kubelet injects both ways:
+                                          - env var LOG_LEVEL=info        (frozen copy)
+                                          - /etc/config/LOG_LEVEL → "info" (live file)
+
+t=10m   kubectl edit configmap app-config
+        LOG_LEVEL: "info" → "debug"
+
+t=10m   env var LOG_LEVEL inside the running container: still "info"
+        (nothing re-reads it — would need a Pod restart to pick up "debug")
+
+t=~11m  /etc/config/LOG_LEVEL on disk: now reads "debug"
+        (kubelet's periodic sync interval updated the mounted file —
+         no restart needed — but the APP must itself notice the file
+         changed; most apps don't hot-reload automatically)
 ```
 
 Three things to hold onto:

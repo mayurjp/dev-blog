@@ -23,6 +23,8 @@ You need Kubernetes to ask the *application* three separate questions — "have 
 
 Probes aren't run by the API server or a controller — they're run by the **kubelet**, directly, on each node, polling each container on a schedule you configure.
 
+**Macro view — the kubelet's decision tree:**
+
 ```
 Node
 ┌────────────────────────────────────────────────────────┐
@@ -41,6 +43,29 @@ Node
 │           (container keeps running — NOT restarted —      │
 │            but Pod is pulled from Service EndpointSlices) │
 └────────────────────────────────────────────────────────┘
+```
+
+**Zoom in — the same container's first few minutes**, using this lesson's
+own `cache-warmer-app` numbers (`startupProbe`: `periodSeconds: 5` ×
+`failureThreshold: 30`; `livenessProbe`: `periodSeconds: 10` ×
+`failureThreshold: 3`):
+
+```
+t=0s     container starts. ONLY startupProbe runs; liveness/readiness held off entirely.
+t=5s     startupProbe hits /startupz → fails (still booting)     [1/30]
+t=10s    startupProbe fails again                                [2/30]
+  ...    (repeats every 5s, up to 30 failures = 150s of runway before
+          the kubelet would give up and restart the container)
+t=45s    startupProbe hits /startupz → succeeds
+         → startupProbe stops polling forever; liveness + readiness begin NOW
+t=55s    first livenessProbe /livez → success
+t=50s    first readinessProbe /readyz → success → Pod added to Service endpoints
+  ...
+t=130s   a dependency wedges; /livez starts failing               [1/3]
+t=140s   /livez fails again                                       [2/3]
+t=150s   /livez fails a 3rd consecutive time
+         → kubelet restarts the CONTAINER (same Pod, same IP, restart count++)
+         → startupProbe runs again on the fresh container instance
 ```
 
 Three things to hold onto:

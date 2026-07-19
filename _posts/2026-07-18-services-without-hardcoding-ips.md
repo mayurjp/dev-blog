@@ -23,6 +23,8 @@ You cannot chase pod IPs by hand. You need a **stable address that never changes
 
 Kubernetes inserts a permanent routing layer *in front of* the volatile pods. That layer is a **Service**. It has a stable virtual IP (the ClusterIP) and a permanent DNS name. Clients talk to the Service; the Service tracks whichever pods are currently alive and healthy.
 
+**Macro view — the routing layer in front of volatile pods:**
+
 ```
 [ Frontend Pod ]
        │  http://backend:80   (DNS name, never changes)
@@ -37,6 +39,30 @@ Kubernetes inserts a permanent routing layer *in front of* the volatile pods. Th
        └─► 10.244.2.82  (backend pod, Ready)
              ▲
              └─ a NOT-Ready pod is NOT in this list — it receives no traffic
+```
+
+**Zoom in — the exact timeline this lesson opened with** (a backend pod
+crashing mid-traffic; this is what Q1/Q7 below are actually describing):
+
+```
+t=0s     EndpointSlice for "backend": [10.244.1.5 (Ready), 10.244.2.82 (Ready)]
+         kube-proxy's iptables/IPVS rules route to both.
+
+t=1s     backend pod 10.244.1.5 crashes / is OOM-killed.
+         EndpointSlice controller notices the pod is gone almost immediately:
+         EndpointSlice for "backend": [10.244.2.82 (Ready)]
+         kube-proxy reprograms rules within milliseconds — 10.244.1.5 is
+         no longer a DNAT target, so in-flight retries land only on .82.
+
+t=2s     Deployment's ReplicaSet creates a REPLACEMENT pod: 10.244.1.9
+         (new IP, new UID — the crashed pod is never "restarted in place")
+
+t=2s..   new pod is NOT yet in the EndpointSlice — it's excluded until its
+         readinessProbe passes at least once, same gate as any other pod.
+
+t=12s    10.244.1.9 passes its readinessProbe.
+         EndpointSlice for "backend": [10.244.2.82 (Ready), 10.244.1.9 (Ready)]
+         kube-proxy adds it back to the routing set — traffic resumes to it.
 ```
 
 The three things to hold onto:
