@@ -29,6 +29,14 @@ permalink: /:categories/:title/
 github_username: mayurjp
 logo: /assets/logo.svg
 
+# Explicit header nav whitelist -- without this, minima lists every page with
+# a `title:` (including the 12 topic pages under topics/, which are meant to
+# be reached only via the homepage's topic cards, not the top nav) and, prior
+# to this being set, CLAUDE.md as well.
+header_pages:
+  - about.md
+  - archive.md
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
@@ -44,4 +52,5 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - README.md
+  - CLAUDE.md
   - vendor

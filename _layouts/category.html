@@ -1,0 +1,37 @@
+---
+layout: default
+---
+{%- assign topic = site.data.topics | where: "slug", page.category | first -%}
+{%- assign topic_posts = site.categories[page.category] -%}
+<div class="home">
+
+  <p class="topic-back"><a href="{{ "/" | relative_url }}">&larr; All topics</a></p>
+
+  <h1 class="page-heading">{{ topic.name | default: page.category }}</h1>
+
+  {%- if topic.description -%}
+    <p>{{ topic.description }}</p>
+  {%- endif -%}
+
+  {%- if topic_posts.size > 0 -%}
+    <ul class="post-list">
+      {%- for post in topic_posts -%}
+      <li>
+        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <h3>
+          <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title | escape }}
+          </a>
+        </h3>
+        {%- if site.show_excerpts -%}
+          {{ post.excerpt }}
+        {%- endif -%}
+      </li>
+      {%- endfor -%}
+    </ul>
+  {%- else -%}
+    <p><em>No posts yet in this topic — check back soon.</em></p>
+  {%- endif -%}
+
+</div>

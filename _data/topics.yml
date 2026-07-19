@@ -1,0 +1,36 @@
+- slug: kubernetes
+  name: Kubernetes
+  description: Pods, Deployments, Services, and the rest of the control plane, taught from real manifests.
+- slug: docker
+  name: Docker
+  description: Images, layers, multi-stage builds, and the container runtime underneath docker run.
+- slug: microservices
+  name: Microservices
+  description: Decomposition, communication, and resilience patterns from real service architectures.
+- slug: security
+  name: Security
+  description: Authentication and authorization, from password hashing to OAuth2/OIDC to RBAC.
+- slug: system-design
+  name: System Design
+  description: Scalability, caching, sharding, and consistency, taught from real distributed systems.
+- slug: design-patterns
+  name: Design Patterns
+  description: Classic GoF patterns as they actually appear in production codebases, not UML diagrams.
+- slug: gcp
+  name: Google Cloud
+  description: Compute, storage, messaging, and IAM on Google Cloud, from real production configs.
+- slug: cicd
+  name: CI/CD
+  description: GitHub Actions workflows, build matrices, caching, and pipeline security.
+- slug: ddd
+  name: Domain-Driven Design
+  description: Aggregates, domain events, and the tactical patterns behind a well-modeled domain.
+- slug: architecture
+  name: Software Architecture
+  description: Layered, hexagonal, and clean architecture, and the tradeoffs between them.
+- slug: databases
+  name: Databases
+  description: Transactions, ORMs, migrations, and the modeling decisions behind SQL and NoSQL.
+- slug: observability
+  name: Observability
+  description: Metrics, logs, and traces, and the OpenTelemetry mechanics that tie them together.

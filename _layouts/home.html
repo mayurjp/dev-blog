@@ -9,32 +9,21 @@ layout: default
 
   {{ content }}
 
-  {%- assign topics = "kubernetes|Kubernetes,docker|Docker,microservices|Microservices,security|Security,system-design|System Design,design-patterns|Design Patterns,gcp|Google Cloud,cicd|CI/CD,ddd|Domain-Driven Design,architecture|Software Architecture,databases|Databases,observability|Observability" | split: "," -%}
-  {%- for topic in topics -%}
-    {%- assign parts = topic | split: "|" -%}
-    {%- assign cat_slug = parts[0] -%}
-    {%- assign cat_name = parts[1] -%}
-    {%- assign cat_posts = site.categories[cat_slug] -%}
-    {%- if cat_posts.size > 0 -%}
-      <h2 class="post-list-heading">{{ cat_name }}</h2>
-      <ul class="post-list">
-        {%- for post in cat_posts -%}
-        <li>
-          {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
-          <span class="post-meta">{{ post.date | date: date_format }}</span>
-          <h3>
-            <a class="post-link" href="{{ post.url | relative_url }}">
-              {{ post.title | escape }}
-            </a>
-          </h3>
-          {%- if site.show_excerpts -%}
-            {{ post.excerpt }}
-          {%- endif -%}
-        </li>
-        {%- endfor -%}
-      </ul>
-    {%- endif -%}
-  {%- endfor -%}
+  <div class="topic-grid">
+    {%- for topic in site.data.topics -%}
+      {%- assign post_count = site.categories[topic.slug].size | default: 0 -%}
+      {%- assign topic_url = "/" | append: topic.slug | append: "/" -%}
+      <a class="topic-card" href="{{ topic_url | relative_url }}">
+        <h3 class="topic-card-name">{{ topic.name }}</h3>
+        <p class="topic-card-description">{{ topic.description }}</p>
+        <span class="topic-card-count">
+          {{ post_count }} post{% unless post_count == 1 %}s{% endunless %}
+        </span>
+      </a>
+    {%- endfor -%}
+  </div>
+
+  <p class="archive-link"><a href="{{ "/archive/" | relative_url }}">Browse all posts &rarr;</a></p>
 
   <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
 
