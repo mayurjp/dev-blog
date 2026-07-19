@@ -9,21 +9,24 @@
   {%- if jekyll.environment == 'production' and site.google_analytics -%}
     {%- include google-analytics.html -%}
   {%- endif -%}
-  <script type="module">
-    // Rouge has no "mermaid" lexer. For a KNOWN language kramdown/Rouge wraps
-    // output as <div class="language-X highlighter-rouge"><div class="highlight">
-    // <pre class="highlight"><code>...spans...</code></pre></div></div>, but for
-    // an UNRECOGNIZED language it falls back to a bare
-    // <pre><code class="language-mermaid">escaped text</code></pre> — no
-    // wrapping div at all (verified against this site's own build output).
-    // Handle both shapes, swap each for a <pre class="mermaid"> Mermaid
-    // actually recognizes, then render. No Jekyll plugin needed — this
-    // repo's github-pages gem pin doesn't allow one anyway.
-    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-
-    document.addEventListener("DOMContentLoaded", function () {
+  <!--
+    Rouge has no "mermaid" lexer. For a KNOWN language kramdown/Rouge wraps
+    output as <div class="language-X highlighter-rouge"><div class="highlight">
+    <pre class="highlight"><code>...spans...</code></pre></div></div>, but for
+    an UNRECOGNIZED language it falls back to a bare
+    <pre><code class="language-mermaid">escaped text</code></pre> — no
+    wrapping div at all (verified against this site's own build output).
+    Load Mermaid as a classic global script (not an ES module import) —
+    fewer moving parts than dynamic module resolution across a CDN, and the
+    de facto standard integration pattern for static sites without a plugin.
+    No Jekyll plugin needed here either way — this repo's github-pages gem
+    pin doesn't allow one.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      if (typeof mermaid === "undefined") return;
       var matches = document.querySelectorAll(".language-mermaid");
-      if (!matches.length) return;
       matches.forEach(function (el) {
         var code = el.tagName === "CODE" ? el : el.querySelector("code");
         if (!code) return;
@@ -33,7 +36,8 @@
         var target = el.closest("div.language-mermaid") || el.closest("pre") || el;
         target.replaceWith(pre);
       });
-      mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" });
+      if (!matches.length) return;
+      mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "loose" });
       mermaid.run();
     });
   </script>
