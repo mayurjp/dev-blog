@@ -53,12 +53,12 @@ sequenceDiagram
     participant K as kubelet
     participant C as container
 
-    Note over K,C: t=0s — container starts; only startupProbe runs
+    Note over K,C: t=0s — container starts, only startupProbe runs
     loop every 5s, up to 30 attempts (150s runway)
         K->>C: GET /startupz
         C-->>K: fails (still booting)
     end
-    Note over K,C: t=45s — /startupz succeeds; startupProbe stops forever
+    Note over K,C: t=45s — /startupz succeeds, startupProbe stops forever
     Note over K,C: liveness + readiness begin now
 
     par livenessProbe, every 10s
@@ -73,7 +73,8 @@ sequenceDiagram
     K->>C: GET /livez (1 of 3 failures)
     K->>C: GET /livez (2 of 3 failures)
     K->>C: GET /livez (3 of 3 — threshold hit)
-    Note over K: kubelet restarts the CONTAINER (same Pod, same IP)<br/>startupProbe runs again on the fresh instance
+    Note over K: kubelet restarts the CONTAINER (same Pod, same IP)
+    Note over K: startupProbe runs again on the fresh instance
 ```
 
 Three things to hold onto:
