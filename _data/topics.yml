@@ -34,3 +34,9 @@
 - slug: observability
   name: Observability
   description: Metrics, logs, and traces, and the OpenTelemetry mechanics that tie them together.
+- slug: mlops
+  name: MLOps
+  description: Feature stores, model registries, drift detection, and the ML production lifecycle.
+- slug: genai
+  name: Generative AI
+  description: RAG, embeddings, agentic loops, and MCP, taught from real LLM application frameworks.

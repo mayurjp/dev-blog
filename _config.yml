@@ -3,8 +3,8 @@ title: "Real Repos, Real Ops"
 description: >-
   In-depth Kubernetes, Docker, Microservices, Security, System Design, Design
   Patterns, Google Cloud, CI/CD, Domain-Driven Design, Software Architecture,
-  Databases, and Observability concepts learned from actual production
-  repositories — not hello-world YAML.
+  Databases, Observability, MLOps, and Generative AI concepts learned from
+  actual production repositories — not hello-world YAML.
 author: Mayur
 
 # IMPORTANT: set these two to match your GitHub before publishing.
