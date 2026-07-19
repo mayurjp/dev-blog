@@ -3,6 +3,7 @@ layout: post
 title: "How does a caller find a service instance whose IP changes every restart?"
 date: 2026-07-23 09:00:00 +0530
 categories: microservices
+order: 3
 tags: [microservices, service-discovery, eureka, spring-cloud, kubernetes]
 published: false
 ---

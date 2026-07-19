@@ -3,6 +3,7 @@ layout: post
 title: "Why does this codebase call it SetShippedStatus instead of UpdateStatus(5)?"
 date: 2026-08-12 09:00:00 +0530
 categories: ddd
+order: 1
 tags: [ddd, domain-driven-design, ubiquitous-language, event-storming, dotnet]
 ---
 

@@ -3,6 +3,7 @@ layout: post
 title: "Why do some Docker rebuilds take 10 seconds and others take 10 minutes?"
 date: 2026-07-18 10:00:00 +0530
 categories: docker
+order: 1
 tags: [docker, images, layers, buildkit, overlay2, caching]
 ---
 

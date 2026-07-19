@@ -3,6 +3,7 @@ layout: post
 title: "How does one container find another when IPs change on every restart?"
 date: 2026-07-31 09:00:00 +0530
 categories: docker
+order: 6
 tags: [docker, networking, bridge, dns, service-discovery, traefik]
 published: false
 ---

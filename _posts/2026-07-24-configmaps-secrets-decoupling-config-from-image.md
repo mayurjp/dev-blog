@@ -3,6 +3,7 @@ layout: post
 title: "Why shouldn't config and credentials live inside the container image?"
 date: 2026-07-24 09:00:00 +0530
 categories: kubernetes
+order: 4
 tags: [kubernetes, configmaps, secrets, kubelet]
 ---
 

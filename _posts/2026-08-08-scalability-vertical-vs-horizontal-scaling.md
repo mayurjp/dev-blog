@@ -3,6 +3,7 @@ layout: post
 title: "Does adding a tenth server actually help, or does it just move the bottleneck?"
 date: 2026-08-08 09:00:00 +0530
 categories: system-design
+order: 1
 tags: [system-design, scalability, load-balancing, distributed-systems, dotnet-orleans]
 ---
 

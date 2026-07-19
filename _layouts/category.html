@@ -2,7 +2,7 @@
 layout: default
 ---
 {%- assign topic = site.data.topics | where: "slug", page.category | first -%}
-{%- assign topic_posts = site.categories[page.category] -%}
+{%- assign topic_posts = site.categories[page.category] | sort: "order" -%}
 <div class="home">
 
   <p class="topic-back"><a href="{{ "/" | relative_url }}">&larr; All topics</a></p>

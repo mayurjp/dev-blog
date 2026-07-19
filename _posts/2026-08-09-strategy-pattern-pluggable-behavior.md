@@ -3,6 +3,7 @@ layout: post
 title: "How does the same Execute() call run a retry today and a circuit breaker tomorrow?"
 date: 2026-08-09 09:00:00 +0530
 categories: design-patterns
+order: 1
 tags: [design-patterns, strategy-pattern, polly, dotnet, resilience]
 ---
 

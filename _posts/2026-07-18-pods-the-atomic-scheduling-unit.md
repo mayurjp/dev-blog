@@ -3,6 +3,7 @@ layout: post
 title: "Why does Kubernetes never schedule a single bare container?"
 date: 2026-07-18 09:00:00 +0530
 categories: kubernetes
+order: 1
 tags: [kubernetes, pods, kubelet, containers]
 ---
 

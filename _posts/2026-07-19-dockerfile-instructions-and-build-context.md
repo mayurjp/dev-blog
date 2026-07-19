@@ -3,6 +3,7 @@ layout: post
 title: "What actually happens between docker build and a runnable image?"
 date: 2026-07-19 09:00:00 +0530
 categories: docker
+order: 2
 tags: [docker, dockerfile, build-context, buildkit, instructions]
 published: false
 ---

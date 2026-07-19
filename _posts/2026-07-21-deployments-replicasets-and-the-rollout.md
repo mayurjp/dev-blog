@@ -3,6 +3,7 @@ layout: post
 title: "Who actually recreates a crashed Pod, and how do you update one without downtime?"
 date: 2026-07-21 09:00:00 +0530
 categories: kubernetes
+order: 2
 tags: [kubernetes, deployments, replicasets, rollouts]
 ---
 

@@ -3,6 +3,7 @@ layout: post
 title: "What actually happens between git push and 'All checks have passed'?"
 date: 2026-08-11 09:00:00 +0530
 categories: cicd
+order: 1
 tags: [cicd, github-actions, ci, dotnet, automation]
 ---
 

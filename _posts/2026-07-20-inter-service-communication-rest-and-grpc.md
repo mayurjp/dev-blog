@@ -3,6 +3,7 @@ layout: post
 title: "Why does the browser get REST while services talk gRPC to each other?"
 date: 2026-07-20 09:00:00 +0530
 categories: microservices
+order: 2
 tags: [microservices, grpc, rest, protobuf, api-design]
 published: false
 ---

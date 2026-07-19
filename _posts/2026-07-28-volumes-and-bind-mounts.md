@@ -3,6 +3,7 @@ layout: post
 title: "Where does a container's data go when the container dies?"
 date: 2026-07-28 09:00:00 +0530
 categories: docker
+order: 5
 tags: [docker, volumes, bind-mounts, compose, storage]
 published: false
 ---

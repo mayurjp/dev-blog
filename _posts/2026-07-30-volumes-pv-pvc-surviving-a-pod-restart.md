@@ -3,6 +3,7 @@ layout: post
 title: "If a Pod is disposable, how does its data ever survive a restart?"
 date: 2026-07-30 09:00:00 +0530
 categories: kubernetes
+order: 6
 tags: [kubernetes, volumes, persistentvolumes, storage]
 published: false
 ---

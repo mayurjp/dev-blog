@@ -3,6 +3,7 @@ layout: post
 title: "What do you do when your replicas can't be interchangeable?"
 date: 2026-08-02 09:00:00 +0530
 categories: kubernetes
+order: 7
 tags: [kubernetes, statefulsets, sharding, controller]
 published: false
 ---

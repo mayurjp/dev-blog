@@ -3,6 +3,7 @@ layout: post
 title: "How do you start twenty dependent containers in the right order, reliably?"
 date: 2026-08-03 09:00:00 +0530
 categories: docker
+order: 7
 tags: [docker, compose, orchestration, yaml-anchors, depends-on]
 published: false
 ---

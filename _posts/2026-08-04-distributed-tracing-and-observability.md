@@ -3,6 +3,7 @@ layout: post
 title: "If checkout is slow, which of six downstream calls is actually to blame?"
 date: 2026-08-04 09:00:00 +0530
 categories: microservices
+order: 7
 tags: [microservices, distributed-tracing, opentelemetry, observability, istio]
 published: false
 ---

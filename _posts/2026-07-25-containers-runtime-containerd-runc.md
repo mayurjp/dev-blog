@@ -3,6 +3,7 @@ layout: post
 title: "When you run docker run, what actually creates the container?"
 date: 2026-07-25 09:00:00 +0530
 categories: docker
+order: 4
 tags: [docker, containerd, runc, oci, runtime]
 published: false
 ---

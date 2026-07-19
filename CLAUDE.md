@@ -40,12 +40,20 @@ layout: post
 title: "Your title here"
 date: 2026-08-01 09:00:00 +0530
 categories: kubernetes
+order: 9
 tags: [kubernetes, deployments]
 ---
 ```
 
 `categories:` must be exactly one of the slugs in `_data/topics.yml` (below) — that's
 what drives which topic page and homepage card the post shows up under.
+
+`order:` (added 2026-07-19) must match that topic's row number in
+`../blog-pipeline/content-tracker.md`'s per-domain table — it's what
+`_layouts/category.html` sorts by (see "Site structure" below), so a topic page reads
+as a learning curriculum in sequence rather than newest-published-first. Every post
+needs this field, not just newly-added ones — a post missing it sorts unpredictably
+against the rest of its topic page.
 
 ## Unpublishing a post without deleting it
 
@@ -75,7 +83,11 @@ past a handful of posts per topic. Current structure (added 2026-07-19):
 - **`topics/<slug>.md`** — one thin page per topic (`layout: category`, `category:
   <slug>`, `permalink: /<slug>/`), rendered by **`_layouts/category.html`**, which looks
   up its own name/description from `_data/topics.yml` and lists that category's posts
-  newest-first. Shows a "no posts yet" fallback for empty topics rather than erroring.
+  sorted by front-matter **`order:`** ascending (changed 2026-07-19 from
+  newest-first — a topic page is a learning curriculum, so a new reader should land on
+  the foundational topic first, not whatever was published most recently; see
+  `order:` in the front matter schema below). Shows a "no posts yet" fallback for
+  empty topics rather than erroring.
 - **`archive.md`** (`permalink: /archive/`) — renders via **`_layouts/archive.html`**, a
   flat reverse-chronological list of every post across all topics, with a topic tag on
   each entry.

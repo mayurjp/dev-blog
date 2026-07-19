@@ -3,6 +3,7 @@ layout: post
 title: "Should a mobile client know that catalog and ordering are different services?"
 date: 2026-07-26 09:00:00 +0530
 categories: microservices
+order: 4
 tags: [microservices, api-gateway, yarp, reverse-proxy, bff]
 published: false
 ---

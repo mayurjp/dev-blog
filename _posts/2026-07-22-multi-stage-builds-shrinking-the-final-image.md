@@ -3,6 +3,7 @@ layout: post
 title: "Why does your production image ship a full Go toolchain to run one binary?"
 date: 2026-07-22 09:00:00 +0530
 categories: docker
+order: 3
 tags: [docker, multi-stage-builds, buildkit, image-size, dockerfile]
 published: false
 ---

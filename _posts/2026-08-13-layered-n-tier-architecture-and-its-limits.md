@@ -3,6 +3,7 @@ layout: post
 title: "If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement?"
 date: 2026-08-13 09:00:00 +0530
 categories: architecture
+order: 1
 tags: [software-architecture, layered-architecture, n-tier, dotnet, dependency-inversion]
 ---
 

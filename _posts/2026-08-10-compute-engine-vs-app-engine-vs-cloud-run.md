@@ -3,6 +3,7 @@ layout: post
 title: "When does adding capacity mean provisioning a VM, and when does it mean nothing at all?"
 date: 2026-08-10 09:00:00 +0530
 categories: gcp
+order: 1
 tags: [gcp, compute-engine, gke, cloud-run, serverless, knative]
 ---
 

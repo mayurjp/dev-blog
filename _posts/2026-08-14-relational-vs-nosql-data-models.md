@@ -3,6 +3,7 @@ layout: post
 title: "What does declaring a shard key actually DO, once you hit save?"
 date: 2026-08-14 09:00:00 +0530
 categories: databases
+order: 1
 tags: [databases, sql, nosql, mongodb, sharding, data-modeling]
 ---
 

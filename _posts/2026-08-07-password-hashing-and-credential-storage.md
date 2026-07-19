@@ -3,6 +3,7 @@ layout: post
 title: "What's actually inside that unreadable string ASP.NET Core stores instead of your password?"
 date: 2026-08-07 09:00:00 +0530
 categories: security
+order: 1
 tags: [security, authentication, aspnetcore, identity, password-hashing, pbkdf2]
 ---
 

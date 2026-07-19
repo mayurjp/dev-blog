@@ -3,6 +3,7 @@ layout: post
 title: "How do containers talk to each other without hardcoding IP addresses?"
 date: 2026-07-18 09:00:00 +0530
 categories: kubernetes
+order: 3
 tags: [kubernetes, services, dns, kube-proxy, endpointslices]
 ---
 

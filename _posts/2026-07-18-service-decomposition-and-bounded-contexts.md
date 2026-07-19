@@ -3,6 +3,7 @@ layout: post
 title: "How do you split a monolith without building a distributed one?"
 date: 2026-07-18 09:00:00 +0530
 categories: microservices
+order: 1
 tags: [microservices, ddd, bounded-context, architecture]
 ---
 
