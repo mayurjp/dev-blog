@@ -10,26 +10,28 @@
     {%- include google-analytics.html -%}
   {%- endif -%}
   <script type="module">
-    // Kramdown/Rouge has no "mermaid" lexer, so a ```mermaid fenced block
-    // just renders as an ordinary highlighted code block:
-    //   <div class="language-mermaid highlighter-rouge">
-    //     <div class="highlight"><pre class="highlight"><code>...</code></pre></div>
-    //   </div>
-    // Swap each one for a <pre class="mermaid"> Mermaid actually recognizes,
-    // then render. No Jekyll plugin needed — this repo's github-pages gem
-    // pin doesn't allow one anyway.
+    // Rouge has no "mermaid" lexer. For a KNOWN language kramdown/Rouge wraps
+    // output as <div class="language-X highlighter-rouge"><div class="highlight">
+    // <pre class="highlight"><code>...spans...</code></pre></div></div>, but for
+    // an UNRECOGNIZED language it falls back to a bare
+    // <pre><code class="language-mermaid">escaped text</code></pre> — no
+    // wrapping div at all (verified against this site's own build output).
+    // Handle both shapes, swap each for a <pre class="mermaid"> Mermaid
+    // actually recognizes, then render. No Jekyll plugin needed — this
+    // repo's github-pages gem pin doesn't allow one anyway.
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
 
     document.addEventListener("DOMContentLoaded", function () {
-      var blocks = document.querySelectorAll(".language-mermaid");
-      if (!blocks.length) return;
-      blocks.forEach(function (wrapper) {
-        var code = wrapper.querySelector("code");
+      var matches = document.querySelectorAll(".language-mermaid");
+      if (!matches.length) return;
+      matches.forEach(function (el) {
+        var code = el.tagName === "CODE" ? el : el.querySelector("code");
         if (!code) return;
         var pre = document.createElement("pre");
         pre.className = "mermaid";
         pre.textContent = code.textContent;
-        wrapper.replaceWith(pre);
+        var target = el.closest("div.language-mermaid") || el.closest("pre") || el;
+        target.replaceWith(pre);
       });
       mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" });
       mermaid.run();

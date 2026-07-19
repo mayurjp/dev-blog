@@ -51,7 +51,7 @@ own `cache-warmer-app` numbers (`startupProbe`: `periodSeconds: 5` ×
 ```mermaid
 gantt
     dateFormat X
-    axisFormat %Ss
+    axisFormat %M:%S
     section startupProbe
     Polling /startupz every 5s, up to 30 failures allowed (150s runway) :active, startup, 0, 45
     section liveness/readiness (begin once startup succeeds at t=45s)
