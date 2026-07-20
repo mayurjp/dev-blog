@@ -6,14 +6,6 @@ permalink: /qa/
 
 Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1496 Q&A pairs across 18 domains**, organized for foundational → mid-level → advanced progression within each topic.
 
-## How to use
-
-1. Pick a domain below
-2. Read 5-10 questions per sitting
-3. Check your understanding against the answers
-4. Click the linked post if you want to go deeper
-5. New Q&A is added automatically when new posts are published
-
 ## Available domains
 
 | Domain | Q&A |
