@@ -70,3 +70,19 @@
   name: .NET
   description: The CLR, the DI container, the middleware pipeline, and other runtime internals, taught from the .NET and ASP.NET Core source.
   glossary: /dotnet/dotnet-key-terms/
+- slug: api-design
+  name: API Design
+  description: REST, gRPC, and the contract decisions — versioning, pagination, errors, and idempotency — behind a good API.
+  glossary: /api-design/api-design-key-terms/
+- slug: messaging
+  name: Messaging & Integration
+  description: Brokers and protocols — Kafka, RabbitMQ, gRPC, SignalR, WebSockets — and the delivery and ordering guarantees that decide correctness.
+  glossary: /messaging/messaging-key-terms/
+- slug: git
+  name: Git
+  description: Branches, merges, rebase, and the object model underneath, taught from git's own source.
+  glossary: /git/git-key-terms/
+- slug: event-driven
+  name: Event-Driven Architecture
+  description: Event sourcing, CQRS, the outbox pattern, and choreography vs orchestration in event-driven systems.
+  glossary: /event-driven/event-driven-key-terms/
