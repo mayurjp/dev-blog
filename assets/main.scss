@@ -133,9 +133,6 @@
 
 /* Q&A bank pages */
 .qa-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -192,12 +189,8 @@
 }
 
 .qa-topic {
-  position: sticky;
-  top: 64px;
-  z-index: 10;
   margin-top: 28px;
   padding: 8px 12px;
-  background: $background-color;
   border-bottom: 2px solid $brand-color;
   font-size: 20px;
 }

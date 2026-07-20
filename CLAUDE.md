@@ -84,6 +84,37 @@ next push on/after that date — this repo's posts are routinely dated a few day
 to space out a publishing cadence, and `future: true` is what makes that work on
 GitHub Pages' legacy (rebuild-on-push-only) infrastructure.
 
+## Q&A bank pages (`qa/`) are generated — do NOT hand-edit
+
+`qa/<domain>.md` and `qa/index.md` are produced by `blog-pipeline/publish-qa.py`, which
+reads `blog-pipeline/question-bank/<domain>.md` and transforms each `### Q:` block into
+a clickable card with a difficulty badge, plus a sticky-free toolbar with a live
+text + difficulty filter, and rewrites the `→ Post: _posts/...md` reference into a
+real `{{ '/<domain>/<slug>/' | relative_url }}` link. **Hand edits to `qa/*.md` are
+overwritten on the next regenerate.** To change the QA pages, edit either the
+question-bank source or `publish-qa.py` and re-run it.
+
+## Build gotcha: Liquid syntax inside code fences breaks the build
+
+A fenced code block containing `{{` (Go templates, jsonnet, Prometheus `{{ $labels }}`,
+Helm/Jinja) or `{%` (e.g. a Prometheus query with `%(selector)s`) makes Liquid try to
+parse it: unterminated `{%` is a **fatal** build error, and `{{` often renders wrong.
+This breaks the *entire* site build (every page, including `qa/`), so a single bad
+post takes the whole site down. Fix: wrap the offending fence in `{% raw %}` … `{% endraw %}`
+placed *outside* the backticks (so the tags aren't displayed). `fix-liquid-codeblocks.py`
+at the repo root does this mechanically for every block that contains `{{`/`{%` and isn't
+already inside a raw block. Verify with `bundle exec jekyll build` after any post edit
+that introduces template syntax.
+
+## kramdown gotcha: markdown is NOT parsed inside raw HTML blocks
+
+When emitting HTML directly (as `publish-qa.py` does for the Q&A cards), kramdown does
+**not** process markdown — `**bold**`, `` `code` ``, lists — inside a raw `<div>` unless
+the div carries `markdown="1"`. Without it, answer text renders with literal asterisks
+and backticks. The answer wrapper uses `<div class="qa-a" markdown="1">` for this reason.
+(Contrast with the Mermaid note below: that's a *code* block, which kramdown renders as
+`<pre><code>`, so inline markdown there is irrelevant.)
+
 ## Site structure — card-grid homepage, per-topic pages, archive
 
 The homepage is **not** a flat list of every post — that broke down once curricula grew
