@@ -4,7 +4,7 @@ title: "Database Storage Engine: How Postgres Turns a Row Into a Page, a Line Po
 description: "What a table row and an index entry physically are underneath the SQL layer — Postgres's fixed-size slotted page format (PageHeaderData, ItemIdData line pointers) shared by heap and B-tree pages, and the real heap_insert/_bt_insertonpg mechanics that place a tuple and trigger an index page split. From Postgres's own server source."
 date: 2026-05-26 09:00:00 +0530
 categories: databases
-order: 0
+order: 1
 tags: [databases, postgres, storage-engine, b-tree, heap-pages, page-layout]
 ---
 

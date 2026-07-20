@@ -1,12 +1,15 @@
 - slug: kubernetes
   name: Kubernetes
   description: Pods, Deployments, Services, and the rest of the control plane, taught from real manifests.
+  glossary: /kubernetes/kubernetes-key-terms/
 - slug: docker
   name: Docker
   description: Images, layers, multi-stage builds, and the container runtime underneath docker run.
+  glossary: /docker/docker-key-terms/
 - slug: microservices
   name: Microservices
   description: Decomposition, communication, and resilience patterns from real service architectures.
+  glossary: /microservices/microservices-key-terms/
 - slug: security
   name: Security
   description: Authentication and authorization, from password hashing to OAuth2/OIDC to RBAC.
@@ -14,42 +17,56 @@
 - slug: system-design
   name: System Design
   description: Scalability, caching, sharding, and consistency, taught from real distributed systems.
+  glossary: /system-design/system-design-key-terms/
 - slug: design-patterns
   name: Design Patterns
   description: Classic GoF patterns as they actually appear in production codebases, not UML diagrams.
+  glossary: /design-patterns/design-patterns-key-terms/
 - slug: gcp
   name: Google Cloud
   description: Compute, storage, messaging, and IAM on Google Cloud, from real production configs.
+  glossary: /gcp/gcp-key-terms/
 - slug: cicd
   name: CI/CD
   description: GitHub Actions workflows, build matrices, caching, and pipeline security.
+  glossary: /cicd/cicd-key-terms/
 - slug: ddd
   name: Domain-Driven Design
   description: Aggregates, domain events, and the tactical patterns behind a well-modeled domain.
+  glossary: /ddd/ddd-key-terms/
 - slug: architecture
   name: Software Architecture
   description: Layered, hexagonal, and clean architecture, and the tradeoffs between them.
+  glossary: /architecture/architecture-key-terms/
 - slug: databases
   name: Databases
   description: Transactions, ORMs, migrations, and the modeling decisions behind SQL and NoSQL.
+  glossary: /databases/databases-key-terms/
 - slug: observability
   name: Observability
   description: Metrics, logs, and traces, and the OpenTelemetry mechanics that tie them together.
+  glossary: /observability/observability-key-terms/
 - slug: mlops
   name: MLOps
   description: Feature stores, model registries, drift detection, and the ML production lifecycle.
+  glossary: /mlops/mlops-key-terms/
 - slug: genai
   name: Generative AI
   description: RAG, embeddings, agentic loops, and MCP, taught from real LLM application frameworks.
+  glossary: /genai/genai-key-terms/
 - slug: gitops
   name: GitOps
   description: Reconciliation loops, sync waves, and progressive delivery, taught from real Argo CD and Flux controllers.
+  glossary: /gitops/gitops-key-terms/
 - slug: angular
   name: Angular
   description: Signals, change detection, and dependency injection, taught from the Angular framework's own source.
+  glossary: /angular/angular-key-terms/
 - slug: multicloud
   name: Multi-Cloud
   description: Cross-provider identity, networking, and cost, taught from real Terraform, Crossplane, and Istio multi-cluster setups.
+  glossary: /multicloud/multicloud-key-terms/
 - slug: dotnet
   name: .NET
   description: The CLR, the DI container, the middleware pipeline, and other runtime internals, taught from the .NET and ASP.NET Core source.
+  glossary: /dotnet/dotnet-key-terms/
