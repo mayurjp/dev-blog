@@ -6,6 +6,7 @@ categories: cicd
 order: 6
 tags: [cicd, github-actions, artifacts, build-outputs]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: job outputs can't carry real files
 
@@ -108,3 +109,4 @@ Known-stale fact: job outputs and artifacts are sometimes treated as interchange
 - **Concept:** Artifacts & build outputs (sharing between jobs)
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/build-terraform-cli.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build-terraform-cli.yml), [`.github/workflows/build.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build.yml) — a large, real project's multi-platform release pipeline.
+{% endraw %}

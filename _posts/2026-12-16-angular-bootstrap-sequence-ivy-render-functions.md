@@ -7,6 +7,7 @@ categories: angular
 order: 0
 tags: [angular, bootstrap, ivy, dependency-injection, change-detection, compiler]
 ---
+{% raw %}
 
 **TL;DR:** When you call `bootstrapApplication(AppComponent)`, what actually turns that one function call into a rendered page? Angular builds a root `EnvironmentInjector` and an `ApplicationRef` first — with no `NgModule` anywhere in the path — then calls `ApplicationRef.bootstrap()`, which creates the root component's view by invoking its Ivy-compiled template function: a plain JavaScript function full of `ɵɵelementStart`/`ɵɵadvance`/`ɵɵproperty` instruction calls, not a virtual-DOM diff.
 
@@ -477,3 +478,4 @@ No — it mounts an additional root component under the *same* `ApplicationRef` 
 - **Concept:** Angular's `bootstrapApplication()`/`ApplicationRef` bootstrap sequence and the Ivy compiler's instruction-based render functions
 - **Domain:** angular
 - **Repo:** [angular/angular](https://github.com/angular/angular) → [`packages/platform-browser/src/browser.ts`](https://github.com/angular/angular/blob/main/packages/platform-browser/src/browser.ts), [`packages/core/src/application/create_application.ts`](https://github.com/angular/angular/blob/main/packages/core/src/application/create_application.ts), [`packages/core/src/application/application_ref.ts`](https://github.com/angular/angular/blob/main/packages/core/src/application/application_ref.ts), [`packages/core/src/platform/bootstrap.ts`](https://github.com/angular/angular/blob/main/packages/core/src/platform/bootstrap.ts), [`packages/core/src/render3/definition.ts`](https://github.com/angular/angular/blob/main/packages/core/src/render3/definition.ts), [`packages/compiler-cli/test/compliance/test_cases/r3_view_compiler_template/nested_template_context.ts`](https://github.com/angular/angular/blob/main/packages/compiler-cli/test/compliance/test_cases/r3_view_compiler_template/nested_template_context.ts) and [`nested_template_context.js`](https://github.com/angular/angular/blob/main/packages/compiler-cli/test/compliance/test_cases/r3_view_compiler_template/nested_template_context.js) — the Angular framework's own source, and its own compiler compliance golden-test suite.
+{% endraw %}

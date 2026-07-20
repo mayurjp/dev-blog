@@ -6,6 +6,7 @@ categories: cicd
 order: 3
 tags: [cicd, github-actions, triggers, workflow-dispatch]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: different automation needs fundamentally different triggering shapes
 
@@ -134,3 +135,4 @@ Known-stale fact: it's easy to assume every GitHub Actions trigger type hands th
 - **Concept:** Triggers & events (push, pull_request, workflow_dispatch, schedule)
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/lock.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/lock.yml), [`.github/workflows/equivalence-test-manual-update.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/equivalence-test-manual-update.yml) — a large, real project's production automation workflows.
+{% endraw %}

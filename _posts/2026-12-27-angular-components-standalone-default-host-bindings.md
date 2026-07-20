@@ -7,6 +7,7 @@ categories: angular
 order: 1
 tags: [angular, components, templates, host-bindings, standalone]
 ---
+{% raw %}
 
 **TL;DR:** Does a new Angular component need to be declared in an NgModule before anything else can use it, and is a component's `host` metadata just a plain object of string key-values? Neither — standalone is the compiler's *default* (an `@Component` needs `standalone: false` to opt *out*, not `standalone: true` to opt in), and `host`'s key syntax itself — a bare key, `[key]`, `(key)`, or `[attr.key]` — is what tells Angular which of three structurally different binding kinds (attribute, property, event) to compile for that one entry.
 
@@ -195,3 +196,4 @@ A: Because `disabled` here needs to become an actual DOM *attribute* (`disabled=
 - **Concept:** Standalone-by-default components and the `host` binding-kind syntax
 - **Domain:** angular
 - **Repo:** [angular/angular](https://github.com/angular/angular) → [`packages/core/src/metadata/directives.ts`](https://github.com/angular/angular/blob/main/packages/core/src/metadata/directives.ts); [angular/components](https://github.com/angular/components) → [`src/material/button/button-base.ts`](https://github.com/angular/components/blob/main/src/material/button/button-base.ts) — the framework's own source and a real, production Material component
+{% endraw %}

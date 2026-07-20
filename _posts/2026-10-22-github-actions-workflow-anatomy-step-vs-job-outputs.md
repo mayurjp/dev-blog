@@ -6,6 +6,7 @@ categories: cicd
 order: 2
 tags: [cicd, github-actions, workflow-anatomy]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: steps and jobs run at genuinely different isolation levels
 
@@ -111,3 +112,4 @@ Known-stale fact: a common beginner assumption is that any step or job in a work
 - **Concept:** GitHub Actions workflow anatomy (workflows, jobs, steps, runners)
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/build.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build.yml) — a large, real project's production release pipeline.
+{% endraw %}

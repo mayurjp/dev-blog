@@ -6,6 +6,7 @@ categories: cicd
 order: 10
 tags: [cicd, github-actions, continuous-deployment, canary, gcp]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: "deploy" and "receive traffic" are two different events, and conflating them is what makes a bad release dangerous
 
@@ -104,3 +105,4 @@ Known-stale fact: canary and blue-green deployment are sometimes described as re
 - **Concept:** Continuous Deployment strategies (blue-green/canary via Actions)
 - **Domain:** cicd
 - **Repo:** [google-github-actions/deploy-cloudrun](https://github.com/google-github-actions/deploy-cloudrun) → [`src/main.ts`](https://github.com/google-github-actions/deploy-cloudrun/blob/main/src/main.ts), [`README.md`](https://github.com/google-github-actions/deploy-cloudrun/blob/main/README.md) — Google's own official GitHub Action for Cloud Run deployments.
+{% endraw %}

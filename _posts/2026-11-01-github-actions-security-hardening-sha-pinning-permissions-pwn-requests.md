@@ -6,6 +6,7 @@ categories: cicd
 order: 12
 tags: [cicd, github-actions, security, supply-chain]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: three separate attack surfaces converge in one ordinary CI workflow
 
@@ -134,3 +135,4 @@ Known-stale fact: pinning a third-party action to a mutable version tag (`@v4`) 
 - **Concept:** Security hardening (SHA-pinning actions, `GITHUB_TOKEN` permissions, supply-chain risk)
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/enforce-changelog.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/enforce-changelog.yml), [`.github/dependabot.yml`](https://github.com/hashicorp/terraform/blob/main/.github/dependabot.yml) — a large, real project's production security-hardened pull-request automation.
+{% endraw %}

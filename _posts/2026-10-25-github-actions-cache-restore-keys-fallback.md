@@ -6,6 +6,7 @@ categories: cicd
 order: 5
 tags: [cicd, github-actions, caching, actions-cache]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: a single fixed cache key is either useless or dangerously stale
 
@@ -103,3 +104,4 @@ Known-stale fact: it's a common but imprecise assumption that `cache-hit: true`/
 - **Concept:** Caching dependencies (`actions/cache`, restore-keys)
 - **Domain:** cicd
 - **Repo:** [actions/cache](https://github.com/actions/cache) → [`src/restoreImpl.ts`](https://github.com/actions/cache/blob/main/src/restoreImpl.ts) — the official GitHub Actions cache action's own real restore logic.
+{% endraw %}

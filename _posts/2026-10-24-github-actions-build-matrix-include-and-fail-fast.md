@@ -6,6 +6,7 @@ categories: cicd
 order: 4
 tags: [cicd, github-actions, build-matrix, testing]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: hand-duplicated per-OS jobs drift out of sync
 
@@ -118,3 +119,4 @@ Known-stale fact: build matrix testing is often assumed to just mean "run the sa
 - **Concept:** Build matrix (multi-OS/multi-version testing)
 - **Domain:** cicd
 - **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly) → [`.github/workflows/build.yml`](https://github.com/App-vNext/Polly/blob/main/.github/workflows/build.yml) — the real, production .NET resilience library's cross-platform build pipeline.
+{% endraw %}

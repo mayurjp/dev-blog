@@ -6,6 +6,7 @@ categories: cicd
 order: 7
 tags: [cicd, github-actions, secrets, environments]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: a repo secret is visible to every workflow, and that's too broad for some secrets
 
@@ -110,3 +111,4 @@ Known-stale fact: GitHub Environments are commonly assumed to be purely a deploy
 - **Concept:** Secrets & environments (repo/org secrets, required reviewers, OIDC federation to cloud providers)
 - **Domain:** cicd
 - **Repo:** [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) → [`.github/workflows/validate-pat-pool.yml`](https://github.com/dotnet/aspnetcore/blob/main/.github/workflows/validate-pat-pool.yml) — a real, current .NET repository's environment-scoped secret validation pipeline.
+{% endraw %}

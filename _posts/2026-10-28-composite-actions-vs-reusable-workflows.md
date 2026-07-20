@@ -6,6 +6,7 @@ categories: cicd
 order: 8
 tags: [cicd, github-actions, composite-actions, reusable-workflows]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: duplication shows up at two genuinely different granularities
 
@@ -146,3 +147,4 @@ Known-stale fact: "composite action" and "reusable workflow" are sometimes treat
 - **Concept:** Reusable workflows & composite actions
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/actions/go-version/action.yml`](https://github.com/hashicorp/terraform/blob/main/.github/actions/go-version/action.yml), [`.github/workflows/build-terraform-cli.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build-terraform-cli.yml) — a large, real project's production release pipeline.
+{% endraw %}

@@ -7,6 +7,7 @@ categories: observability
 order: 9
 tags: [observability, dashboards, red-method, use-method, grafana, prometheus]
 ---
+{% raw %}
 
 **TL;DR:** RED (Rate, Errors, Duration) and USE (Utilization, Saturation, Errors) both sound like "pick three metrics and put them on a dashboard" — but they're not the same three panels with different labels. RED is built from request counters and duration histograms, always scoped to an operation a caller performed; USE is built from capacity/usage/limit gauges, scoped to a resource that has no idea a "request" even happened. A real dashboard-as-code project, `kubernetes-monitoring/kubernetes-mixin`, implements them as genuinely different Grafana panel functions querying genuinely different Prometheus metric shapes.
 
@@ -184,3 +185,4 @@ A: `kubernetes-mixin` itself mixes them at the *dashboard-set* level, not by ble
 - **Concept:** Structuring dashboards around the RED and USE methods
 - **Domain:** observability
 - **Repo:** [kubernetes-monitoring/kubernetes-mixin](https://github.com/kubernetes-monitoring/kubernetes-mixin) → [`dashboards/apiserver.libsonnet`](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/master/dashboards/apiserver.libsonnet), [`dashboards/resources/node.libsonnet`](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/master/dashboards/resources/node.libsonnet), [`dashboards/resources/queries/node.libsonnet`](https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/master/dashboards/resources/queries/node.libsonnet) — the real, widely-deployed Kubernetes Grafana dashboard-as-code mixin
+{% endraw %}

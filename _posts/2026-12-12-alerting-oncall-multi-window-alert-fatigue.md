@@ -6,6 +6,7 @@ categories: observability
 order: 8
 tags: [observability, alerting, on-call, prometheus, sre]
 ---
+{% raw %}
 
 ## 1. The Engineering Problem: a single-window alert pages on every transient blip, which is exactly what causes alert fatigue
 
@@ -101,3 +102,4 @@ Known-stale fact: alerting is sometimes designed around a single threshold-and-w
 - **Concept:** Alerting & on-call (paging thresholds, alert fatigue)
 - **Domain:** observability
 - **Repo:** [slok/sloth](https://github.com/slok/sloth) → [`internal/plugin/slo/core/alert_rules_v1/plugin.go`](https://github.com/slok/sloth/blob/main/internal/plugin/slo/core/alert_rules_v1/plugin.go), [`internal/alert/windows/google-30d.yaml`](https://github.com/slok/sloth/blob/main/internal/alert/windows/google-30d.yaml) — a real, widely used open-source Prometheus SLO generator.
+{% endraw %}
