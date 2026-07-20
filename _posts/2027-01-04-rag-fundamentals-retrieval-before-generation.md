@@ -157,3 +157,7 @@ A: Not reliably — an LLM given irrelevant or misleading pasted-in text will of
 - **Concept:** RAG's two-stage retrieval-then-combination pipeline
 - **Domain:** genai
 - **Repo:** [langchain-ai/langchain](https://github.com/langchain-ai/langchain) → [`libs/langchain/langchain_classic/chains/retrieval.py`](https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain_classic/chains/retrieval.py), [`libs/langchain/langchain_classic/chains/combine_documents/stuff.py`](https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain_classic/chains/combine_documents/stuff.py) — the most widely used real RAG/agent framework
+
+---
+
+**Next in the Generative AI series:** [Chunking Strategies for RAG: Why Fixed-Size Splitting Breaks Retrieval]({{ '/genai/chunking-strategies-for-rag-fixed-size-vs-semantic-splitting/' | relative_url }})
