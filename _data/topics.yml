@@ -49,3 +49,6 @@
 - slug: multicloud
   name: Multi-Cloud
   description: Cross-provider identity, networking, and cost, taught from real Terraform, Crossplane, and Istio multi-cluster setups.
+- slug: dotnet
+  name: .NET
+  description: The CLR, the DI container, the middleware pipeline, and other runtime internals, taught from the .NET and ASP.NET Core source.
