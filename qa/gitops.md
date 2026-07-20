@@ -387,4 +387,4 @@ The controller attempted a reconciliation (`lastAttemptedRevision` is set) but i
 
 **Last updated:** July 2026 | **Total Q&A:** 88 across GitOps
 
-[Back to Q&A Index](/qa/) • [All GitOps posts](/gitops/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All GitOps posts]({{ '/gitops/' | relative_url }})

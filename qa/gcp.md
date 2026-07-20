@@ -307,4 +307,4 @@ The apply fails because the stable provider's resource schema doesn't know about
 
 **Last updated:** July 2026 | **Total Q&A:** 68 across Google Cloud
 
-[Back to Q&A Index](/qa/) • [All Google Cloud posts](/gcp/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Google Cloud posts]({{ '/gcp/' | relative_url }})

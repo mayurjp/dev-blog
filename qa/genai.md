@@ -421,4 +421,4 @@ The handshake is a transport-level concern — the runner must validate the prot
 
 **Last updated:** July 2026 | **Total Q&A:** 94 across Generative AI
 
-[Back to Q&A Index](/qa/) • [All Generative AI posts](/genai/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Generative AI posts]({{ '/genai/' | relative_url }})

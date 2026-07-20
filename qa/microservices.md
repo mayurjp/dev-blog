@@ -419,4 +419,4 @@ Browsers can't speak native gRPC. gRPC-Web only reliably supports unary and serv
 
 **Last updated:** July 2026 | **Total Q&A:** 110 across Microservices
 
-[Back to Q&A Index](/qa/) • [All Microservices posts](/microservices/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Microservices posts]({{ '/microservices/' | relative_url }})

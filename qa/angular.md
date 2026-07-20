@@ -407,4 +407,4 @@ The compiler's `configureDeferInstructions` phase emits a `[loadingMinimumTime, 
 
 **Last updated:** July 2026 | **Total Q&A:** 92 across Angular
 
-[Back to Q&A Index](/qa/) • [All Angular posts](/angular/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Angular posts]({{ '/angular/' | relative_url }})

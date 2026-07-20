@@ -371,4 +371,4 @@ The dependency graph *is* the architectural decision, visible and auditable in o
 
 **Last updated:** July 2026 | **Total Q&A:** 78 across Databases
 
-[Back to Q&A Index](/qa/) • [All Databases posts](/databases/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Databases posts]({{ '/databases/' | relative_url }})

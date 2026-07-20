@@ -347,4 +347,4 @@ Treating a heartbeat timeout as a definitive declaration of death — "ping it, 
 
 **Last updated:** July 2026 | **Total Q&A:** 78 across System Design
 
-[Back to Q&A Index](/qa/) • [All System Design posts](/system-design/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All System Design posts]({{ '/system-design/' | relative_url }})

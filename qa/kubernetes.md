@@ -586,4 +586,4 @@ A stray `kubectl create secret` or an un-migrated raw `Secret` manifest applied 
 
 **Last updated:** July 2026 | **Total Q&A:** 109 across Kubernetes
 
-[Back to Q&A Index](/qa/) • [All Kubernetes posts](/kubernetes/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Kubernetes posts]({{ '/kubernetes/' | relative_url }})

@@ -351,4 +351,4 @@ It's only available when your language's compiler supports targeting a different
 
 **Last updated:** July 2026 | **Total Q&A:** 79 across Docker
 
-[Back to Q&A Index](/qa/) • [All Docker posts](/docker/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Docker posts]({{ '/docker/' | relative_url }})

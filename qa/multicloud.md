@@ -301,4 +301,4 @@ State and provider versions are tightly coupled. If state records `schemaVersion
 
 **Last updated:** July 2026 | **Total Q&A:** 67 across Multi-Cloud
 
-[Back to Q&A Index](/qa/) • [All Multi-Cloud posts](/multicloud/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Multi-Cloud posts]({{ '/multicloud/' | relative_url }})

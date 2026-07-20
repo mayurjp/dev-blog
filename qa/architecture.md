@@ -337,4 +337,4 @@ Treating architecture as a static, one-time analysis — a diagram drawn once, a
 
 **Last updated:** July 2026 | **Total Q&A:** 76 across Software Architecture
 
-[Back to Q&A Index](/qa/) • [All Software Architecture posts](/architecture/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Software Architecture posts]({{ '/architecture/' | relative_url }})

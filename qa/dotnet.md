@@ -407,4 +407,4 @@ If a custom data attribute returns `false`, `TheoryDiscoverer` bails out to a si
 
 **Last updated:** July 2026 | **Total Q&A:** 92 across .NET
 
-[Back to Q&A Index](/qa/) • [All .NET posts](/dotnet/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All .NET posts]({{ '/dotnet/' | relative_url }})

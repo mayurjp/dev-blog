@@ -325,4 +325,4 @@ Layer 1 (`ValidatorBehavior` + FluentValidation) runs first, before the handler 
 
 **Last updated:** July 2026 | **Total Q&A:** 73 across Domain-Driven Design
 
-[Back to Q&A Index](/qa/) • [All Domain-Driven Design posts](/ddd/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Domain-Driven Design posts]({{ '/ddd/' | relative_url }})

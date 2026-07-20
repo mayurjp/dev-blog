@@ -325,4 +325,4 @@ Chain of Responsibility passes work along to the next handler and lets each deci
 
 **Last updated:** July 2026 | **Total Q&A:** 73 across Design Patterns
 
-[Back to Q&A Index](/qa/) • [All Design Patterns posts](/design-patterns/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Design Patterns posts]({{ '/design-patterns/' | relative_url }})

@@ -341,4 +341,4 @@ A: With three separate pipelines (Prometheus scrapes metrics, Loki ingests logs,
 
 **Last updated:** July 2026 | **Total Q&A:** 77 across Observability
 
-[Back to Q&A Index](/qa/) • [All Observability posts](/observability/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Observability posts]({{ '/observability/' | relative_url }})

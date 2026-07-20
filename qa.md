@@ -26,23 +26,23 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 
 | Domain | Q&A |
 |--------|-----|
-| [Kubernetes](/qa/kubernetes/) | 103 |
-| [Docker](/qa/docker/) | 79 |
-| [Microservices](/qa/microservices/) | 110 |
-| [Security](/qa/security/) | 78 |
-| [System Design](/qa/system-design/) | 80 |
-| [Design Patterns](/qa/design-patterns/) | 73 |
-| [Google Cloud](/qa/gcp/) | 79 |
-| [CI/CD](/qa/cicd/) | 75 |
-| [Domain-Driven Design](/qa/ddd/) | 72 |
-| [Software Architecture](/qa/architecture/) | 73 |
-| [Databases](/qa/databases/) | 76 |
-| [Observability](/qa/observability/) | 77 |
-| [MLOps](/qa/mlops/) | 96 |
-| [Generative AI](/qa/genai/) | 107 |
-| [GitOps](/qa/gitops/) | 88 |
-| [Angular](/qa/angular/) | 92 |
-| [Multi-Cloud](/qa/multicloud/) | 68 |
-| [.NET](/qa/dotnet/) | 87 |
+| [Kubernetes]({{ '/qa/kubernetes/' | relative_url }}) | 103 |
+| [Docker]({{ '/qa/docker/' | relative_url }}) | 79 |
+| [Microservices]({{ '/qa/microservices/' | relative_url }}) | 110 |
+| [Security]({{ '/qa/security/' | relative_url }}) | 78 |
+| [System Design]({{ '/qa/system-design/' | relative_url }}) | 80 |
+| [Design Patterns]({{ '/qa/design-patterns/' | relative_url }}) | 73 |
+| [Google Cloud]({{ '/qa/gcp/' | relative_url }}) | 79 |
+| [CI/CD]({{ '/qa/cicd/' | relative_url }}) | 75 |
+| [Domain-Driven Design]({{ '/qa/ddd/' | relative_url }}) | 72 |
+| [Software Architecture]({{ '/qa/architecture/' | relative_url }}) | 73 |
+| [Databases]({{ '/qa/databases/' | relative_url }}) | 76 |
+| [Observability]({{ '/qa/observability/' | relative_url }}) | 77 |
+| [MLOps]({{ '/qa/mlops/' | relative_url }}) | 96 |
+| [Generative AI]({{ '/qa/genai/' | relative_url }}) | 107 |
+| [GitOps]({{ '/qa/gitops/' | relative_url }}) | 88 |
+| [Angular]({{ '/qa/angular/' | relative_url }}) | 92 |
+| [Multi-Cloud]({{ '/qa/multicloud/' | relative_url }}) | 68 |
+| [.NET]({{ '/qa/dotnet/' | relative_url }}) | 87 |
 
 **Total: 1,513 Q&A across 18 domains**

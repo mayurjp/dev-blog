@@ -403,4 +403,4 @@ A: `signal.signal(signal.SIGINT, signal.SIG_IGN)` means the worker ignores Ctrl-
 
 **Last updated:** July 2026 | **Total Q&A:** 91 across MLOps
 
-[Back to Q&A Index](/qa/) • [All MLOps posts](/mlops/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All MLOps posts]({{ '/mlops/' | relative_url }})

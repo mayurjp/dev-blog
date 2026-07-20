@@ -325,4 +325,4 @@ Use a separate, unprivileged `pull_request`-triggered workflow for the actual bu
 
 **Last updated:** July 2026 | **Total Q&A:** 73 across CI/CD
 
-[Back to Q&A Index](/qa/) • [All CI/CD posts](/cicd/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All CI/CD posts]({{ '/cicd/' | relative_url }})

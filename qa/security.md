@@ -371,4 +371,4 @@ It's the most commonly reported real-world vulnerability because "check who you 
 
 **Last updated:** July 2026 | **Total Q&A:** 78 across Security
 
-[Back to Q&A Index](/qa/) • [All Security posts](/security/)
+[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Security posts]({{ '/security/' | relative_url }})
