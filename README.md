@@ -43,6 +43,20 @@ tags: [kubernetes, deployments]
 
 GitHub rebuilds the site automatically on every push.
 
+## Publishing Q&A
+
+The `/qa/` section contains bite-sized questions and answers distilled from 
+blog posts — one domain per page. Q&A content lives in 
+`../blog-pipeline/question-bank/` and is published here via `publish-qa.py`.
+
+**To update published Q&A:**
+1. The `question-bank` skill appends new Q&A to `../blog-pipeline/question-bank/`
+2. Run `python ../publish-qa.py` from the repo root to sync all domains
+3. Commit and push the updated `/qa/` pages
+
+The script converts each question-bank markdown file to a Jekyll page with 
+proper front matter, counts, and footer links back to the index and posts.
+
 ## Preview locally (optional)
 Requires Ruby. From this folder:
 
