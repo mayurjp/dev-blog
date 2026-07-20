@@ -59,6 +59,39 @@
   letter-spacing: 0.03em;
 }
 
+.qa-section {
+  background: linear-gradient(135deg, rgba(71, 138, 201, 0.05) 0%, rgba(134, 78, 165, 0.05) 100%);
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 40px 0;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 24px;
+
+    a {
+      color: $brand-color;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  p {
+    margin: 0 0 12px;
+    line-height: 1.6;
+    color: $text-color;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
 .archive-link {
   margin-top: 10px;
 }
