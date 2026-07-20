@@ -32,6 +32,7 @@ logo: /assets/logo.svg
 # Explicit header nav whitelist -- without this, minima lists every page with
 # a `title:` (including the topic pages under topics/ and domain pages under qa/).
 header_pages:
+  - qa.md
   - about.md
   - archive.md
 
