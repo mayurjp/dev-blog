@@ -2,6 +2,6 @@
 layout: home
 ---
 
-Notes on how Kubernetes actually works — each one starting from a real
+Notes on how real systems actually work — each one starting from a real
 engineering problem and taught through an actual production repository's
-manifests, not hello-world YAML.
+code, not hello-world examples.
