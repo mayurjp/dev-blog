@@ -5,7 +5,7 @@ description: "73 interview-ready CI/CD questions with senior-level, 2-4 sentence
 permalink: /qa/cicd/
 ---
 
-Bite-sized questions and answers from CI/CD blog posts. Read 5-10 per sitting. Each answer is 2-4 sentences max and links back to the full post for deeper understanding.
+Bite-sized, standalone interview questions and answers for CI/CD. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
 <p class="qa-shown-line"><strong><span id="qa-shown">73</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
@@ -28,7 +28,6 @@ Bite-sized questions and answers from CI/CD blog posts. Read 5-10 per sitting. E
   <div class="qa-a" markdown="1">
 Local builds prove "it works on my machine" — same SDK version, same cached deps, same stale branch. CI provisions a fresh ephemeral runner from a known-clean state every time, so "it passed CI" means something reproducible that a local build never can. The environment is identical for every contributor, every commit.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -36,7 +35,6 @@ Local builds prove "it works on my machine" — same SDK version, same cached de
   <div class="qa-a" markdown="1">
 The `pull_request` trigger is the pre-merge gate — it validates the branch before it's allowed to merge. The `push: branches: [main]` trigger re-validates after merge, catching the case where two individually-passing PRs merge into a broken combination. Only one trigger misses this class of integration failure.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -44,7 +42,6 @@ The `pull_request` trigger is the pre-merge gate — it validates the branch bef
   <div class="qa-a" markdown="1">
 It prevents the workflow from running at all when only matched files change. A markdown-only PR or a change scoped entirely to a separate subsystem skips the entire workflow rather than spinning up a runner to build a solution that change couldn't possibly break — real compute cost and time savings, not just tidiness.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -52,7 +49,6 @@ It prevents the workflow from running at all when only matched files change. A m
   <div class="qa-a" markdown="1">
 It reuses the binaries from the `dotnet build` step instead of rebuilding. The test step trusts the build step's output rather than repeating expensive work — a small but real detail that prevents the test step from masking build failures by rebuilding silently.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -60,7 +56,6 @@ It reuses the binaries from the `dotnet build` step instead of rebuilding. The t
   <div class="qa-a" markdown="1">
 Nothing. The pipeline just reports pass/fail onto the commit or PR as a status check. Without an explicit enforcement layer (branch protection rules), a red build and a green build are both mergeable by clicking the same button — the signal exists but nothing is wired to act on it.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -68,7 +63,6 @@ Nothing. The pipeline just reports pass/fail onto the commit or PR as a status c
   <div class="qa-a" markdown="1">
 It reads the repo's own `global.json` to pick the SDK version, meaning CI is guaranteed to build with the same SDK version every contributor's `dotnet` CLI resolves to locally — not whatever happens to be newest on the runner image. This pins the toolchain to what the repo declares, not what the CI environment defaults to.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/ci-fundamentals-from-manual-builds-to-pipelines/' | relative_url }})</p>
 </div>
 
 ## Topic: GitHub Actions workflow anatomy (Order 2)
@@ -80,7 +74,6 @@ It reads the repo's own `global.json` to pick the SDK version, meaning CI is gua
   <div class="qa-a" markdown="1">
 Jobs run on separate runners with no shared filesystem — a step's output is a value on that runner's local state, not in a global namespace. The job must explicitly re-expose it in its `outputs:` block to make it accessible across the runner-isolation boundary. A value computed in a step but never declared at the job level is genuinely invisible to other jobs.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -88,7 +81,6 @@ Jobs run on separate runners with no shared filesystem — a step's output is a 
   <div class="qa-a" markdown="1">
 It creates a data-access relationship (`needs.<job>.outputs`) and an execution-order dependency (the consuming job waits for the producing job to finish). You cannot reference another job's outputs without also making your job depend on its completion — the two are inseparable.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -96,7 +88,6 @@ It creates a data-access relationship (`needs.<job>.outputs`) and an execution-o
   <div class="qa-a" markdown="1">
 Passing structured or multi-line values as an environment variable avoids string-interpolation escaping concerns in downstream scripts. The value arrives as a genuine environment variable the script can read normally, rather than requiring shell-safe quoting inside a `run:` command string.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -104,7 +95,6 @@ Passing structured or multi-line values as an environment variable avoids string
   <div class="qa-a" markdown="1">
 The first references a step output within the same job — both steps share the same runner and workspace. The second crosses a runner-isolation boundary — it references a value that was explicitly re-declared in another job's `outputs:` block. The syntax difference reflects genuinely different isolation levels, not just naming convention.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -112,7 +102,6 @@ The first references a step output within the same job — both steps share the 
   <div class="qa-a" markdown="1">
 A job commonly computes several independent pieces of data across different steps — version numbers, experiment flags, package names — each requiring its own explicit line in the `outputs:` block. There is no blanket "expose everything" switch; each value needs deliberate promotion.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -120,7 +109,6 @@ A job commonly computes several independent pieces of data across different step
   <div class="qa-a" markdown="1">
 Jobs without a `needs:` relationship run fully in parallel by default. Only jobs that genuinely need each other's data or ordering get connected — everything else runs concurrently to keep total pipeline time down. Adding unnecessary `needs:` links serializes what could run in parallel for no benefit.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-workflow-anatomy-step-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 ## Topic: Triggers & events (Order 3)
@@ -132,7 +120,6 @@ Jobs without a `needs:` relationship run fully in parallel by default. Only jobs
   <div class="qa-a" markdown="1">
 Cron is pure time-based — it tells the workflow *when* to run, never *what* changed. There is no git event, no commit SHA, no PR number. Any scheduled workflow that needs to know what's changed or what needs attention has to determine that itself, from scratch, on every run — the trigger only provides timing.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -140,7 +127,6 @@ Cron is pure time-based — it tells the workflow *when* to run, never *what* ch
   <div class="qa-a" markdown="1">
 `push` and `pull_request` hand you metadata about what already happened (commit SHA, PR number, sender). `workflow_dispatch` hands you exactly, and only, whatever fields the workflow author chose to expose as a form — explicitly author-defined, not automatically derived from any event. The data is future-oriented (what you want to do), not retrospective.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -148,7 +134,6 @@ Cron is pure time-based — it tells the workflow *when* to run, never *what* ch
   <div class="qa-a" markdown="1">
 Yes. Required means "this field will always have SOME value" — a default supplies that value when the human doesn't override it. Most runs won't need to think about it, but the field always resolves, which is what `required` guarantees.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -156,7 +141,6 @@ Yes. Required means "this field will always have SOME value" — a default suppl
   <div class="qa-a" markdown="1">
 A human choosing to run a `workflow_dispatch` workflow is selecting, at trigger time, which branch the entire rest of the job operates against — via inputs like `ref: ${{ inputs.target-branch }}`. This is real, meaningful control that a push/pull_request-triggered workflow doesn't have, where the target is already determined by the event itself.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -164,7 +148,6 @@ A human choosing to run a `workflow_dispatch` workflow is selecting, at trigger 
   <div class="qa-a" markdown="1">
 It doesn't — the entire workflow just runs unconditionally at 1:50 AM UTC daily, and the third-party action (`dessant/lock-threads`) is responsible for figuring out which issues/PRs qualify (inactive 30+ days). There's genuinely nothing for the workflow to react to beyond the clock; all the decision logic lives downstream of the trigger.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -172,7 +155,6 @@ It doesn't — the entire workflow just runs unconditionally at 1:50 AM UTC dail
   <div class="qa-a" markdown="1">
 Assuming the `github.event` context carries useful payload like it does for push/PR triggers. A schedule run's event context contains essentially nothing actionable — the workflow must independently determine what state to check or act on, using its own logic, on every invocation.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-triggers-schedule-vs-dispatch/' | relative_url }})</p>
 </div>
 
 ## Topic: Build matrix (Order 4)
@@ -184,7 +166,6 @@ Assuming the `github.event` context carries useful payload like it does for push
   <div class="qa-a" markdown="1">
 Cross-product generates every combination of separate arrays — mostly invalid when axes are correlated (a specific runner only pairs with a specific OS). `include` with fully-specified objects states valid combinations directly, avoiding invalid combos that need `exclude:` pruning or waste CI time generating jobs that were never going to work.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -192,7 +173,6 @@ Cross-product generates every combination of separate arrays — mostly invalid 
   <div class="qa-a" markdown="1">
 It cancels every other in-progress matrix job immediately. For platform-specific testing, this throws away useful information — knowing Linux and macOS still pass after Windows fails is often exactly the diagnostic signal you need. The default trades complete cross-platform information for saved compute.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -200,7 +180,6 @@ It cancels every other in-progress matrix job immediately. For platform-specific
   <div class="qa-a" markdown="1">
 Each serves a different downstream consumer: `runner` is the literal `runs-on` value GitHub needs; `os-name` is a normalized short label for artifact naming and Codecov flags; `job-name` is a human-friendly display label. One matrix axis producing three differently-shaped values for three different purposes is a real, common pattern.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -208,7 +187,6 @@ Each serves a different downstream consumer: `runner` is the literal `runs-on` v
   <div class="qa-a" markdown="1">
 Coverage results from all platform legs get uploaded separately, tagged by `matrix.os-name`, instead of merging into one undifferentiated blob. This lets a coverage dashboard show platform-specific coverage gaps ("this code path is covered on Linux but not on Windows") rather than an aggregate number that hides them.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -216,7 +194,6 @@ Coverage results from all platform legs get uploaded separately, tagged by `matr
   <div class="qa-a" markdown="1">
 Use a conditional: `if: matrix.os-name == 'windows'`. Matrix variables aren't limited to parameterizing setup steps — they can gate whether an entire step runs at all, letting platform-specific steps live inside the same job definition rather than needing a wholly separate job.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -224,7 +201,6 @@ Use a conditional: `if: matrix.os-name == 'windows'`. Matrix variables aren't li
   <div class="qa-a" markdown="1">
 When testing across platforms where knowing which ones still pass after one fails is diagnostic information you actually need. A matrix genuinely testing platform-specific behavior benefits from always seeing the full picture. `fail-fast: true` saves compute but silently discards that cross-platform status.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-build-matrix-include-and-fail-fast/' | relative_url }})</p>
 </div>
 
 ## Topic: Caching dependencies (Order 5)
@@ -236,7 +212,6 @@ When testing across platforms where knowing which ones still pass after one fail
   <div class="qa-a" markdown="1">
 `cache-hit` reports `true` only for an exact primary-key match. A `restore-keys` fallback match still restores real files from an older, close-enough cache but reports `cache-hit: false` — because a fallback-restored cache is a useful starting point for incremental install, not a guaranteed-complete substitute for one.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -244,7 +219,6 @@ When testing across platforms where knowing which ones still pass after one fail
   <div class="qa-a" markdown="1">
 The primary key (typically a lockfile hash) is tried first. If it misses, restore-keys are tried in the order they're listed, stopping at the first prefix match. A broader key like `npm-` matches any older npm cache regardless of lockfile hash. The workflow author controls fallback specificity by ordering broader-to-narrower deliberately.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -252,7 +226,6 @@ The primary key (typically a lockfile hash) is tried first. If it misses, restor
   <div class="qa-a" markdown="1">
 It returns the key that actually matched — a string — not a boolean. Comparing the returned key against the originally requested primary key is what makes `isExactKeyMatch` possible. A fallback match and an exact match both return a truthy string; only comparing the two strings reveals which kind of match happened.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -260,7 +233,6 @@ It returns the key that actually matched — a string — not a boolean. Compari
   <div class="qa-a" markdown="1">
 A fallback-restored cache is a partial starting point, not a complete dependency set. Running `npm ci` after a fallback restore is fast because it's incremental — it only downloads what's missing or changed — but skipping it based on `cache-hit: false` means missing real dependencies, while skipping based on a false assumption of completeness is wrong.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -268,7 +240,6 @@ A fallback-restored cache is a partial starting point, not a complete dependency
   <div class="qa-a" markdown="1">
 It changes miss behavior from "log and continue" to "throw and fail the job." Most caching use cases want misses to be non-fatal (just a slower cold start), but this option exists for cases where a workflow genuinely depends on a cache existing — referencing a cache populated by a separate job — and treats its absence as a real error.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -276,7 +247,6 @@ It changes miss behavior from "log and continue" to "throw and fail the job." Mo
   <div class="qa-a" markdown="1">
 It's a deliberate debugging aid. When a cache genuinely can't be found, the workflow log shows every key attempted, which is exactly the information needed to diagnose whether a restore-key list was too narrow, misspelled, or simply had no prior cache to match at all.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-cache-restore-keys-fallback/' | relative_url }})</p>
 </div>
 
 ## Topic: Artifacts & build outputs (Order 6)
@@ -288,7 +258,6 @@ It's a deliberate debugging aid. When a cache genuinely can't be found, the work
   <div class="qa-a" markdown="1">
 Job outputs only carry small string values — a version number, a computed flag. Artifacts upload actual file content to GitHub's artifact storage under an explicit name, because each job runs on its own separate runner with no shared filesystem, and the first runner may already be destroyed by the time the next job starts.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -296,7 +265,6 @@ Job outputs only carry small string values — a version number, a computed flag
   <div class="qa-a" markdown="1">
 Multiple parallel matrix legs upload different files under different names. If two legs used the same hardcoded name, they'd collide. Dynamic naming (e.g., `app-${{ matrix.os }}`) ensures each leg uploads under a unique name that downstream jobs can match exactly.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -304,7 +272,6 @@ Multiple parallel matrix legs upload different files under different names. If t
   <div class="qa-a" markdown="1">
 The default behavior (a warning, not a failure) lets a build that silently produced zero files pass its own job successfully, only to fail confusingly several jobs later when nothing can be downloaded. Setting `error` moves the failure to the moment it actually happened, with a clearer error message pointing at the real cause.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -312,7 +279,6 @@ The default behavior (a warning, not a failure) lets a build that silently produ
   <div class="qa-a" markdown="1">
 The artifact system does no fuzzy matching — the name must match byte for byte. The downloading job must independently reconstruct the exact name string the uploading job used, which means both jobs need access to the same underlying matrix/version values via job outputs, env vars, or matrix inputs.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -320,7 +286,6 @@ The artifact system does no fuzzy matching — the name must match byte for byte
   <div class="qa-a" markdown="1">
 It computes the artifact name from a glob at runtime instead of duplicating the packaging tool's naming logic in the workflow YAML. The exact filename includes version and architecture details baked in by the packaging tool itself — using the filesystem directly prevents the workflow from drifting out of sync with what the tool actually produces.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -328,7 +293,6 @@ It computes the artifact name from a glob at runtime instead of duplicating the 
   <div class="qa-a" markdown="1">
 When the value is small and string-shaped — a version number, a boolean flag, an environment name. Artifacts are for actual file content a later job needs to read, execute, or test. Using one where the other fits is an avoidable inefficiency once a pipeline grows past its simplest form.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-artifacts-vs-job-outputs/' | relative_url }})</p>
 </div>
 
 ## Topic: Secrets & environments (Order 7)
@@ -340,7 +304,6 @@ When the value is small and string-shaped — a version number, a boolean flag, 
   <div class="qa-a" markdown="1">
 A repo secret is visible to every workflow and job in the repo. An environment-scoped secret is only accessible to a job that explicitly declares `environment: <name>` — every other job gets an empty value because the secret simply doesn't exist outside that scope. This gives high-value secrets a narrower blast radius independent of any deployment gating.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -348,7 +311,6 @@ A repo secret is visible to every workflow and job in the repo. An environment-s
   <div class="qa-a" markdown="1">
 No. Scoping (which secrets exist for a given job) and gating (required reviewers, wait timers) are two separate, composable mechanisms. A repo can use an environment purely for its scoping property, with zero deployment gate involved — as `dotnet/aspnetcore`'s PAT validation workflow demonstrates.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -356,7 +318,6 @@ No. Scoping (which secrets exist for a given job) and gating (required reviewers
   <div class="qa-a" markdown="1">
 GitHub's runner redacts known secret values from logs, but that redaction reliably tracks values coming directly from a secrets context. A value transformed, concatenated, or echoed through shell substitution can slip past the automatic log protection — injecting via `env:` keeps the secret's path clean for redaction.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -364,7 +325,6 @@ GitHub's runner redacts known secret values from logs, but that redaction reliab
   <div class="qa-a" markdown="1">
 It lets all PATs in the pool be checked in a single run. Without it, the first invalid PAT would stop the job before the remaining nine were ever checked — defeating the purpose of validating the entire pool in one invocation.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -372,7 +332,6 @@ It lets all PATs in the pool be checked in a single run. Without it, the first i
   <div class="qa-a" markdown="1">
 The workflow calls an external Copilot CLI, not the GitHub API — it needs zero GitHub API access to do its job. Setting `permissions: {}` explicitly grants zero, which is the precise minimal-permission mindset applied consistently, not an oversight.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -380,7 +339,6 @@ The workflow calls an external Copilot CLI, not the GitHub API — it needs zero
   <div class="qa-a" markdown="1">
 It gets an empty value. The secret doesn't exist outside the environment's scope — the declaration is what makes it visible, not the syntax of the reference. This is a real source of confusion when a secret reference looks correct but the job is missing the `environment:` declaration.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-environments-as-secret-scoping/' | relative_url }})</p>
 </div>
 
 ## Topic: Reusable workflows & composite actions (Order 8)
@@ -392,7 +350,6 @@ It gets an empty value. The secret doesn't exist outside the environment's scope
   <div class="qa-a" markdown="1">
 Composite actions bundle multiple steps into one reusable step, invoked *inside* a job's `steps:` list, running on the same runner. Reusable workflows bundle an entire job (or several), invoked *as* a job via `uses:` at the job level. The distinguishing question is whether reused logic needs its own runner.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -400,7 +357,6 @@ Composite actions bundle multiple steps into one reusable step, invoked *inside*
   <div class="qa-a" markdown="1">
 No. Composite actions inherit whatever runner the calling job is already using — they run inside that job's step sequence on the same machine. Reusable workflows always specify their own `runs-on`, because they run as a separate job with their own runner.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -408,7 +364,6 @@ No. Composite actions inherit whatever runner the calling job is already using �
   <div class="qa-a" markdown="1">
 `inherit` gives the called workflow everything the caller has access to — convenient for workflows with many secret dependencies. The cost is not documenting at the call site precisely which secrets actually get used, making the dependency surface less explicit and harder to audit.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -416,7 +371,6 @@ No. Composite actions inherit whatever runner the calling job is already using �
   <div class="qa-a" markdown="1">
 The reusable workflow itself has no knowledge of the matrix — it just runs once per set of inputs it's handed. The calling workflow's `strategy.matrix` expands, and each expansion calls the reusable workflow with different `with:` values, resulting in N independent invocations.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -424,7 +378,6 @@ The reusable workflow itself has no knowledge of the matrix — it just runs onc
   <div class="qa-a" markdown="1">
 It's referenced from multiple different workflows across the repo, each getting the same `cat .go-version` logic in one place. Every workflow needing the Go version answer gets it identically rather than each re-implementing and potentially drifting from the same logic independently.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -432,7 +385,6 @@ It's referenced from multiple different workflows across the repo, each getting 
   <div class="qa-a" markdown="1">
 It fails — reusable workflows are invoked at the job level, not inside a job's steps. Conversely, a composite action can't be invoked at the job level. The `uses:` placement is the hard structural boundary between the two mechanisms.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/composite-actions-vs-reusable-workflows/' | relative_url }})</p>
 </div>
 
 ## Topic: Self-hosted vs GitHub-hosted runners (Order 9)
@@ -444,7 +396,6 @@ It fails — reusable workflows are invoked at the job level, not inside a job's
   <div class="qa-a" markdown="1">
 A GitHub-hosted runner provisions a fresh VM for every job — no leftover files, no lingering env vars, no risk of cross-job contamination. A self-hosted runner reuses the same persistent filesystem and OS by default, so one job's artifacts or a compromised workflow step can contaminate the next job.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -452,7 +403,6 @@ A GitHub-hosted runner provisions a fresh VM for every job — no leftover files
   <div class="qa-a" markdown="1">
 The runner registers, listens for exactly one job, executes it, then calls `configManager.DeleteLocalRunnerConfig()` to erase its own registration and exits. It is expected to never run a second job — something else (an autoscaling controller) must provision a fresh runner for the next job.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -460,7 +410,6 @@ The runner registers, listens for exactly one job, executes it, then calls `conf
   <div class="qa-a" markdown="1">
 A Runner ScaleSet Listener pod holds a long-poll HTTPS connection to GitHub. When a `Job Available` message arrives, it patches the EphemeralRunnerSet's desired-replica count, the EphemeralRunner Controller creates a new runner pod, which registers, runs one job, and is torn down after GitHub confirms deletion.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -468,7 +417,6 @@ A Runner ScaleSet Listener pod holds a long-poll HTTPS connection to GitHub. Whe
   <div class="qa-a" markdown="1">
 It polled GitHub's API on a fixed `--sync-period` timer for a `PercentageRunnersBusy` metric. At scale, this repeated polling consumed the API rate limit. The new long-poll architecture holds a single connection that GitHub pushes messages down, eliminating the rate-limit problem entirely.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -476,7 +424,6 @@ It polled GitHub's API on a fixed `--sync-period` timer for a `PercentageRunners
   <div class="qa-a" markdown="1">
 A compromised workflow's `run:` step could leave malicious state — injected secrets in env vars, modified binaries, planted files — that the next job on the same runner picks up. There is no filesystem isolation between jobs unless `--ephemeral` or equivalent orchestration provides it.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -484,7 +431,6 @@ A compromised workflow's `run:` step could leave malicious state — injected se
   <div class="qa-a" markdown="1">
 An ephemeral runner doesn't just stop — it actively erases its own registration first. This ensures no valid config is left behind for a restart; the orchestrator (ARC, an autoscaling group) must provision a genuinely new runner rather than restarting the old process.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/self-hosted-vs-github-hosted-runners-ephemeral-flag/' | relative_url }})</p>
 </div>
 
 ## Topic: Continuous Deployment strategies (Order 10)
@@ -496,7 +442,6 @@ An ephemeral runner doesn't just stop — it actively erases its own registratio
   <div class="qa-a" markdown="1">
 If the new version receives 100% of traffic immediately upon deployment, every user hits any bug simultaneously. Separating creation (deploy with `no_traffic: true`) from exposure (traffic shifting in a second step) allows gradual rollout and fast rollback without redeploying.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -504,7 +449,6 @@ If the new version receives 100% of traffic immediately upon deployment, every u
   <div class="qa-a" markdown="1">
 The old revision was never deleted or replaced — it's still running, holding whatever traffic percentage it wasn't assigned away from. "Undo" is exactly as fast as "do" and carries none of the risk of a fresh deploy potentially hitting a different failure mode than the one being rolled back from.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -512,7 +456,6 @@ The old revision was never deleted or replaced — it's still running, holding w
   <div class="qa-a" markdown="1">
 `revision_traffic` names a specific revision directly — it won't survive the next deploy. `tag_traffic` names a stable tag that points at whichever revision currently holds it — it persists across deploys. Mixing them in one call would be ambiguous about which targeting mechanism wins, so they're mutually exclusive.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -520,7 +463,6 @@ The old revision was never deleted or replaced — it's still running, holding w
   <div class="qa-a" markdown="1">
 The deploy action skips the `update-traffic` step entirely — the new revision gets 100% of traffic by default. Canary/blue-green behavior is opt-in, layered onto the same action, not a fork of it.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -528,7 +470,6 @@ The deploy action skips the `update-traffic` step entirely — the new revision 
   <div class="qa-a" markdown="1">
 A tag is a stable pointer that Cloud Run re-assigns to the newest revision on each deploy. A revision name is pinned to the exact version it was created with — it never moves. This is why tag-based traffic shifting is operationally safer for gradual promotion workflows.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -536,7 +477,6 @@ A tag is a stable pointer that Cloud Run re-assigns to the newest revision on ea
   <div class="qa-a" markdown="1">
 Cloud Run's revision-and-traffic-split model is native to the platform. The `gcloud run deploy --no-traffic` and `gcloud run services update-traffic` are two real, independently-callable gcloud subcommands — the primitive exists at the platform level, not as an external component bolted on.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/continuous-deployment-canary-traffic-splitting/' | relative_url }})</p>
 </div>
 
 ## Topic: Branch protection & required status checks (Order 11)
@@ -548,7 +488,6 @@ Cloud Run's revision-and-traffic-split model is native to the platform. The `gcl
   <div class="qa-a" markdown="1">
 It requires a PR to be re-tested against the *latest* state of the target branch before merging — not just whatever the target branch looked like when the PR was last pushed. This closes the gap where a check passed against stale code that has since drifted from what will actually land after the merge.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -556,7 +495,6 @@ It requires a PR to be re-tested against the *latest* state of the target branch
   <div class="qa-a" markdown="1">
 Without it, anything capable of setting a commit status with the matching context string — including a compromised token — could satisfy the requirement. Pinning the App ID ensures the required check originates from a specific, trusted GitHub App, not just any actor that knows the context name.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -564,7 +502,6 @@ Without it, anything capable of setting a commit status with the matching contex
   <div class="qa-a" markdown="1">
 A repo can require status checks on every update to a branch while still allowing that branch (or the repository) to be created before any check has ever run against it. The check can't exist before the branch does — a single blanket "require checks" toggle can't express this ordering problem.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -572,7 +509,6 @@ A repo can require status checks on every update to a branch while still allowin
   <div class="qa-a" markdown="1">
 Multiple rulesets can apply to the same branch simultaneously — one requiring status checks, a separate one requiring code-owner review, another restricting who can bypass — each independently scoped. Classic branch protection was one monolithic config per branch name pattern, which couldn't express layered, independently-auditable rules.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -580,7 +516,6 @@ Multiple rulesets can apply to the same branch simultaneously — one requiring 
   <div class="qa-a" markdown="1">
 A specific GitHub App (like a release bot or dependency-update App) can bypass the ruleset's rules unconditionally, not just during specific operations like a pull request merge. Bypass is a first-class, actor-scoped, mode-scoped concept, not a blanket "admins can always force-push" escape hatch.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -588,7 +523,6 @@ A specific GitHub App (like a release bot or dependency-update App) can bypass t
   <div class="qa-a" markdown="1">
 CI is just information — it reports pass/fail as a status check. Without branch protection rules wiring the check result to enforcement, nothing about running CI prevents a merge. The signal exists but nothing is connected to act on it unless explicitly configured.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/branch-protection-required-status-checks-as-code/' | relative_url }})</p>
 </div>
 
 ## Topic: Security hardening (SHA-pinning, GITHUB_TOKEN permissions) (Order 12)
@@ -600,7 +534,6 @@ CI is just information — it reports pass/fail as a status check. Without branc
   <div class="qa-a" markdown="1">
 A SHA never updates itself. A repo either freezes on one commit forever — missing real security fixes — or needs an active process (Dependabot's `github-actions` ecosystem) to bump the pin. SHA-pinning and an update process are a pair, not a single fix.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -608,7 +541,6 @@ A SHA never updates itself. A repo either freezes on one commit forever — miss
   <div class="qa-a" markdown="1">
 A `pull_request_target` workflow gets elevated permissions and secrets for fork PRs. If that same workflow checks out and runs the fork's own head commit, the attacker's code executes with the elevated token — the fork's code runs in the target repo's trusted context. The fix is to never check out fork code under elevated permissions.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -616,7 +548,6 @@ A `pull_request_target` workflow gets elevated permissions and secrets for fork 
   <div class="qa-a" markdown="1">
 Even the checkout that does happen in this elevated-permission workflow pulls only the target branch's own file, never the fork's contributed commit, and only the path actually needed (`version/VERSION`). Two independent restrictions stacked on the one checkout step that could otherwise be the pwn-request vector.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -624,7 +555,6 @@ Even the checkout that does happen in this elevated-permission workflow pulls on
   <div class="qa-a" markdown="1">
 Broader write access than a job actually needs enlarges the blast radius if anything in that job is later compromised. Explicitly scoping to only what the workflow needs (`contents: read`, `pull-requests: write`) follows minimal-permission principles — a deliberate absence, not an oversight.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -632,7 +562,6 @@ Broader write access than a job actually needs enlarges the blast radius if anyt
   <div class="qa-a" markdown="1">
 A SHA-pinned action bump is a new, unreviewed piece of code until reviewed. Separating breaking-risk bumps (major) from routine ones (minor, patch) lets a maintainer apply a different review bar to each group rather than treating every pin update identically.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -640,7 +569,6 @@ A SHA-pinned action bump is a new, unreviewed piece of code until reviewed. Sepa
   <div class="qa-a" markdown="1">
 The tag `@v4` was force-moved to point at different, unreviewed, malicious code. Repos referencing it by tag silently pulled the compromised code on their next run. Pinning to a full commit SHA closes this specific gap because a SHA is immutable — the exact commit can't be repointed without the pinning repo's knowledge.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -648,14 +576,13 @@ The tag `@v4` was force-moved to point at different, unreviewed, malicious code.
   <div class="qa-a" markdown="1">
 Use a separate, unprivileged `pull_request`-triggered workflow for the actual build/test, passing results back to the `pull_request_target` workflow via `workflow_run`. This keeps elevated token access and attacker-controlled code on opposite sides of a process boundary.
   </div>
-  <p class="qa-link">[Full post →]({{ '/cicd/github-actions-security-hardening-sha-pinning-permissions-pwn-requests/' | relative_url }})</p>
 </div>
 
 ---
 
 **Last updated:** July 2026 | **Total Q&A:** 73 across CI/CD
 
-[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All CI/CD posts]({{ '/cicd/' | relative_url }})
+[Back to Q&A Index]({{ '/qa/' | relative_url }})
 
 <script>
 (function () {

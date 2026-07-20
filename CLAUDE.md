@@ -89,8 +89,8 @@ GitHub Pages' legacy (rebuild-on-push-only) infrastructure.
 `qa/<domain>.md` and `qa/index.md` are produced by `blog-pipeline/publish-qa.py`, which
 reads `blog-pipeline/question-bank/<domain>.md` and transforms each `### Q:` block into
 a clickable card with a difficulty badge, plus a sticky-free toolbar with a live
-text + difficulty filter, and rewrites the `→ Post: _posts/...md` reference into a
-real `{{ '/<domain>/<slug>/' | relative_url }}` link. **Hand edits to `qa/*.md` are
+text + difficulty filter. It **drops** the `→ Post: _posts/...md` reference so the QA
+pages are standalone (no link back to a blog post). **Hand edits to `qa/*.md` are
 overwritten on the next regenerate.** To change the QA pages, edit either the
 question-bank source or `publish-qa.py` and re-run it.
 

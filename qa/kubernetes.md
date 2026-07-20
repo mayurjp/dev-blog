@@ -5,7 +5,7 @@ description: "109 interview-ready Kubernetes questions with senior-level, 2-4 se
 permalink: /qa/kubernetes/
 ---
 
-Bite-sized questions and answers from Kubernetes blog posts. Read 5-10 per sitting. Each answer is 2-4 sentences max and links back to the full post for deeper understanding.
+Bite-sized, standalone interview questions and answers for Kubernetes. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
 <p class="qa-shown-line"><strong><span id="qa-shown">109</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
@@ -28,7 +28,6 @@ Bite-sized questions and answers from Kubernetes blog posts. Read 5-10 per sitti
   <div class="qa-a" markdown="1">
 The scheduler needs a running API server to record placement decisions, and the API server needs etcd to store state — but none of them exist yet. You can't use normal scheduling to start the very first control-plane component because the scheduler that would do the placement is itself one of those components.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -36,7 +35,6 @@ The scheduler needs a running API server to record placement decisions, and the 
   <div class="qa-a" markdown="1">
 kubeadm writes Pod manifest YAML files directly to `/etc/kubernetes/manifests/` on the control-plane node. The kubelet has a separate **file source** (`pkg/kubelet/config/file.go`) that polls that directory and starts whatever Pod specs it finds — completely bypassing the scheduler and API server.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -44,7 +42,6 @@ kubeadm writes Pod manifest YAML files directly to `/etc/kubernetes/manifests/` 
   <div class="qa-a" markdown="1">
 Once the API server is up, the kubelet registers a read-only mirror of each static pod it's running so `kubectl get pods -n kube-system` can see it. Editing or deleting the mirror via the API changes nothing — the kubelet recreates it from the local file, which remains the source of truth.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -52,7 +49,6 @@ Once the API server is up, the kubelet registers a read-only mirror of each stat
   <div class="qa-a" markdown="1">
 The API server loses its backing store and starts failing reads/writes, which cascades to the scheduler and controller-manager — both of which depend on the API server. Even though their own manifest files never changed, a single unhealthy etcd pod can make the entire control plane appear broken.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -60,7 +56,6 @@ The API server loses its backing store and starts failing reads/writes, which ca
   <div class="qa-a" markdown="1">
 The file source (`sourceFile`) feeds Pod objects straight into a Go channel (`updates chan<- sourceUpdate`) by polling a directory on disk. The API-server source uses informer/watch machinery over the network. These are two completely separate code paths inside the kubelet, not one path with a special case bolted on.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -68,7 +63,6 @@ The file source (`sourceFile`) feeds Pod objects straight into a Go channel (`up
   <div class="qa-a" markdown="1">
 Editing the mirror Pod via `kubectl edit` in `kube-system` and expecting it to take effect. The real source of truth is the YAML file on disk at `/etc/kubernetes/manifests/`, not the API object. Also, assuming the kube-apiserver manifest looks healthy means etcd is healthy — kube-apiserver depends on etcd, not the other way around.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/kubernetes-control-plane-bootstrap-static-pods/' | relative_url }})</p>
 </div>
 
 ## Topic: Pod (Order 1)
@@ -80,7 +74,6 @@ Editing the mirror Pod via `kubectl edit` in `kube-system` and expecting it to t
   <div class="qa-a" markdown="1">
 Sidecars need the same node, the same IP, and the same lifecycle as the container they sit next to. A Pod is the smallest scheduling unit — it guarantees co-location on one node, shared network namespace (so containers reach each other over `127.0.0.1`), and shared lifecycle managed by one kubelet.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -88,7 +81,6 @@ Sidecars need the same node, the same IP, and the same lifecycle as the containe
   <div class="qa-a" markdown="1">
 The pause container is a tiny infrastructure container the kubelet creates first. It holds the network namespace (and IPC namespace) open; all subsequent containers join that same namespace. It never appears in your YAML — you only see it in `crictl ps` or `docker ps` on the node.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -96,7 +88,6 @@ The pause container is a tiny infrastructure container the kubelet creates first
   <div class="qa-a" markdown="1">
 Pod-level `securityContext` (`fsGroup`, `runAsUser`, `runAsNonRoot`) shapes the whole sandbox and volume ownership. Container-level `securityContext` (`allowPrivilegeEscalation`, `capabilities`, `readOnlyRootFilesystem`) applies per-container kernel capabilities. Confusing the two scopes is one of the most common manifest review mistakes.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -104,7 +95,6 @@ Pod-level `securityContext` (`fsGroup`, `runAsUser`, `runAsNonRoot`) shapes the 
   <div class="qa-a" markdown="1">
 A rescheduled Pod is a completely new Pod object — new UID, new IP. Nothing relocates the existing Pod; a controller (Deployment, StatefulSet, DaemonSet) creates a brand-new Pod, which the scheduler places independently, usually on a different node.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -112,7 +102,6 @@ A rescheduled Pod is a completely new Pod object — new UID, new IP. Nothing re
   <div class="qa-a" markdown="1">
 When a debugging sidecar needs to see every container's processes via `ps` and `/proc/$pid/root`. The tradeoff: the pause container becomes PID 1, so any container assuming it is PID 1 (e.g., one running `systemd`) can misbehave or refuse to start.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -120,7 +109,6 @@ When a debugging sidecar needs to see every container's processes via `ps` and `
   <div class="qa-a" markdown="1">
 The 30-second default is a guess that fits nothing in particular. A stateless gRPC service might shut down in 5 seconds; a database with a flush cache could need 120. Leaving it untuned means every rollout or scale-down takes longer than it should, or kills a process mid-shutdown.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -128,7 +116,6 @@ The 30-second default is a guess that fits nothing in particular. A stateless gR
   <div class="qa-a" markdown="1">
 The kubelet no longer talks to Docker Engine — it speaks CRI directly to containerd or CRI-O. Docker-built images still run fine (they're OCI-compliant); only Docker's runtime control path was removed. Any tooling that relied on `docker` CLI inside a Pod or node broke.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/pods-the-atomic-scheduling-unit/' | relative_url }})</p>
 </div>
 
 ## Topic: Deployment / ReplicaSet (Order 2)
@@ -140,7 +127,6 @@ The kubelet no longer talks to Docker Engine — it speaks CRI directly to conta
   <div class="qa-a" markdown="1">
 The Deployment controller manages transitions between ReplicaSet generations — creating a new ReplicaSet, scaling it up while scaling the old one down, bounded by `maxUnavailable`/`maxSurge`. The ReplicaSet controller's job is narrower: ensure exactly N Pods matching its selector exist right now.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -148,7 +134,6 @@ The Deployment controller manages transitions between ReplicaSet generations —
   <div class="qa-a" markdown="1">
 Each ReplicaSet's selector only matches Pods carrying its own hash value. A v1 ReplicaSet won't claim a v2 Pod (wrong hash), and vice versa. This is what lets both generations coexist mid-rollout without either controller accidentally deleting or recreating the other's Pods.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -156,7 +141,6 @@ Each ReplicaSet's selector only matches Pods carrying its own hash value. A v1 R
   <div class="qa-a" markdown="1">
 The rollout becomes impossible — you can't create a new Pod until an old one is deleted, but you can't delete an old one until a new one is ready. This is a deadlock, not a safety measure. In practice, `maxUnavailable: 0` with `maxSurge: 1` achieves zero-downtime updates.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -164,7 +148,6 @@ The rollout becomes impossible — you can't create a new Pod until an old one i
   <div class="qa-a" markdown="1">
 A new Pod isn't counted as "available" until it passes its readiness probe. If the v2 container is slow to start, the Deployment controller stalls at its current step — it won't surge another v2 Pod or drain another v1 Pod until the current one passes. A slow probe slows the rollout; a missing probe lets it barrel ahead blindly.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -172,7 +155,6 @@ A new Pod isn't counted as "available" until it passes its readiness probe. If t
   <div class="qa-a" markdown="1">
 No — `apps/v1` makes the selector immutable after creation. If you need a different selector, you must delete and recreate the Deployment. This is why selectors are chosen conservatively up front, not as an afterthought.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -180,7 +162,6 @@ No — `apps/v1` makes the selector immutable after creation. If you need a diff
   <div class="qa-a" markdown="1">
 Both default to 25% of desired replicas. An un-tuned Deployment can go 25% over capacity and 25% under capacity simultaneously during a routine update — significant for a large replica count, and invisible if you never explicitly set these fields.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -188,7 +169,6 @@ Both default to 25% of desired replicas. An un-tuned Deployment can go 25% over 
   <div class="qa-a" markdown="1">
 You almost never author a ReplicaSet directly. The Deployment generates it, names it by hashing the pod template, and owns it via `ownerReferences`. Running `kubectl get rs` after a Deployment change is the fastest way to see the reconcile loop working in real time.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})</p>
 </div>
 
 ## Topic: Service (Order 3)
@@ -200,7 +180,6 @@ You almost never author a ReplicaSet directly. The Deployment generates it, name
   <div class="qa-a" markdown="1">
 The EndpointSlice controller watches the API for Pod changes and republishes the Service's backing address list. Modern Kubernetes uses `EndpointSlices` (not the legacy `Endpoints` object) — sliced objects that scale better. `kube-proxy` and CoreDNS consume those slices to reprogram routing.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -208,7 +187,6 @@ The EndpointSlice controller watches the API for Pod changes and republishes the
   <div class="qa-a" markdown="1">
 No. A Pod's IP is only added to the Service's routing set after its readiness probe passes. A booting or unhealthy Pod is deliberately excluded from traffic — remove the readiness probe and you route requests into cold or broken Pods.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -216,7 +194,6 @@ No. A Pod's IP is only added to the Service's routing set after its readiness pr
   <div class="qa-a" markdown="1">
 It's a virtual IP not bound to any NIC. `kube-proxy` programs kernel routing rules (iptables/IPVS/nftables) so that any packet destined for the ClusterIP is DNAT'd to a real Pod IP:port. No process ever listens on the ClusterIP itself — it's pure packet rewriting at the kernel level.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -224,7 +201,6 @@ It's a virtual IP not bound to any NIC. `kube-proxy` programs kernel routing rul
   <div class="qa-a" markdown="1">
 A headless Service (`clusterIP: None`) returns individual Pod IPs in DNS instead of one virtual IP. Clients do their own load balancing. You use it for StatefulSets (stable per-pod DNS like `pod-0.cache.ns.svc`), databases with primary/replica awareness, or gRPC clients that manage connections themselves.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -232,7 +208,6 @@ A headless Service (`clusterIP: None`) returns individual Pod IPs in DNS instead
   <div class="qa-a" markdown="1">
 Any name with fewer than 5 dots is tried against every search domain first (e.g., `api.stripe.com.default.svc.cluster.local`, `api.stripe.com.svc.cluster.local`, etc.) before falling through to the actual external query. For external FQDNs, this means several failed cluster-internal DNS lookups before the real answer returns.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -240,7 +215,6 @@ Any name with fewer than 5 dots is tried against every search domain first (e.g.
   <div class="qa-a" markdown="1">
 Two things, in order: (1) selector/label mismatch — does the Service's `selector` exactly match the Pod labels? A typo means zero endpoints. (2) Readiness — are the Pods actually passing their readiness probe? Running ≠ Ready; a failing probe keeps a Pod out of the endpoint set.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -248,7 +222,6 @@ Two things, in order: (1) selector/label mismatch — does the Service's `select
   <div class="qa-a" markdown="1">
 In iptables mode (default), traffic is sent to a randomly-chosen endpoint using probability rules — statistically even, not sequential. IPVS mode offers real algorithms (round-robin, least-connection, etc.), which is why large clusters prefer IPVS. Newer clusters may also use nftables mode.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
 </div>
 
 ## Topic: ConfigMap / Secret (Order 4)
@@ -260,7 +233,6 @@ In iptables mode (default), traffic is sent to a randomly-chosen endpoint using 
   <div class="qa-a" markdown="1">
 A value injected via `env.valueFrom.configMapKeyRef` is read once at container start and frozen — editing the ConfigMap does nothing until the Pod restarts. A value delivered via a mounted volume is kept in sync by the kubelet's periodic sync interval — the file on disk updates, but the application must notice the change itself.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -268,7 +240,6 @@ A value injected via `env.valueFrom.configMapKeyRef` is read once at container s
   <div class="qa-a" markdown="1">
 No. A Secret is base64-*encoded*, not encrypted. Unless the cluster admin configures `--encryption-provider-config` with a real provider (`aescbc`, `aesgcm`, `secretbox`), Secret data sits in etcd as plain base64. "It's a Secret so it's encrypted" is a common and wrong assumption.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -276,7 +247,6 @@ No. A Secret is base64-*encoded*, not encrypted. Unless the cluster admin config
   <div class="qa-a" markdown="1">
 It tells the API server the object will never change again. The kubelet stops watching it for updates (less API server load at scale) and it prevents accidental `kubectl edit` in production. The common pattern is naming the ConfigMap with a content hash and rolling the Deployment on every change.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -284,7 +254,6 @@ It tells the API server the object will never change again. The kubelet stops wa
   <div class="qa-a" markdown="1">
 `stringData` lets you write plaintext in the manifest; the API server base64-encodes it into `.data` on write. You never hand-encode a Secret in a real manifest. The field is write-only — it's not present when you read the object back.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -292,7 +261,6 @@ It tells the API server the object will never change again. The kubelet stops wa
   <div class="qa-a" markdown="1">
 Environment variables are flat key-value strings — a multi-hundred-line YAML with Go template syntax inside it (`<<.GroupBy>>`) is structurally impossible to pass as one. This is the practical reason ConfigMaps support volume mounting at all, not just env injection.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -300,7 +268,6 @@ Environment variables are flat key-value strings — a multi-hundred-line YAML w
   <div class="qa-a" markdown="1">
 A Secret's RBAC defaults and `kubectl get -o wide` visibility make it a reasonable choice for operational config that shouldn't be world-readable via `kubectl get configmap -o yaml` — but it's not encrypted at rest unless you've configured etcd encryption. Teams often assume Secret = encrypted, which it isn't by default.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/configmaps-secrets-decoupling-config-from-image/' | relative_url }})</p>
 </div>
 
 ## Topic: Probes (Order 5)
@@ -312,7 +279,6 @@ A Secret's RBAC defaults and `kubectl get -o wide` visibility make it a reasonab
   <div class="qa-a" markdown="1">
 A failed liveness probe makes the kubelet restart the container in place (same Pod, same UID, same IP). A failed readiness probe does *not* restart anything — the container keeps running, but the Pod is pulled out of Service traffic until it passes again. Two completely different outcomes from two different failure signals.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -320,7 +286,6 @@ A failed liveness probe makes the kubelet restart the container in place (same P
   <div class="qa-a" markdown="1">
 `startupProbe` holds off liveness and readiness checks until it succeeds once. This gives a slow-booting app (large JVM, big cache warm) a long runway without being killed by premature liveness checks. For a small, fast-starting Go binary, the normal `initialDelaySeconds` plus `failureThreshold` already gives enough slack — a `startupProbe` isn't always needed.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -328,7 +293,6 @@ A failed liveness probe makes the kubelet restart the container in place (same P
   <div class="qa-a" markdown="1">
 The kubelet, directly, on each node where the Pod runs. It's a local polling loop, not a control-plane operation. No API server round-trip is involved in the probe itself.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -336,7 +300,6 @@ The kubelet, directly, on each node where the Pod runs. It's a local polling loo
   <div class="qa-a" markdown="1">
 `/readyz` answers "has the metrics cache finished warming up?" — it depends on initialization. `/livez` answers "is the process alive?" — a fundamentally different question. A single shared `/health` endpoint conflates the two and risks restart loops triggered by conditions that only affect readiness.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -344,7 +307,6 @@ The kubelet, directly, on each node where the Pod runs. It's a local polling loo
   <div class="qa-a" markdown="1">
 The kubelet's only health signal becomes the process exit code. A container that is alive but wedged — deadlocked event loop, exhausted connection pool, stuck thread — stays running forever, eating every request routed to it, with no automatic restart.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -352,7 +314,6 @@ The kubelet's only health signal becomes the process exit code. A container that
   <div class="qa-a" markdown="1">
 metrics-server feeds the HPA and `kubectl top`. A gap during rollout means cluster-wide autoscaling stalls. `maxUnavailable: 0` accepts a slower rollout in exchange for zero gaps in metrics availability — the tradeoff is correctness over speed.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -360,7 +321,6 @@ metrics-server feeds the HPA and `kubectl top`. A gap during rollout means clust
   <div class="qa-a" markdown="1">
 Setting it too short for a slow-starting app causes premature restarts; setting it too long delays detection of genuine post-boot deadlocks. The real fix for slow boots is a `startupProbe` with a generous `failureThreshold × periodSeconds` window, not inflating `initialDelaySeconds` on the liveness probe.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/probes-liveness-readiness-startup/' | relative_url }})</p>
 </div>
 
 ## Topic: Volumes / PV / PVC (Order 6)
@@ -372,7 +332,6 @@ Setting it too short for a slow-starting app causes premature restarts; setting 
   <div class="qa-a" markdown="1">
 `emptyDir` is scoped to the Pod's lifetime — it's created when the Pod is scheduled on a node and deleted when the Pod is removed. If the Pod is rescheduled to a different node, the new Pod gets a fresh `emptyDir`. It's designed for inter-container data sharing within a single Pod, not persistence.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -380,7 +339,6 @@ Setting it too short for a slow-starting app causes premature restarts; setting 
   <div class="qa-a" markdown="1">
 A PVC is a namespaced *request* for storage (e.g., "I need 10Gi ReadWriteOnce"). A PV is the actual storage resource, cluster-scoped, usually created on demand by a StorageClass's CSI provisioner. The PVC binds to the PV; the PV outlives any individual Pod that uses it.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -388,7 +346,6 @@ A PVC is a namespaced *request* for storage (e.g., "I need 10Gi ReadWriteOnce").
   <div class="qa-a" markdown="1">
 `Delete` (the default for most dynamic-provisioning classes) destroys the underlying cloud disk when the PVC is deleted. `Retain` orphans the disk for manual admin cleanup. Deleting a PVC on the `Delete` policy without checking what data lives on it is a classic way to destroy production data or leak cloud disks forever.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -396,7 +353,6 @@ A PVC is a namespaced *request* for storage (e.g., "I need 10Gi ReadWriteOnce").
   <div class="qa-a" markdown="1">
 It's opt-in persistence — without a `storage.volumeClaimTemplate`, the monitoring stack's own metrics history doesn't survive a Pod reschedule. "Prometheus obviously persists its data" is exactly the assumption that costs someone their metrics history during a routine node drain.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -404,7 +360,6 @@ It's opt-in persistence — without a `storage.volumeClaimTemplate`, the monitor
   <div class="qa-a" markdown="1">
 The data stays pinned to the original node. The new Pod on a different node gets an empty directory — the data never left the old machine. `hostPath` is only safe when the Pod is guaranteed to always run on the same node (DaemonSets), not general-purpose workloads.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -412,7 +367,6 @@ The data stays pinned to the original node. The new Pod on a different node gets
   <div class="qa-a" markdown="1">
 It creates a tmpfs mount — RAM-backed, faster than disk, and counted against the Pod's memory limit. Use it for plugin scratch space or temporary caches that benefit from RAM speed. The gotcha: memory usage looks higher than the process's own footprint because these files are in the Pod's memory accounting.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -420,7 +374,6 @@ It creates a tmpfs mount — RAM-backed, faster than disk, and counted against t
   <div class="qa-a" markdown="1">
 `ReadWriteOnce` means one node can mount it at a time. If a Deployment with multiple replicas all try to mount the same `ReadWriteOnce` PVC, only one succeeds — the rest stay `Pending`. `ReadWriteOncePod` (a newer access mode) restricts it further to a single Pod, not just a single node.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/volumes-pv-pvc-surviving-a-pod-restart/' | relative_url }})</p>
 </div>
 
 ## Topic: StatefulSet (Order 7)
@@ -432,7 +385,6 @@ It creates a tmpfs mount — RAM-backed, faster than disk, and counted against t
   <div class="qa-a" markdown="1">
 Stable, per-replica ordinal identity (`app-0`, `app-1`, `app-2`) with corresponding stable DNS entries (`app-0.app.ns.svc.cluster.local`) and, optionally, per-ordinal persistent volumes that follow the same replica across reschedules. Deployments produce anonymous, fungible Pods; StatefulSets produce named, distinguishable ones.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -440,7 +392,6 @@ Stable, per-replica ordinal identity (`app-0`, `app-1`, `app-2`) with correspond
   <div class="qa-a" markdown="1">
 The headless Service (`clusterIP: None`) is what gives each Pod its own DNS entry — DNS returns individual Pod IPs instead of one virtual IP. Without it, Pods still get created, but they never get the stable `<pod>.<service>` DNS names that are the entire reason to use a StatefulSet.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -448,7 +399,6 @@ The headless Service (`clusterIP: None`) is what gives each Pod its own DNS entr
   <div class="qa-a" markdown="1">
 Pods are created and deleted one at a time, in ordinal order, each waiting to reach Ready before the controller touches the next. This sequencing is how you safely bootstrap a primary before its replicas, or roll a cluster node-by-node instead of all at once.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -456,7 +406,6 @@ Pods are created and deleted one at a time, in ordinal order, each waiting to re
   <div class="qa-a" markdown="1">
 No — by default, deleting or scaling down a StatefulSet does *not* delete its PVCs. This is deliberate: data safety is considered more valuable than automatic cleanup. An opt-in `persistentVolumeClaimRetentionPolicy` field exists if you want automatic cleanup.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -464,7 +413,6 @@ No — by default, deleting or scaling down a StatefulSet does *not* delete its 
   <div class="qa-a" markdown="1">
 The StatefulSet exists purely for stable, predictable ordinal identity — each replica's ordinal becomes a shard number for cluster-watching assignments. A Deployment's replicas have no durable ordinal to shard by, so a rescheduled Pod could silently "become" a different shard than the one it was covering.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -472,7 +420,6 @@ The StatefulSet exists purely for stable, predictable ordinal identity — each 
   <div class="qa-a" markdown="1">
 The application controller can't introspect its own StatefulSet's replica count from inside the Pod. If you bump `spec.replicas` without updating the `ARGOCD_CONTROLLER_REPLICAS` env var, the sharding math silently uses the old count — a real operational gotcha.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -480,7 +427,6 @@ The application controller can't introspect its own StatefulSet's replica count 
   <div class="qa-a" markdown="1">
 In reverse ordinal order, one Pod at a time. If you scale from 3 to 1, `app-2` is deleted first, then `app-1`, each waiting to fully terminate before the next deletion starts.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/statefulsets-stable-identity-not-just-storage/' | relative_url }})</p>
 </div>
 
 ## Topic: DaemonSet (Order 8)
@@ -492,7 +438,6 @@ In reverse ordinal order, one Pod at a time. If you scale from 3 to 1, `app-2` i
   <div class="qa-a" markdown="1">
 Nothing guarantees the scheduler spreads exactly one Pod per node — two Pods could land on the same node while another gets zero. When you add an 11th node, a Deployment has no idea it exists. A DaemonSet automatically adds a Pod to new nodes and removes it from departed ones.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -500,7 +445,6 @@ Nothing guarantees the scheduler spreads exactly one Pod per node — two Pods c
   <div class="qa-a" markdown="1">
 No — that's pre-1.17 behavior. The DaemonSet controller creates each Pod with node affinity, and the default scheduler typically takes over to bind it to the target node. The controller creates Pods; the scheduler does the binding.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -508,7 +452,6 @@ No — that's pre-1.17 behavior. The DaemonSet controller creates each Pod with 
   <div class="qa-a" markdown="1">
 Without it, the DaemonSet silently skips tainted nodes — including the control plane, which absolutely still needs its CPU/memory/disk monitored. The blanket toleration is what gets the monitoring Pod onto every node, even those repelled by default taints.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -516,7 +459,6 @@ Without it, the DaemonSet silently skips tainted nodes — including the control
   <div class="qa-a" markdown="1">
 Its job is reading the node's real network interfaces and process table. These fields deliberately break the Pod network and PID isolation that normally protects it from the host — a necessary exception for a node-level monitoring agent.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -524,7 +466,6 @@ Its job is reading the node's real network interfaces and process table. These f
   <div class="qa-a" markdown="1">
 A DaemonSet updates one node's Pod at a time (controlled by `maxUnavailable`). With `maxSurge` at its default of 0, the old Pod is deleted *before* the new one starts — there's never two copies on the same node. A Deployment can surge Pods above the target count.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -532,7 +473,6 @@ A DaemonSet updates one node's Pod at a time (controlled by `maxUnavailable`). W
   <div class="qa-a" markdown="1">
 The actual metrics exporter is intentionally unreachable from outside the Pod. The `kube-rbac-proxy` sidecar adds TLS and RBAC authentication in front of those metrics, and exposes `hostPort: 9100` — splitting "collect the data" from "authenticate access to the data" into two containers sharing the Pod's localhost.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -540,7 +480,6 @@ The actual metrics exporter is intentionally unreachable from outside the Pod. T
   <div class="qa-a" markdown="1">
 The Pod is evicted — there's nowhere else to go since DaemonSet Pods are node-specific. No replacement is scheduled on a different node. A Deployment, by contrast, would reschedule the Pod elsewhere.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/daemonsets-one-pod-per-node/' | relative_url }})</p>
 </div>
 
 ## Topic: Job / CronJob (Order 9)
@@ -552,7 +491,6 @@ The Pod is evicted — there's nowhere else to go since DaemonSet Pods are node-
   <div class="qa-a" markdown="1">
 `restartPolicy: Always` is for long-lived workloads — the kubelet always restarts the container, so the process never "completes." A Job tracks *completions* (Pods that exit 0), so the restart policy must be `Never` or `OnFailure` to let a Pod actually finish.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -560,7 +498,6 @@ The Pod is evicted — there's nowhere else to go since DaemonSet Pods are node-
   <div class="qa-a" markdown="1">
 When a tick fires while the previous Job is still running, the new tick is skipped entirely. This is a correctness decision for workloads that mutate shared state — two concurrent descheduler passes, for example, could both evict the same Pods at once, compounding disruption.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -568,7 +505,6 @@ When a tick fires while the previous Job is still running, the new tick is skipp
   <div class="qa-a" markdown="1">
 They stick around in etcd until manually cleaned up or garbage-collected by `successfulJobsHistoryLimit`/`failedJobsHistoryLimit` on the CronJob (defaults: 3 and 1). A high-frequency CronJob (every 2 minutes) accumulates finished Job objects fast — production clusters need to actually monitor that history limit.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -576,7 +512,6 @@ They stick around in etcd until manually cleaned up or garbage-collected by `suc
   <div class="qa-a" markdown="1">
 The CronJob's `jobTemplate.spec` is structurally identical to a standalone Job's `spec` — same `priorityClassName`, `restartPolicy`, `livenessProbe`, `securityContext`. The CronJob adds exactly one thing: `schedule` plus `concurrencyPolicy`. It's a Job with a clock around it, not a separate execution model.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -584,7 +519,6 @@ The CronJob's `jobTemplate.spec` is structurally identical to a standalone Job's
   <div class="qa-a" markdown="1">
 It caps the number of times the Job controller creates a replacement Pod after failures (default: 6). Once `backoffLimit` is hit, the Job is marked as failed and the controller stops creating new Pods. Exponential backoff is applied between retries.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -592,7 +526,6 @@ It caps the number of times the Job controller creates a replacement Pod after f
   <div class="qa-a" markdown="1">
 The descheduler evicts other Pods to fix scheduling — if its own Pod got preempted under node pressure, the thing meant to relieve pressure would be the first casualty. A high priority class protects the workload from being the first to be evicted.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -600,7 +533,6 @@ The descheduler evicts other Pods to fix scheduling — if its own Pod got preem
   <div class="qa-a" markdown="1">
 If the CronJob controller is down across several scheduled ticks, it doesn't replay every missed tick on restart by default — but it also might replay them all at once if the window isn't bounded. Setting `startingDeadlineSeconds` bounds how late a missed tick is still allowed to start, preventing a flood of catch-up Jobs.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/jobs-cronjobs-run-to-completion-not-keep-alive/' | relative_url }})</p>
 </div>
 
 ## Topic: HPA (Order 10)
@@ -612,7 +544,6 @@ If the CronJob controller is down across several scheduled ticks, it doesn't rep
   <div class="qa-a" markdown="1">
 `desiredReplicas = ceil(currentReplicas × (currentMetricValue / desiredMetricValue))`. It polls a metrics API (typically metrics-server) every sync period (default 15s), computes this ratio, and patches the target Deployment's `spec.replicas`.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -620,7 +551,6 @@ If the CronJob controller is down across several scheduled ticks, it doesn't rep
   <div class="qa-a" markdown="1">
 "70% utilization" means 70% *of the request*. An unset request makes the percentage undefined — the HPA literally has no baseline to compute utilization against.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -628,7 +558,6 @@ If the CronJob controller is down across several scheduled ticks, it doesn't rep
   <div class="qa-a" markdown="1">
 Scale-down has a default 300-second stabilization window (avoid flapping right before the next spike). Scale-up defaults to near-immediate. A manifest that overrides `scaleUp.stabilizationWindowSeconds: 0` is choosing instant reaction over default caution.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -636,7 +565,6 @@ Scale-down has a default 300-second stabilization window (avoid flapping right b
   <div class="qa-a" markdown="1">
 This creates Guaranteed QoS for the CPU dimension — it makes "70% utilization" mean the same, stable thing on every replica instead of drifting with however much headroom `limits` happened to leave above `requests`.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -644,7 +572,6 @@ This creates Guaranteed QoS for the CPU dimension — it makes "70% utilization"
   <div class="qa-a" markdown="1">
 It caps growth at doubling the replica count every 5 seconds. Even with `stabilizationWindowSeconds: 0`, the *rate* of scale-up is still bounded — a guard against a metrics blip causing `maxReplicas` to be hit in one step.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -652,7 +579,6 @@ It caps growth at doubling the replica count every 5 seconds. Even with `stabili
   <div class="qa-a" markdown="1">
 `v2beta1` and `v2beta2` were removed in Kubernetes 1.26, not just deprecated. A manifest still targeting `v2beta2` will fail outright on any current cluster. `autoscaling/v2` (which carries the `behavior` field) has been the only API version since 1.23 went GA.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -660,7 +586,6 @@ It caps growth at doubling the replica count every 5 seconds. Even with `stabili
   <div class="qa-a" markdown="1">
 No — an HPA can only scale what `scaleTargetRef` names (a Deployment, ReplicaSet, or StatefulSet). It patches someone else's `replicas` field; it never creates Pods independently.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/hpa-horizontal-pod-autoscaling/' | relative_url }})</p>
 </div>
 
 ## Topic: Ingress (Order 11)
@@ -672,7 +597,6 @@ No — an HPA can only scale what `scaleTargetRef` names (a Deployment, ReplicaS
   <div class="qa-a" markdown="1">
 An Ingress is a set of routing rules stored in etcd with no built-in reconciler. Without an Ingress Controller (a Pod watching Ingress objects via `ingressClassName`) to turn those rules into real proxy behavior, the rules just sit in etcd, matched by nothing.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -680,7 +604,6 @@ An Ingress is a set of routing rules stored in etcd with no built-in reconciler.
   <div class="qa-a" markdown="1">
 At the Ingress Controller, not the backend Service. The `tls:` block names a Secret holding the cert/key; NGINX decrypts there and usually proxies plaintext HTTP to the backend Pod over the cluster network.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -688,7 +611,6 @@ At the Ingress Controller, not the backend Service. The `tls:` block names a Sec
   <div class="qa-a" markdown="1">
 These annotations are controller-specific — they only work because `ingress-nginx` reads them and wires NGINX directives. Swapping to a different controller (Traefik, HAProxy, GCE Ingress) silently drops this behavior unless that controller has its own equivalent annotation. The base Kubernetes `Ingress` API only standardizes host/path routing and TLS.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -696,7 +618,6 @@ These annotations are controller-specific — they only work because `ingress-ng
   <div class="qa-a" markdown="1">
 Pre-`v1`, path matching semantics were controller-specific and inconsistent. `v1` made `pathType` required (`Exact`, `Prefix`, or `ImplementationSpecific`) precisely so an Ingress means the same thing across controllers.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -704,7 +625,6 @@ Pre-`v1`, path matching semantics were controller-specific and inconsistent. `v1
   <div class="qa-a" markdown="1">
 The Ingress controller doesn't create the TLS Secret, issue the cert, or validate the CN matches the host — that's cert-manager's job upstream. An Ingress referencing a missing Secret fails silently from the client's perspective, falling back to a default self-signed cert rather than rejecting the Ingress.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -712,7 +632,6 @@ The Ingress controller doesn't create the TLS Secret, issue the cert, or validat
   <div class="qa-a" markdown="1">
 Each `LoadBalancer` Service provisions one cloud load balancer — a billed, externally-routable IP per Service. For 20 HTTP services, that's 20 cloud LBs, 20 IPs, 20 TLS certs, and no shared routing logic. Ingress consolidates all of them behind one entry point with host/path routing.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -720,7 +639,6 @@ Each `LoadBalancer` Service provisions one cloud load balancer — a billed, ext
   <div class="qa-a" markdown="1">
 The `ingressClassName` field on the Ingress spec, plus a real `IngressClass` object in the cluster. Using the old annotation on a current cluster with multiple controllers installed has undefined behavior for which one claims the Ingress.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/ingress-routing-http-without-a-loadbalancer-per-service/' | relative_url }})</p>
 </div>
 
 ## Topic: NetworkPolicy (Order 12)
@@ -732,7 +650,6 @@ The `ingressClassName` field on the Ingress spec, plus a real `IngressClass` obj
   <div class="qa-a" markdown="1">
 It means deny all incoming traffic to the selected Pods — *once any policy selects a Pod for a direction*, that direction switches from "allow everything" to "allow only what's explicitly listed." A Pod matched by zero policies stays fully open.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -740,7 +657,6 @@ It means deny all incoming traffic to the selected Pods — *once any policy sel
   <div class="qa-a" markdown="1">
 No. Like an Ingress without a controller, a NetworkPolicy is inert without a CNI plugin (Calico, Cilium) that implements the NetworkPolicy API. A cluster running a CNI that doesn't implement NetworkPolicy will accept these objects via the API and silently do nothing.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -748,7 +664,6 @@ No. Like an Ingress without a controller, a NetworkPolicy is inert without a CNI
   <div class="qa-a" markdown="1">
 Additive, never overriding. If two policies both select the same Pod, the Pod's allowed traffic is the *union* of what each policy permits. You cannot "un-allow" something a broader policy already opened.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -756,7 +671,6 @@ Additive, never overriding. If two policies both select the same Pod, the Pod's 
   <div class="qa-a" markdown="1">
 It leaves egress unrestricted. A Pod locked down by a `web-deny-all` ingress policy can still connect *out* to anything — databases, external APIs, data exfiltration endpoints. Full defense requires both ingress and egress policies.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -764,7 +678,6 @@ It leaves egress unrestricted. A Pod locked down by a `web-deny-all` ingress pol
   <div class="qa-a" markdown="1">
 No, and they never have. A namespace is an API/RBAC boundary, not a network one. A Pod in `dev` can reach a Pod in `prod` unless a NetworkPolicy explicitly stops it. GKE specifically requires Dataplane V2 (Cilium-based) for NetworkPolicy enforcement.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -772,7 +685,6 @@ No, and they never have. A namespace is an API/RBAC boundary, not a network one.
   <div class="qa-a" markdown="1">
 `podSelector` matches Pods by their labels in the same namespace as the policy. `namespaceSelector` matches entire namespaces by their labels, regardless of Pod labels. They compose: a rule can require both "from this namespace" AND "matching this Pod label" at once.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -780,7 +692,6 @@ No, and they never have. A namespace is an API/RBAC boundary, not a network one.
   <div class="qa-a" markdown="1">
 The API server accepts the object without error — but no CNI agent programs the corresponding iptables/eBPF rules, so traffic flows as if no policy existed. It's the exact same silent failure as deploying an Ingress with no controller watching it.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/networkpolicy-default-deny-and-allow-lists/' | relative_url }})</p>
 </div>
 
 ## Topic: RBAC (Order 13)
@@ -792,7 +703,6 @@ The API server accepts the object without error — but no CNI agent programs th
   <div class="qa-a" markdown="1">
 No. RBAC has no `deny` rule — every grant is purely additive. You cannot subtract a permission another binding already granted. The only way to restrict access is to never grant it in the first place, which is why least-privilege must be the default posture, not a cleanup pass.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -800,7 +710,6 @@ No. RBAC has no `deny` rule — every grant is purely additive. You cannot subtr
   <div class="qa-a" markdown="1">
 The ClusterRole's rules don't change, but the *binding* limits where they apply. A workload can reuse a broadly-defined ClusterRole via a RoleBinding to get permissions in just one namespace, instead of needing a separate Role definition.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -808,7 +717,6 @@ The ClusterRole's rules don't change, but the *binding* limits where they apply.
   <div class="qa-a" markdown="1">
 A ClusterRole aggregation controller watches for any ClusterRole carrying a specific label (e.g., `rbac.authorization.k8s.io/aggregate-to-view: "true"`) and merges its rules into the built-in role automatically. No RoleBinding changes are needed — anyone already holding `view` gains the new permissions.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -816,7 +724,6 @@ A ClusterRole aggregation controller watches for any ClusterRole carrying a spec
   <div class="qa-a" markdown="1">
 The ConfigMap `extension-apiserver-authentication` only exists in `kube-system` — a ClusterRoleBinding would be strictly broader than the workload needs. Meanwhile, `system:auth-delegator` and `system:metrics-server` must be cluster-wide because metrics-server serves Pod/Node metrics for *every* namespace.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -824,7 +731,6 @@ The ConfigMap `extension-apiserver-authentication` only exists in `kube-system` 
   <div class="qa-a" markdown="1">
 Nothing. It exists purely to extend the built-in `view`/`edit`/`admin` roles via its aggregate-to labels, so any human already holding `view` automatically gains read access to `metrics.k8s.io` data — a permission grant aimed at *other* subjects, not at metrics-server's own ServiceAccount.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -832,7 +738,6 @@ Nothing. It exists purely to extend the built-in `view`/`edit`/`admin` roles via
   <div class="qa-a" markdown="1">
 RBAC may not be the only authorization layer. ABAC and legacy `Node,RBAC` authorizer chains still exist in self-managed clusters. A debugging session that assumes "RBAC is the only thing deciding this" can waste hours if an older ABAC policy file is also present. Check `--authorization-mode` on the API server.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/rbac-roles-bindings-and-aggregation/' | relative_url }})</p>
 </div>
 
 ## Topic: ResourceQuota / LimitRange (Order 14)
@@ -844,7 +749,6 @@ RBAC may not be the only authorization layer. ABAC and legacy `Node,RBAC` author
   <div class="qa-a" markdown="1">
 LimitRange (mutating) runs first, injecting `default`/`defaultRequest` values into any Pod that omitted them. ResourceQuota (validating) runs after, checking whether the sum of all existing usage plus this Pod's requests exceeds the hard ceiling. The ordering is critical — LimitRange makes ResourceQuota survivable for Pods without explicit resources.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -852,7 +756,6 @@ LimitRange (mutating) runs first, injecting `default`/`defaultRequest` values in
   <div class="qa-a" markdown="1">
 The API server returns a 403 Forbidden with "exceeded quota." The Pod is never created. This is the enforcement mechanism — a namespace can't run 500 Pods each requesting 2 CPU on a 200-CPU cluster once a ResourceQuota is in place.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -860,7 +763,6 @@ The API server returns a 403 Forbidden with "exceeded quota." The Pod is never c
   <div class="qa-a" markdown="1">
 Yes — `pods: "50"` is a completely separate axis from CPU/memory. A namespace can be well under its compute quota and still get new Pod creations rejected because it hit the object-count ceiling.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -868,7 +770,6 @@ Yes — `pods: "50"` is a completely separate axis from CPU/memory. A namespace 
   <div class="qa-a" markdown="1">
 A Pod that omits `resources` gets a small request (110m) — so it schedules easily and doesn't inflate quota usage — but a larger limit (700m) as headroom for bursts. Setting both to the same value removes burst headroom for exactly the Pods least likely to have been tuned by their author.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -876,7 +777,6 @@ A Pod that omits `resources` gets a small request (110m) — so it schedules eas
   <div class="qa-a" markdown="1">
 It blocks NodePort Services entirely in that namespace — a policy enforcement lever, not a resource cap. It shows ResourceQuota isn't just about compute; it's a general per-namespace admission gate that can control which *types* of objects are allowed.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -884,7 +784,6 @@ It blocks NodePort Services entirely in that namespace — a policy enforcement 
   <div class="qa-a" markdown="1">
 Yes — a ResourceQuota with `scopeSelector` (matching by PriorityClass or built-in scopes like `BestEffort`/`Terminating`) lets you apply different quotas to different subsets of Pods. Multiple scoped ResourceQuota objects can coexist in the same namespace, each enforcing its own limits.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -892,7 +791,6 @@ Yes — a ResourceQuota with `scopeSelector` (matching by PriorityClass or built
   <div class="qa-a" markdown="1">
 No. Both only act at admission time. Changing a LimitRange's `default` or a ResourceQuota's `hard` ceiling never retroactively touches Pods already running — only new Pod creations are affected.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/resourcequota-limitrange-sharing-a-cluster-safely/' | relative_url }})</p>
 </div>
 
 ## Topic: Secret Management & GitOps (Order 15)
@@ -904,7 +802,6 @@ No. Both only act at admission time. Changing a LimitRange's `default` or a Reso
   <div class="qa-a" markdown="1">
 The object's namespace and name are fed as an RSA-OAEP label directly into the cryptographic scheme. Decryption with the wrong label produces a cryptographic failure, not just a policy rejection — there's no "does this namespace match" `if` statement to bypass.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -912,7 +809,6 @@ The object's namespace and name are fed as an RSA-OAEP label directly into the c
   <div class="qa-a" markdown="1">
 SealedSecrets encrypts the value client-side into ciphertext safe to commit — the value lives in git, encrypted. External Secrets Operator never puts the value in git at all; the committed `ExternalSecret` is just a reference to an external store, and the controller fetches the live value on a `refreshInterval`.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -920,7 +816,6 @@ SealedSecrets encrypts the value client-side into ciphertext safe to commit — 
   <div class="qa-a" markdown="1">
 RSA-OAEP has a maximum plaintext size tied to the key size — far too small for real secret payloads (TLS private keys, JSON credential blobs). The hybrid scheme generates a random one-time AES-256 key, encrypts the payload with that, and only RSA-encrypts the small AES key itself.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -928,7 +823,6 @@ RSA-OAEP has a maximum plaintext size tied to the key size — far too small for
   <div class="qa-a" markdown="1">
 External Secrets Operator re-fetches on every `refreshInterval` tick. A credential rotated in AWS Secrets Manager doesn't reach the cluster instantly — it reaches it within one `refreshInterval` window, which is a real latency characteristic to design around.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Beginner">
@@ -936,7 +830,6 @@ External Secrets Operator re-fetches on every `refreshInterval` tick. A credenti
   <div class="qa-a" markdown="1">
 `StrictScope` (the default) binds ciphertext to the exact namespace/name — strongest blast-radius containment but the SealedSecret can't be moved. `ClusterWideScope` sets an empty RSA-OAEP label, allowing portability across namespaces but giving up the cryptographic namespace binding.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Intermediate">
@@ -944,7 +837,6 @@ External Secrets Operator re-fetches on every `refreshInterval` tick. A credenti
   <div class="qa-a" markdown="1">
 Yes — once it creates the target `Secret` object, that Secret lives in etcd (base64-encoded, encrypted at rest only if etcd encryption-at-rest is configured). The distinction is about *git*: the `ExternalSecret` in the repo never contained the value; the real `Secret` it produces follows normal Kubernetes storage semantics.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 <div class="qa-item" data-diff="Expert">
@@ -952,14 +844,13 @@ Yes — once it creates the target `Secret` object, that Secret lives in etcd (b
   <div class="qa-a" markdown="1">
 A stray `kubectl create secret` or an un-migrated raw `Secret` manifest applied directly, bypassing both mechanisms. Either approach's guarantee only holds if it's the only path secrets enter the cluster through — one raw Secret in the GitOps flow defeats the whole point.
   </div>
-  <p class="qa-link">[Full post →]({{ '/kubernetes/secret-management-gitops-sealed-secrets-external-secrets/' | relative_url }})</p>
 </div>
 
 ---
 
 **Last updated:** July 2026 | **Total Q&A:** 109 across Kubernetes
 
-[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Kubernetes posts]({{ '/kubernetes/' | relative_url }})
+[Back to Q&A Index]({{ '/qa/' | relative_url }})
 
 <script>
 (function () {

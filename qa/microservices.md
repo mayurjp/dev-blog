@@ -5,7 +5,7 @@ description: "110 interview-ready Microservices questions with senior-level, 2-4
 permalink: /qa/microservices/
 ---
 
-Bite-sized questions and answers from Microservices blog posts. Read 5-10 per sitting. Each answer is 2-4 sentences max and links back to the full post for deeper understanding.
+Bite-sized, standalone interview questions and answers for Microservices. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
 <p class="qa-shown-line"><strong><span id="qa-shown">110</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
@@ -63,7 +63,6 @@ If two services can `JOIN` across each other's tables, they are functionally one
   <div class="qa-a" markdown="1">
 The misconception that decomposition means "one service per database table" or "one service per REST resource." `identity-api` fronts one database, `basket-api` fronts none (Redis), and `order-processor` shares `orderingdb` with `ordering-api`. The correct unit is a business capability where a concept genuinely means something different.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/service-decomposition-and-bounded-contexts/' | relative_url }})</p>
 </div>
 
 ## Topic: Inter-Service Communication â€— REST/gRPC (Order 2)
@@ -110,7 +109,6 @@ It deliberately skips TLS at the application layer because the app runs inside I
   <div class="qa-a" markdown="1">
 It hooks OpenTelemetry into every RPC automatically at the transport level. All six downstream calls in `PlaceOrder` are traced without a single line of tracing code inside `PlaceOrder` itself â€— the stats handler intercepts every inbound and outbound RPC and writes span data, making the fan-out debuggable.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/inter-service-communication-rest-and-grpc/' | relative_url }})</p>
 </div>
 
 ## Topic: Service Discovery (Order 3)
@@ -157,7 +155,6 @@ The registry is the one service that can't discover itself via discovery â€�
   <div class="qa-a" markdown="1">
 It's fetched at boot from a separate git repository via Spring Cloud Config, not from each service's own resources. Discovery configuration is itself externalized â€— which registry to talk to can change without rebuilding the service. This follows the twelve-factor principle of separating config from code.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/service-discovery/' | relative_url }})</p>
 </div>
 
 ## Topic: API Gateway (Order 4)
@@ -204,7 +201,6 @@ The gateway resolves targets through the same service-discovery mechanism as eve
   <div class="qa-a" markdown="1">
 When different clients have fundamentally different needs â€— a mobile client on a metered connection needs fewer round trips, a browser SPA can afford parallel fetches. A single shared gateway forced to serve both either over-complicates or under-serves.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/api-gateway/' | relative_url }})</p>
 </div>
 
 ## Topic: Externalized Configuration (Order 5)
@@ -244,7 +240,6 @@ The `native.searchLocations` setting lets the same config server serve from git 
   <div class="qa-a" markdown="1">
 The `optional:configserver:` prefix in the client's `spring.config.import` makes the config server non-blocking â€— if unreachable, the service falls back to its local `application.yml`. Without the `optional:` prefix, a missing config server would prevent the service from starting at all, creating a hard startup dependency.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/externalized-configuration/' | relative_url }})</p>
 </div>
 
 ## Topic: Circuit Breakers & Resilience (Order 6)
@@ -291,7 +286,6 @@ Version-based routing (subsets for canary/traffic-splitting) and resilience poli
   <div class="qa-a" markdown="1">
 Resilience4j replaced Hystrix for in-application work. But the more consequential shift for polyglot systems is moving this logic out of application code entirely into service-mesh infrastructure config, applied uniformly regardless of language. The answer to "which library" became "no library at all."
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/circuit-breakers-and-resilience/' | relative_url }})</p>
 </div>
 
 ## Topic: Distributed Tracing & Observability (Order 7)
@@ -338,7 +332,6 @@ These are stats-handler hooks the gRPC library calls on every RPC automatically 
   <div class="qa-a" markdown="1">
 Span nesting alone doesn't tell you which of six calls is the bottleneck. A real trace shows that `shipping.GetQuote` took 220ms of a 340ms request (65%) â€— an on-call engineer knows exactly which downstream call to investigate first, rather than guessing based on span tree shape.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/distributed-tracing-and-observability/' | relative_url }})</p>
 </div>
 
 ## Topic: Event-Driven Communication (Order 8)
@@ -385,7 +378,6 @@ A sibling `EventBusServiceBus` folder implements the same interface against Azur
   <div class="qa-a" markdown="1">
 The publish retry handles *broker connectivity* failures (`BrokerUnreachableException`, `SocketException`) with exponential backoff. A consumer's handler retry handles *processing* failures. Two different failure domains, two different strategies â€— easy to conflate.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/event-driven-communication-message-brokers/' | relative_url }})</p>
 </div>
 
 ## Topic: Saga & Outbox (Order 9)
@@ -432,7 +424,6 @@ A duplicate event is cheap to handle (consumers should be idempotent) while a lo
   <div class="qa-a" markdown="1">
 Production RabbitMQ/Kafka deployments essentially never support XA end-to-end, and even where a broker does, a blocked transaction coordinator can freeze the whole system. The outbox-plus-relay is the industry-standard replacement because it needs no cross-system coordinator at all.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/saga-outbox-pattern-atomic-db-write-and-publish/' | relative_url }})</p>
 </div>
 
 ## Topic: Service Mesh (Order 10)
@@ -472,7 +463,6 @@ If the injection webhook is unreachable, the Pod CREATE is *rejected* â€— n
   <div class="qa-a" markdown="1">
 This is Kubernetes' native sidecar mechanism â€— init containers with `restartPolicy: Always` start before the main app and keep running for the Pod's lifetime. It guarantees the proxy is up before the app starts, closing a startup race that plain second-container setups hit.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/service-mesh-sidecar-proxies-and-envoy/' | relative_url }})</p>
 </div>
 
 ## Topic: Cross-Service Auth â€— JWT/OAuth Propagation (Order 11)
@@ -512,7 +502,6 @@ Every outgoing client registration calls `.AddAuthToken()` â€— one shared b
   <div class="qa-a" markdown="1">
 It reads the current user's `access_token` from the encrypted auth cookie and attaches it as `Authorization: Bearer` on every outgoing HTTP or gRPC call. The token is relayed verbatim â€— the frontend never generates or signs anything itself.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/cross-service-auth-jwt-oauth-token-propagation/' | relative_url }})</p>
 </div>
 
 ## Topic: Deployment Strategies â€— Canary/Blue-Green (Order 12)
@@ -559,7 +548,6 @@ It pauses indefinitely until a human runs `kubectl argo rollouts promote`. Later
   <div class="qa-a" markdown="1">
 No. Those fields only control Pod replacement pace, never traffic percentage, and have no pause/promote/analysis gate. Canary is a genuinely different deployment shape requiring a different controller (Argo Rollouts, Flagger, or mesh traffic-splitting).
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/deployment-strategies-canary-bluegreen/' | relative_url }})</p>
 </div>
 
 ## Topic: Rate Limiting & Bulkheads (Order 13)
@@ -599,7 +587,6 @@ The per-endpoint bucket caps throughput for abuse prevention. The global concurr
   <div class="qa-a" markdown="1">
 A concurrency cap alone doesn't stop fast request bursts from overwhelming a cheap endpoint. A rate cap alone doesn't prevent slow responses from filling all threads. They defend against orthogonal failure modes â€— frequency vs. duration.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/rate-limiting-and-bulkheads/' | relative_url }})</p>
 </div>
 
 ## Topic: CQRS (Order 14)
@@ -639,7 +626,6 @@ Reaching for a fully separate read database with async event projection when a s
   <div class="qa-a" markdown="1">
 It enforces model separation: writes go through invariants, reads get purpose-shaped projections. Without the split, you either water down the write model (losing invariant enforcement) or every read pays the cost of loading a rich domain object it has no use for.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/cqrs-separating-read-and-write-models/' | relative_url }})</p>
 </div>
 
 ## Topic: Strangler Fig (Order 15)
@@ -679,7 +665,6 @@ Strangler Fig is fundamentally a *routing* pattern â€— a reverse proxy's ro
   <div class="qa-a" markdown="1">
 No â€— it applies to monolith-to-monolith, framework swaps, or replacing a single subsystem. Its defining property is the incremental, revertible, route-at-a-time cutover, independent of what architecture sits on either side.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/strangler-fig-incremental-monolith-migration/' | relative_url }})</p>
 </div>
 
 ## Topic: Sidecar & Ambassador Patterns (Order 16)
@@ -719,7 +704,6 @@ If the webhook is unreachable, Pod CREATE is rejected â€— no Pod without a 
   <div class="qa-a" markdown="1">
 Kubernetes' native sidecar mechanism: starts before the main app, keeps running for the Pod's lifetime. Guarantees the proxy is accepting connections before the app starts, closing a startup race.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/sidecar-and-ambassador-patterns/' | relative_url }})</p>
 </div>
 
 ## Topic: Anti-Corruption Layer (Order 17)
@@ -759,7 +743,6 @@ Every call site referencing the vendor SDK type, its response shape, and native 
   <div class="qa-a" markdown="1">
 Different providers natively produce different vector lengths. The database schema has a fixed column type. The ACL normalizes to the schema's expectation so swapping providers never requires a schema migration.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/anti-corruption-layer/' | relative_url }})</p>
 </div>
 
 ## Topic: Choreography vs Orchestration (Order 18)
@@ -799,7 +782,6 @@ Only events listed under the current state's `During` block are valid transition
   <div class="qa-a" markdown="1">
 MassTransit sagas are driven entirely by messages over the same broker. The coordinator is another message consumer with persisted state, not a synchronous RPC hub. The distinction is centralized state tracking vs. distributed stateless reactions.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/choreography-vs-orchestration-saga-coordination/' | relative_url }})</p>
 </div>
 
 ## Topic: BFF & Aggregator Patterns (Order 19)
@@ -839,7 +821,6 @@ Inside the aggregator via `GroupBy(x => x.ProductId).Sum(i => i.Quantity)`. If a
   <div class="qa-a" markdown="1">
 GraphQL provides one flexible API surface; BFF provides per-client-optimized surfaces. BFF is preferable when different clients need fundamentally different response shapes â€— mobile needs fewer fields than a web SPA.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/bff-and-aggregator-patterns/' | relative_url }})</p>
 </div>
 
 ## Topic: gRPC Streaming Modes (Order 20)
@@ -886,14 +867,13 @@ Browsers can't speak native gRPC. gRPC-Web only reliably supports unary and serv
   <div class="qa-a" markdown="1">
 `_subscribers.Remove(responseStream)` cleans up on disconnect. Without it, a dead stream stays in the set, causing `WriteAsync` to throw and potentially breaking iteration over other subscribers.
   </div>
-  <p class="qa-link">[Full post →]({{ '/microservices/grpc-streaming-modes/' | relative_url }})</p>
 </div>
 
 ---
 
 **Last updated:** July 2026 | **Total Q&A:** 110 across Microservices
 
-[Back to Q&A Index]({{ '/qa/' | relative_url }}) • [All Microservices posts]({{ '/microservices/' | relative_url }})
+[Back to Q&A Index]({{ '/qa/' | relative_url }})
 
 <script>
 (function () {
