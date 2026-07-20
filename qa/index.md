@@ -20,7 +20,6 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 - **Comparison** — "How does X differ from Y?" (mid-level)  
 - **Scenario** — "When would you use X?" / "What happens if X fails?" (interview-style)
 - **Tradeoff** — "What are the downsides of X?" (architect-level)
-- **Gotcha** — "What's the common mistake with X?" (senior-level)
 
 ## Available domains
 
