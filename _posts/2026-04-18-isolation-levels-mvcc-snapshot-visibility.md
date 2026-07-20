@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does Postgres decide whether YOUR transaction can see a row someone else just committed?"
+title: "Isolation Levels: How Postgres's MVCC Snapshot Decides Row Visibility"
 date: 2026-04-18 09:00:00 +0530
 categories: databases
 order: 4
 tags: [databases, isolation-levels, mvcc, postgresql, c]
 ---
+
+**TL;DR:** How does Postgres decide whether your transaction can see a row someone else just committed? It checks the row version's creating transaction ID against a frozen snapshot taken at some earlier moment — if that transaction was still in-progress as of the snapshot, the row is invisible regardless of whether it has actually committed since; isolation levels differ only in how often a new snapshot gets taken.
+
+**Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: concurrent transactions need a consistent view of data, but "consistent" has real degrees
 

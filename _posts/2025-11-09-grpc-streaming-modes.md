@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does gRPC define four different shapes for a single RPC call?"
+title: "gRPC Streaming Modes: Unary, Client, Server, and Bidirectional"
 date: 2025-11-09 09:00:00 +0530
 categories: microservices
 order: 20
 tags: [microservices, grpc, streaming, http2]
 ---
+
+**TL;DR:** Why does gRPC define four different shapes for a single RPC call? Because request/response doesn't fit every interaction — gRPC lets a `.proto` contract declare unary, client-streaming, server-streaming, or bidirectional streaming, all riding the same HTTP/2 connection's native multiplexed framing instead of needing polling or a separate WebSocket layer.
+
+**Real repo:** [`grpc/grpc-dotnet`](https://github.com/grpc/grpc-dotnet)
 
 ## 1. The Engineering Problem: request/response doesn't fit every real interaction
 

@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why does one workflow need TWO different ways to pass a value between steps?"
+title: "GitHub Actions Workflow Anatomy: Step Outputs vs Job Outputs"
 date: 2026-02-07 09:00:00 +0530
 categories: cicd
 order: 2
 tags: [cicd, github-actions, workflow-anatomy]
 ---
 {% raw %}
+
+**TL;DR:** Why does one workflow need two different ways to pass a value between steps — one for steps, another for jobs? Steps in the same job share a runner, so a later step reads an earlier step's output directly (`steps.<id>.outputs.<name>`); jobs run on separate runners, so a job must explicitly re-declare a step's output in its own `outputs:` block before another job — which must also declare `needs: <job-name>` — can reference it as `needs.<job-name>.outputs.<name>`.
+
+**Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: steps and jobs run at genuinely different isolation levels
 

@@ -10,6 +10,8 @@ tags: [kubernetes, pods, kubelet, containers]
 
 **TL;DR:** Why does Kubernetes never schedule a single bare container? Because sidecars need the same node, the same IP, and the same lifecycle as the container they sit next to — so Kubernetes schedules a **Pod**, not a container, and lets the kubelet manage the whole group as one unit.
 
+**Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
+
 ## 1. The Engineering Problem: containers that need to live together
 
 Say you're running a gRPC service, and you also want a sidecar process next to it — a service-mesh proxy, a log shipper, or a init step that fetches a TLS cert before the app boots. On a single VM you'd probably just run both processes with `docker run`, give them a shared bind-mount for logs, and let them talk over `localhost`.

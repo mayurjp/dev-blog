@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does the same Execute() call run a retry today and a circuit breaker tomorrow?"
+title: "Strategy Pattern: Swapping Retry, Circuit Breaker, and Timeout Behind One Execute() Call"
 date: 2025-09-12 09:00:00 +0530
 categories: design-patterns
 order: 1
 tags: [design-patterns, strategy-pattern, polly, dotnet, resilience]
 ---
+
+**TL;DR:** How does the same `Execute()` call run a retry today and a circuit breaker tomorrow? Because the pipeline (the context) only ever holds a reference to a minimal abstract `ResilienceStrategy` interface — never a concrete type — so swapping which strategy is injected changes the behavior without changing a single line of caller code.
+
+**Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: swapping behavior without touching the caller
 

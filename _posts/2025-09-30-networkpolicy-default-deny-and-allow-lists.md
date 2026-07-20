@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why can every Pod in your cluster talk to every other Pod by default?"
+title: "NetworkPolicy: Default-Deny and Allow-Lists for Pod-to-Pod Traffic"
 date: 2025-09-30 09:00:00 +0530
 categories: kubernetes
 order: 12
 tags: [kubernetes, networkpolicy, cni, security]
 ---
+
+**TL;DR:** Why can every Pod in your cluster talk to every other Pod by default? Kubernetes networking starts fully open with no NAT between Pods, and a NetworkPolicy only locks that down once a CNI plugin that implements the NetworkPolicy API (like Calico or Cilium) enforces the `podSelector`-based rules you define — an empty `ingress: []` on a selected Pod means deny all inbound.
+
+**Real repo:** [`ahmetb/kubernetes-network-policy-recipes`](https://github.com/ahmetb/kubernetes-network-policy-recipes)
 
 ## 1. The Engineering Problem: Kubernetes networking starts fully open
 

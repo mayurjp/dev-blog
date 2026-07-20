@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "If checkout is slow, which of six downstream calls is actually to blame?"
+title: "Distributed Tracing: Finding Which Downstream Call Is Slow"
 date: 2025-09-02 09:00:00 +0530
 categories: microservices
 order: 7
 tags: [microservices, distributed-tracing, opentelemetry, observability, istio]
 published: false
 ---
+
+**TL;DR:** If checkout is slow, which of six downstream calls is actually to blame? Distributed tracing assigns a trace ID at the edge and propagates it through every hop so a collector can reassemble all the spans into one call graph with per-span timing, showing exactly which downstream call is the bottleneck.
+
+**Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo), [`istio/istio`](https://github.com/istio/istio)
 
 ## 1. The Engineering Problem
 

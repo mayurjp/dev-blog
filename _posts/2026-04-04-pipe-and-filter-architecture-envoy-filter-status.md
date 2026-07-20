@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a filter in a request pipeline pause the whole chain to wait on an async auth call?"
+title: "Pipe-and-Filter Architecture: How a Filter Pauses the Whole Chain for an Async Auth Call"
 date: 2026-04-04 09:00:00 +0530
 categories: architecture
 order: 8
 tags: [architecture, pipe-and-filter, envoy, proxy, cpp]
 ---
+
+**TL;DR:** How does a filter in a request pipeline pause the whole chain to wait on an async auth call? Each filter returns an explicit status — `StopIteration` halts the chain right where it is until the filter later calls `continueDecoding()` from within its async callback, resuming the chain from outside the original synchronous flow.
+
+**Real repo:** [`envoyproxy/envoy`](https://github.com/envoyproxy/envoy)
 
 ## 1. The Engineering Problem: many independent processing steps need to compose without coupling to each other, and some need to pause the whole pipeline
 

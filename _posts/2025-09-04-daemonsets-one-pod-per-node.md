@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "How do you guarantee a Pod runs on every node, not just somewhere in the cluster?"
+title: "Kubernetes DaemonSets: Guaranteeing One Pod Per Node, Not Just Somewhere"
 date: 2025-09-04 09:00:00 +0530
 categories: kubernetes
 order: 8
 tags: [kubernetes, daemonsets, scheduler, node-agents]
 published: false
 ---
+
+**TL;DR:** How do you guarantee a Pod runs on every node, not just somewhere in the cluster? A DaemonSet replaces the `replicas` count with a node-matching criterion, ensuring exactly one matching Pod exists on every eligible node — automatically adding one when a node joins and removing it when a node leaves — something a Deployment's fixed replica count can't guarantee.
+
+**Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: some workloads are per-node, not per-application
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a downstream API trust a request without asking the user to log in again?"
+title: "Cross-Service Auth: Propagating JWT/OAuth Tokens Without Re-Login"
 date: 2025-10-22 09:00:00 +0530
 categories: microservices
 order: 11
 tags: [microservices, jwt, oauth, token-relay]
 ---
+
+**TL;DR:** How does a downstream API trust a request without asking the user to log in again? Token relay forwards the same OAuth2/OIDC access token the frontend obtained at login as a Bearer header on every downstream call, and each service validates that token independently against the shared identity provider, with no re-authentication and no synchronous callback per request.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: the user only logs in once, but three services need to know who they are
 

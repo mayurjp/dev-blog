@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What's actually inside that unreadable string ASP.NET Core stores instead of your password?"
+title: "Password Hashing: What's Inside the String ASP.NET Core Stores Instead of Your Password"
 date: 2025-09-08 09:00:00 +0530
 categories: security
 order: 1
 tags: [security, authentication, aspnetcore, identity, password-hashing, pbkdf2]
 ---
+
+**TL;DR:** When a database breach exposes the Users table, does the attacker walk away with usable passwords or garbage? A production password hasher salts each password uniquely and runs it through a deliberately slow, versioned hash (like PBKDF2) so every guess costs real time, and old and new hashes can both still be verified.
+
+**Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore)
 
 ## 1. The Engineering Problem: a database breach shouldn't be a password breach
 

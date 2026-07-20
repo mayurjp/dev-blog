@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What does 'broken access control' actually look like in real code?"
+title: "Broken Access Control: What It Actually Looks Like in Real Code"
 date: 2025-12-01 09:00:00 +0530
 categories: security
 order: 12
 tags: [security, vulnerabilities, idor, owasp]
 ---
+
+**TL;DR:** What does "broken access control" actually look like in real code? It's an endpoint that verifies who's calling but then trusts a client-supplied ID to decide which resource to act on, without an explicit, independent check that the caller is actually allowed to touch that specific resource — an identity comparison is not an authorization decision.
+
+**Real repo:** [`WebGoat/WebGoat`](https://github.com/WebGoat/WebGoat)
 
 ## 1. The Engineering Problem: verifying WHO someone is doesn't verify WHAT they're allowed to touch
 

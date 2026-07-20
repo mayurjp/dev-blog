@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why shouldn't config and credentials live inside the container image?"
+title: "Kubernetes ConfigMaps & Secrets: Decoupling Config and Credentials from the Image"
 date: 2025-08-11 09:00:00 +0530
 categories: kubernetes
 order: 4
 tags: [kubernetes, configmaps, secrets, kubelet]
 ---
+
+**TL;DR:** Why shouldn't config and credentials live inside the container image? Kubernetes stores configuration as its own API objects — a **ConfigMap** for ordinary config, a **Secret** for sensitive data — separate from any Pod, and the kubelet injects their contents into a container at runtime, either as environment variables or as mounted files.
+
+**Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: config baked into the image
 

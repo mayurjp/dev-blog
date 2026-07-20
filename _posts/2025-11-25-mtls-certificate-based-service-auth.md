@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a service prove its identity to another service without a shared secret?"
+title: "mTLS Service Auth: How a Service Proves Its Identity Without a Shared Secret"
 date: 2025-11-25 09:00:00 +0530
 categories: security
 order: 9
 tags: [security, mtls, spiffe, x509]
 ---
+
+**TL;DR:** How does a service prove its identity to another service without a shared secret? Mutual TLS has both sides present X.509 certificates carrying a SPIFFE ID in a URI SAN, verified against a trusted CA and checked against an explicit authorization rule — identity is proven cryptographically, with no hostname/IP lookup and no shared secret involved.
+
+**Real repo:** [`spiffe/spire`](https://github.com/spiffe/spire), [`spiffe/go-spiffe`](https://github.com/spiffe/go-spiffe)
 
 ## 1. The Engineering Problem: shared secrets don't scale as a service-identity mechanism
 

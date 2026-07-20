@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why does the browser get REST while services talk gRPC to each other?"
+title: "Inter-Service Communication: Why Browsers Get REST, Services Get gRPC"
 date: 2025-08-03 09:00:00 +0530
 categories: microservices
 order: 2
 tags: [microservices, grpc, rest, protobuf, api-design]
 published: false
 ---
+
+**TL;DR:** Why does the browser get REST while services talk gRPC to each other? REST/JSON stays at the edge because browsers and third parties need human-readable payloads without generated code, while gRPC handles internal service-to-service calls because both ends are code you control and a compiler-checked, binary, HTTP/2 contract is cheaper and safer.
+
+**Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem
 

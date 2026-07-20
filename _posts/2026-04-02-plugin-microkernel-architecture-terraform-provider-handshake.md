@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a Terraform provider refuse to start unless a specific environment variable is set?"
+title: "Plugin/Microkernel Architecture: Why a Terraform Provider Refuses to Start Without a Specific Env Var"
 date: 2026-04-02 09:00:00 +0530
 categories: architecture
 order: 7
 tags: [architecture, plugin-architecture, microkernel, terraform, go]
 ---
+
+**TL;DR:** Why does a Terraform provider refuse to start unless a specific environment variable is set? A magic-cookie handshake (`TF_PLUGIN_MAGIC_COOKIE`) proves the process was launched specifically as a Terraform plugin, by Terraform, on purpose — without it, a provider binary run directly or invoked by an unrelated program refuses to start serving requests at all.
+
+**Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: hundreds of independently-developed extensions can't all be bundled into one binary, or trusted to share its process
 

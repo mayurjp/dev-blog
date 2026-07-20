@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why shouldn't changing a timeout require rebuilding the service?"
+title: "Externalized Configuration: Changing Settings Without a Rebuild"
 date: 2025-08-21 09:00:00 +0530
 categories: microservices
 order: 5
 tags: [microservices, spring-cloud-config, configuration, twelve-factor]
 published: false
 ---
+
+**TL;DR:** Why shouldn't changing a timeout require rebuilding the service? Because externalized configuration moves settings out of the build entirely — a dedicated config server serves configuration from git (or another store) keyed by application name and profile, and services fetch it over the network at startup instead of shipping it inside the artifact.
+
+**Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
 

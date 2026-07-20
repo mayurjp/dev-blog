@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a message with the same key always land on the same partition?"
+title: "Message Queues: Partitioning by Key for Parallelism and Ordering"
 date: 2025-12-15 09:00:00 +0530
 categories: system-design
 order: 8
 tags: [system-design, kafka, message-queues, partitioning]
 ---
+
+**TL;DR:** Why does a message with the same key always land on the same partition? Kafka routes each keyed message via `hash(key) % numPartitions`, deterministically landing the same key on the same partition every time to guarantee per-key ordering, while different keys spread across partitions for parallel processing — unkeyed messages instead use load-aware "sticky" batching rather than pure round-robin.
+
+**Real repo:** [`apache/kafka`](https://github.com/apache/kafka)
 
 ## 1. The Engineering Problem: parallelism and ordering pull in opposite directions
 

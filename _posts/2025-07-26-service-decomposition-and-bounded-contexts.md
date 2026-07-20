@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do you split a monolith without building a distributed one?"
+title: "Service Decomposition: Splitting a Monolith Without a Distributed One"
 date: 2025-07-26 09:00:00 +0530
 categories: microservices
 order: 1
 tags: [microservices, ddd, bounded-context, architecture]
 ---
+
+**TL;DR:** How do you split a monolith without building a distributed one? Decompose along bounded contexts — explicit boundaries where each context exclusively owns its data and talks to others only through explicit contracts (APIs or events), never a shared database.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Which shard does a specific row actually land on, and why?"
+title: "Database Sharding: How Vindex Hashing and Key Ranges Route a Row to Its Shard"
 date: 2025-12-09 09:00:00 +0530
 categories: system-design
 order: 5
 tags: [system-design, sharding, vitess, partitioning]
 ---
+
+**TL;DR:** Which shard does a specific row actually land on, and why? Vitess deterministically hashes a primary key into a keyspace ID via a reversible Vindex, then routes to whichever shard's byte-range interval contains that keyspace ID — a pure comparison against range boundaries, not a lookup table or a modulo that would break on resharding.
+
+**Real repo:** [`vitessio/vitess`](https://github.com/vitessio/vitess)
 
 ## 1. The Engineering Problem: "split the data across many databases" hides a real routing question
 

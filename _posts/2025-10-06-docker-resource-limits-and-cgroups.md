@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does one runaway container take down every other container on the host?"
+title: "Docker Resource Limits: Why One Runaway Container Can Take Down the Whole Host"
 date: 2025-10-06 09:00:00 +0530
 categories: docker
 order: 9
 tags: [docker, cgroups, resource-limits, oom]
 ---
+
+**TL;DR:** Why does one runaway container take down every other container on the host? Docker's `mem_limit`/`cpus` settings are a thin interface onto Linux cgroups — without them, a memory leak in one container can exhaust the host's RAM and trigger the host-wide OOM killer, which scores every process on the machine and can kill an unrelated container's process instead of the one actually leaking.
+
+**Real repo:** [`openfoodfacts/robotoff`](https://github.com/openfoodfacts/robotoff)
 
 ## 1. The Engineering Problem: a container is just a process, sharing the host's RAM and CPU
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a circuit breaker have a 4th state that has nothing to do with failures?"
+title: "Circuit Breaker: The 4th State (Isolated) That Has Nothing to Do With Failures"
 date: 2026-01-12 09:00:00 +0530
 categories: design-patterns
 order: 11
 tags: [design-patterns, circuit-breaker, polly, resilience]
 ---
+
+**TL;DR:** Why does a circuit breaker have a 4th state that has nothing to do with failures? Because alongside the automatic Closed/Open/HalfOpen failure-detection states, Polly adds a manually-triggered Isolated state so an operator can deliberately force a dependency offline, and it throws a distinct `IsolatedCircuitException` so monitoring can tell a deliberate action apart from a real incident.
+
+**Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: repeatedly calling a failing dependency wastes resources and can make things worse
 

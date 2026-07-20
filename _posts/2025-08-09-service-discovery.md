@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "How does a caller find a service instance whose IP changes every restart?"
+title: "Service Discovery: Finding Instances Whose IP Changes Every Restart"
 date: 2025-08-09 09:00:00 +0530
 categories: microservices
 order: 3
 tags: [microservices, service-discovery, eureka, spring-cloud, kubernetes]
 published: false
 ---
+
+**TL;DR:** How does a caller find a service instance whose IP changes every restart? A service registry turns discovery into a heartbeat protocol — instances register and keep re-announcing themselves on an interval, and callers query the registry for the current instance list instead of reading a static config file.
+
+**Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
 

@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why can't you just use a job output to pass a compiled binary to the next job?"
+title: "GitHub Actions Artifacts: Sharing Files Between Jobs vs Job Outputs"
 date: 2026-02-15 09:00:00 +0530
 categories: cicd
 order: 6
 tags: [cicd, github-actions, artifacts, build-outputs]
 ---
 {% raw %}
+
+**TL;DR:** Why can't you just use a job output to pass a compiled binary to the next job? Job outputs only carry small string values, not real files; `actions/upload-artifact` uploads actual files to GitHub's artifact storage under an explicit name, and `actions/download-artifact` in a later job retrieves them by matching that name, since each job runs on its own separate runner with no shared filesystem.
+
+**Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: job outputs can't carry real files
 

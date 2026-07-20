@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "How do you start twenty dependent containers in the right order, reliably?"
+title: "Docker Compose: Starting Dependent Containers in the Right Order, Reliably"
 date: 2025-08-31 09:00:00 +0530
 categories: docker
 order: 7
 tags: [docker, compose, orchestration, yaml-anchors, depends-on]
 published: false
 ---
+
+**TL;DR:** How do you start twenty dependent containers in the right order, reliably? `docker compose` reads a declarative YAML spec, resolves each service's `depends_on` graph, and — when a `condition: service_healthy` is declared — waits for a dependency's healthcheck to actually pass, not merely for its process to start, before bringing up whatever depends on it.
+
+**Real repo:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted)
 
 ## 1. The Engineering Problem: one service is easy, a system of services is not
 

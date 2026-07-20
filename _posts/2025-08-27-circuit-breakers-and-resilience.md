@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "If a dependency is dying, should your own code have to notice?"
+title: "Circuit Breakers: Stopping Cascading Failures Without App Code"
 date: 2025-08-27 09:00:00 +0530
 categories: microservices
 order: 6
 tags: [microservices, circuit-breaker, istio, service-mesh, resilience]
 ---
+
+**TL;DR:** If a dependency is dying, should your own code have to notice? No — a service mesh sidecar (Envoy, via Istio) can apply circuit breaking as infrastructure config, limiting connections proactively and ejecting unhealthy endpoints reactively, without any application code involved.
+
+**Real repo:** [`istio/istio`](https://github.com/istio/istio)
 
 ## 1. The Engineering Problem
 

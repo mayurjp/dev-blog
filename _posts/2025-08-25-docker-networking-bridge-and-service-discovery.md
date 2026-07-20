@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "How does one container find another when IPs change on every restart?"
+title: "Docker Networking: How Containers Find Each Other When IPs Change on Restart"
 date: 2025-08-25 09:00:00 +0530
 categories: docker
 order: 6
 tags: [docker, networking, bridge, dns, service-discovery, traefik]
 published: false
 ---
+
+**TL;DR:** How does one container find another when IPs change on every restart? Every user-defined bridge network runs an embedded DNS server that resolves each container's name to its current IP on every lookup, so containers address each other by a stable service name instead of a hardcoded IP that goes stale the instant a container restarts.
+
+**Real repo:** [`traefik/traefik`](https://github.com/traefik/traefik)
 
 ## 1. The Engineering Problem: the address book is out of date the moment you write it
 

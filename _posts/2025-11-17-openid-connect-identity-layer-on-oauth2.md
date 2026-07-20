@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What does OAuth2 not tell you about a user that OpenID Connect does?"
+title: "OpenID Connect: What OAuth2 Doesn't Tell You About the User That OIDC Does"
 date: 2025-11-17 09:00:00 +0530
 categories: security
 order: 5
 tags: [security, oidc, oauth2, id-token]
 ---
+
+**TL;DR:** What does OAuth2 not tell you about a user that OpenID Connect does? OIDC adds a separate ID token alongside the access token with standardized claims about the authentication event itself — who (`sub`), when and how (`auth_time`/`acr`/`amr`) — plus `at_hash` and `nonce` to bind it to the access token and defeat replay.
+
+**Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 
 ## 1. The Engineering Problem: an access token proves access, not identity
 

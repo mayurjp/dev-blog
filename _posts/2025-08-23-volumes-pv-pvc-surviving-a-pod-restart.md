@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "If a Pod is disposable, how does its data ever survive a restart?"
+title: "Kubernetes Volumes: How PersistentVolumes and Claims Survive a Pod Restart"
 date: 2025-08-23 09:00:00 +0530
 categories: kubernetes
 order: 6
 tags: [kubernetes, volumes, persistentvolumes, storage]
 published: false
 ---
+
+**TL;DR:** If a Pod is disposable, how does its data ever survive a restart? `emptyDir`, `configMap`, and `secret` volumes are Pod-scoped and die with the Pod, but a volume backed by a `PersistentVolumeClaim` survives — the PVC is just a request, bound to a cluster-scoped `PersistentVolume` that a StorageClass's provisioner creates independently of any one Pod or node.
+
+**Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: a container's filesystem dies with the container
 

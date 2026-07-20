@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why does a scheduled workflow have nothing to react to, but a manual one gets a form?"
+title: "GitHub Actions Triggers: Schedule vs workflow_dispatch"
 date: 2026-02-09 09:00:00 +0530
 categories: cicd
 order: 3
 tags: [cicd, github-actions, triggers, workflow-dispatch]
 ---
 {% raw %}
+
+**TL;DR:** Why does a scheduled workflow have nothing to react to, but a manually-triggered one gets a form? `schedule` is pure time-based with essentially no event payload, so the workflow has to independently determine what needs doing on every run; `workflow_dispatch` provides zero automatic event data either, but instead exposes structured, typed, author-defined input fields that become a literal form a human fills in before the run starts.
+
+**Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: different automation needs fundamentally different triggering shapes
 

@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "What actually happens between docker build and a runnable image?"
+title: "Dockerfile Instructions: What Happens Between docker build and a Runnable Image"
 date: 2025-08-01 09:00:00 +0530
 categories: docker
 order: 2
 tags: [docker, dockerfile, build-context, buildkit, instructions]
 published: false
 ---
+
+**TL;DR:** What actually happens between `docker build` and a runnable image? The Docker CLI sends the Dockerfile and build context to BuildKit (the default builder since Docker Engine 23.0), which parses the Dockerfile into a dependency graph, executes instructions — running independent ones in parallel — and writes the resulting layers into containerd's content store as a taggable image.
+
+**Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: turning "how I set this up" into something repeatable
 

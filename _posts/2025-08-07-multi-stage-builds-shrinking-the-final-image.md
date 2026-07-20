@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why does your production image ship a full Go toolchain to run one binary?"
+title: "Multi-Stage Docker Builds: Shrinking the Final Image by Discarding the Toolchain"
 date: 2025-08-07 09:00:00 +0530
 categories: docker
 order: 3
 tags: [docker, multi-stage-builds, buildkit, image-size, dockerfile]
 published: false
 ---
+
+**TL;DR:** Why does your production image ship a full Go toolchain to run one binary? Multi-stage builds let a single Dockerfile declare multiple `FROM` stages, each with its own isolated filesystem, so only the final stage — typically just the compiled binary pulled in via `COPY --from=<stage>` — actually ships, leaving the compiler, headers, and source tree behind in an earlier, discarded stage.
+
+**Real repo:** [`grafana/grafana`](https://github.com/grafana/grafana)
 
 ## 1. The Engineering Problem: the build toolchain becomes part of the artifact
 

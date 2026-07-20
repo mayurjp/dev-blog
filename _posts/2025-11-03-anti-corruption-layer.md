@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do you depend on an external system without letting its model leak into yours?"
+title: "Anti-Corruption Layer: Keeping an External System's Model Out of Yours"
 date: 2025-11-03 09:00:00 +0530
 categories: microservices
 order: 17
 tags: [microservices, anti-corruption-layer, ddd, integration]
 ---
+
+**TL;DR:** How do you depend on an external system without letting its model leak into yours? An Anti-Corruption Layer is a translation boundary your own code owns, sitting between your domain and the external system, so every caller depends only on your own types while the ACL alone absorbs and normalizes the external system's actual shape.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: an external system's shape leaking into your codebase makes every future change everyone's problem
 

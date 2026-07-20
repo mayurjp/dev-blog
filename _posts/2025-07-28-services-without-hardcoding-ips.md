@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do containers talk to each other without hardcoding IP addresses?"
+title: "Kubernetes Services: How Containers Discover Each Other Without Hardcoded IPs"
 date: 2025-07-28 09:00:00 +0530
 categories: kubernetes
 order: 3
 tags: [kubernetes, services, dns, kube-proxy, endpointslices]
 ---
+
+**TL;DR:** How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtual IP and DNS name — in front of the volatile pods, tracking which pods are currently alive and Ready via a label selector so clients never need a pod's real IP.
+
+**Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: the volatile IP address
 

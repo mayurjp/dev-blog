@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why do some secrets need their own GitHub Environment instead of just being a repo secret?"
+title: "GitHub Actions Environments: Secret Scoping Beyond Deployment Gates"
 date: 2026-02-17 09:00:00 +0530
 categories: cicd
 order: 7
 tags: [cicd, github-actions, secrets, environments]
 ---
 {% raw %}
+
+**TL;DR:** Why do some secrets need their own GitHub Environment instead of just being a repo secret? A repo secret is visible to every workflow and job in the repo, but a secret defined at the environment level is only accessible to a job that explicitly declares that environment — every other job, even one that syntactically references it, gets an empty value, giving high-value secrets a narrower blast radius independent of any deployment gating.
+
+**Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore)
 
 ## 1. The Engineering Problem: a repo secret is visible to every workflow, and that's too broad for some secrets
 

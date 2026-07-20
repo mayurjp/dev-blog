@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does eShop wrap EF Core's DbSet in another layer of abstraction?"
+title: "Repository Pattern: Why eShop Wraps EF Core's DbSet in Another Layer"
 date: 2026-01-10 09:00:00 +0530
 categories: design-patterns
 order: 10
 tags: [design-patterns, repository, efcore, ddd]
 ---
+
+**TL;DR:** Why does eShop wrap EF Core's DbSet in another layer of abstraction? Because a narrow, domain-shaped repository interface like `IOrderRepository` centralizes the correct way to load a specific aggregate (eager-loading its related collections) in exactly one place, instead of relying on every caller to remember to do it right.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: a generic query API doesn't encode "how to correctly load this specific aggregate"
 

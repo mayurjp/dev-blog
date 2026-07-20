@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a GitHub Actions job authenticate to GCP without ever storing a GCP credential?"
+title: "Workload Identity Federation: Authenticating to GCP With No Stored Credential"
 date: 2026-02-01 09:00:00 +0530
 categories: gcp
 order: 10
 tags: [gcp, workload-identity-federation, oauth2, github-actions]
 ---
+
+**TL;DR:** How does a GitHub Actions job authenticate to GCP without ever storing a GCP credential? Workload Identity Federation exchanges GitHub's own short-lived OIDC token for a Google Cloud token via an OAuth2 token exchange (RFC 8693) at request time — Google's STS verifies the token against GitHub's public keys and hands back a federated access token, with nothing long-lived stored on either side.
+
+**Real repo:** [`google-github-actions/auth`](https://github.com/google-github-actions/auth)
 
 ## 1. The Engineering Problem: CI pipelines calling cloud APIs traditionally need a long-lived stored secret
 

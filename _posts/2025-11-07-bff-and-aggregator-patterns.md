@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a mobile client need its own gateway instead of sharing the web app's?"
+title: "BFF & Aggregator: A Gateway Per Client That Merges Backend Calls"
 date: 2025-11-07 09:00:00 +0530
 categories: microservices
 order: 19
 tags: [microservices, bff, aggregator, api-gateway]
 ---
+
+**TL;DR:** Why does a mobile client need its own gateway instead of sharing the web app's? A Backend-for-Frontend gives each client type its own gateway shaped for its own needs, and it's the natural place to put aggregation logic that fans out to multiple backend services and merges the results into one response, so the client makes one call instead of composing data itself.
+
+**Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers)
 
 ## 1. The Engineering Problem: one shared gateway can't serve every client well, and forcing clients to compose data themselves is worse
 

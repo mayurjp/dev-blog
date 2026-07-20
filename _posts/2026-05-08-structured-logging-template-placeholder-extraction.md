@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "logger.LogInformation($\"User {userId}\") and logger.LogInformation(\"User {UserId}\", userId) look the same — why is only one structured?"
+title: "Structured Logging: Why Template Placeholders Beat String Interpolation"
 date: 2026-05-08 09:00:00 +0530
 categories: observability
 order: 2
 tags: [observability, structured-logging, dotnet, csharp]
 ---
+
+**TL;DR:** `logger.LogInformation($"User {userId}")` and `logger.LogInformation("User {UserId}", userId)` look the same — why is only one structured? Because .NET's structured logging parses the template string for `{Name}` placeholders at log-call time and passes each name/value pair (plus the original template) as separate, individually queryable fields, while string interpolation collapses everything into one opaque message before the logging API ever sees it.
+
+**Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 
 ## 1. The Engineering Problem: two nearly identical-looking log calls produce fundamentally different queryability later
 

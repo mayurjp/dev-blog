@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Who decides what happens next in a multi-step process — everyone, or one coordinator?"
+title: "Choreography vs Orchestration: Who Coordinates a Multi-Step Saga"
 date: 2025-11-05 09:00:00 +0530
 categories: microservices
 order: 18
 tags: [microservices, saga, choreography, orchestration, masstransit]
 ---
+
+**TL;DR:** Who decides what happens next in a multi-step process — everyone, or one coordinator? Choreography has each service react to the previous event and publish its own next one, with no central coordinator; orchestration has one saga/state machine explicitly track state and issue each step as a command — a real architectural tradeoff between decentralized flexibility and centralized visibility.
+
+**Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers), [`MassTransit/MassTransit`](https://github.com/MassTransit/MassTransit)
 
 ## 1. The Engineering Problem: a multi-step process needs SOMETHING deciding "what happens next," and where that logic lives is a real architectural choice
 

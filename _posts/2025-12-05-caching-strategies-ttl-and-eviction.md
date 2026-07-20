@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What happens when your cache fills up, and who's actually responsible for keeping it in sync?"
+title: "Caching Strategies: Cache-Aside vs Write-Through, TTL, and Eviction Sampling"
 date: 2025-12-05 09:00:00 +0530
 categories: system-design
 order: 3
 tags: [system-design, caching, redis, eviction, ttl]
 ---
+
+**TL;DR:** What happens when your cache fills up, and who's actually responsible for keeping it in sync? Sync is a choice between cache-aside (the app checks the cache, falls back to the DB on a miss, and invalidates on write) and write-through (writes flow through the cache itself); eviction under memory pressure is handled by sampling a handful of random keys and evicting the worst-scored one from a small candidate pool, not by maintaining a perfectly-ordered LRU list.
+
+**Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
 ## 1. The Engineering Problem: two separate questions hide under "add a cache"
 

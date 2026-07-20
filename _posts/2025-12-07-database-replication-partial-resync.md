@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a replica catch up after a network blip without re-copying the whole database?"
+title: "Database Replication: Partial Resync After a Network Blip"
 date: 2025-12-07 09:00:00 +0530
 categories: system-design
 order: 4
 tags: [system-design, replication, redis, leader-follower]
 ---
+
+**TL;DR:** How does a replica catch up after a network blip without re-copying the whole database? The leader keeps a bounded replication backlog tagged with an offset, and on reconnect checks that the replica's replication lineage still matches and that the needed offset is still within the backlog before streaming only the missing slice; if either check fails, it falls back to a full resync.
+
+**Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
 ## 1. The Engineering Problem: reconnection shouldn't cost as much as the initial copy
 

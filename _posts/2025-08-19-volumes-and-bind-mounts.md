@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Where does a container's data go when the container dies?"
+title: "Docker Volumes and Bind Mounts: Where a Container's Data Goes When It Dies"
 date: 2025-08-19 09:00:00 +0530
 categories: docker
 order: 5
 tags: [docker, volumes, bind-mounts, compose, storage]
 published: false
 ---
+
+**TL;DR:** Where does a container's data go when the container dies? Docker gives you two distinct mount mechanisms — named volumes, which Docker manages and which outlive the container (surviving `docker rm`), and bind mounts, which map an exact host path into the container for live, two-way access to config or source — and picking the right one for the job is what makes persistence a declared, portable part of the service definition rather than a fragile host-path convention.
+
+**Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: a container's filesystem is disposable by design
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a DI container throw an exception if you inject the wrong lifetime?"
+title: "Singleton Anti-Pattern: Why DI Containers Throw on Captive Scoped Dependencies"
 date: 2025-12-27 09:00:00 +0530
 categories: design-patterns
 order: 3
 tags: [design-patterns, singleton, dependency-injection, dotnet]
 ---
+
+**TL;DR:** Why does a DI container throw an exception if you inject the wrong lifetime? Because ASP.NET Core's DI container walks a singleton's entire transitive dependency tree at validation time and throws the moment it finds a scoped service anywhere in it, catching the captive-dependency bug at startup instead of letting it silently corrupt data under concurrent load in production.
+
+**Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 
 ## 1. The Engineering Problem: a Singleton that captures per-request state lives forever, silently
 

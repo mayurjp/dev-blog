@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do you rate-limit a client when their requests might hit any of 50 app servers?"
+title: "Distributed Rate Limiting: Shared State Across App Servers"
 date: 2025-12-17 09:00:00 +0530
 categories: system-design
 order: 9
 tags: [system-design, rate-limiting, redis, distributed-systems]
 ---
+
+**TL;DR:** How do you rate-limit a client when their requests might hit any of 50 app servers? By moving the counter out of each instance's memory into shared state (Redis) that every instance atomically increments and checks via `INCRBY`/`EXPIRE`, with a local per-instance cache of already-over-limit clients and jittered TTLs to avoid a Redis round-trip on every retry and a thundering herd at window boundaries.
+
+**Real repo:** [`envoyproxy/ratelimit`](https://github.com/envoyproxy/ratelimit)
 
 ## 1. The Engineering Problem: an in-memory counter only sees its own instance's traffic
 

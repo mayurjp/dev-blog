@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does a GCP firewall rule target 'the web tier' without knowing any IP addresses?"
+title: "GCP VPC Firewalls: Targeting by Tag Instead of IP Address"
 date: 2026-01-18 09:00:00 +0530
 categories: gcp
 order: 3
 tags: [gcp, vpc, networking, terraform]
 ---
+
+**TL;DR:** How does a GCP firewall rule target "the web tier" without knowing any IP addresses? GCP firewall rules can match by network tag or service-account identity instead of CIDR range, so a rule stays correct as instances are recreated with different IPs; subnets separately support secondary IP ranges so a single subnet can carve out an independent address space for Pod and Service IPs alongside Node IPs.
+
+**Real repo:** [`terraform-google-modules/terraform-google-network`](https://github.com/terraform-google-modules/terraform-google-network)
 
 ## 1. The Engineering Problem: IP-based firewall rules are brittle when instances constantly change IPs
 

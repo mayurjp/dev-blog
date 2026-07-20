@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "A metric with a user-ID tag can crash a metrics backend — how does the SDK stop it?"
+title: "Metrics Cardinality: How the SDK Stops Explosion With an Overflow Bucket"
 date: 2026-05-14 09:00:00 +0530
 categories: observability
 order: 5
 tags: [observability, metrics, cardinality, opentelemetry, csharp]
 ---
+
+**TL;DR:** A metric with a user-ID tag can blow up a metrics backend with millions of time series — how does the SDK stop it? OpenTelemetry's .NET SDK reserves a fixed number of metric-point slots per cardinality limit and, once that limit is hit, routes every further new tag combination into one shared overflow bucket tagged `otel.metric.overflow=true`, while incrementing a visible `DroppedMeasurements` counter.
+
+**Real repo:** [`open-telemetry/opentelemetry-dotnet`](https://github.com/open-telemetry/opentelemetry-dotnet)
 
 ## 1. The Engineering Problem: an unbounded tag value turns one metric into millions of effectively-separate time series
 

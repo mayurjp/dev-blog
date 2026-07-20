@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What does the 'cost=0.00..1234.56' number in EXPLAIN actually measure?"
+title: "Query Plans: What EXPLAIN's cost=0.00..1234.56 Number Actually Measures"
 date: 2026-04-26 09:00:00 +0530
 categories: databases
 order: 8
 tags: [databases, query-plans, explain-analyze, postgresql, c]
 ---
+
+**TL;DR:** What does the "cost=0.00..1234.56" number in `EXPLAIN` actually measure? It's a literal arithmetic formula — the table's page count times a tunable per-page I/O cost constant, plus its tuple count times a tunable per-tuple CPU cost constant — computed from statistics gathered by `ANALYZE`, not a live measurement or an opaque heuristic score.
+
+**Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: EXPLAIN's cost numbers look like a black-box score with no visible unit
 

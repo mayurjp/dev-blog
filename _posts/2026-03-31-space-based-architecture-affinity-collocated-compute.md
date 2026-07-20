@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does this code group keys by partition BEFORE running a single query?"
+title: "Space-Based Architecture: Why Keys Get Grouped by Partition Before a Single Query Runs"
 date: 2026-03-31 09:00:00 +0530
 categories: architecture
 order: 6
 tags: [architecture, space-based-architecture, in-memory-data-grid, java]
 ---
+
+**TL;DR:** Why does this code group keys by partition before running a single query? Because space-based architecture routes computation to wherever the data already lives — grouping keys by partition first turns N individual network round trips into one task per node that actually holds relevant data, each computing a local partial answer in parallel.
+
+**Real repo:** [`apache/ignite`](https://github.com/apache/ignite)
 
 ## 1. The Engineering Problem: a central database becomes the bottleneck no amount of app-tier scaling can fix
 

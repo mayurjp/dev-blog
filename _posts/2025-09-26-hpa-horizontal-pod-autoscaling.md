@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does Kubernetes decide when to add more Pods on its own?"
+title: "HorizontalPodAutoscaler: How Kubernetes Decides When to Add More Pods"
 date: 2025-09-26 09:00:00 +0530
 categories: kubernetes
 order: 10
 tags: [kubernetes, hpa, autoscaling, metrics-server]
 ---
+
+**TL;DR:** How does Kubernetes decide when to add more Pods on its own? An HPA is a control loop that polls a metrics API (such as metrics-server) every sync period, computes `desiredReplicas = ceil(currentReplicas * (currentMetricValue / desiredMetricValue))`, and patches the target's `replicas` field accordingly.
+
+**Real repo:** [`GoogleCloudPlatform/bank-of-anthos`](https://github.com/GoogleCloudPlatform/bank-of-anthos)
 
 ## 1. The Engineering Problem: a fixed `replicas` count is always wrong somewhere
 

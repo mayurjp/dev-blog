@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Does adding a tenth server actually help, or does it just move the bottleneck?"
+title: "Scalability: Vertical vs Horizontal Scaling and Load-Aware Placement"
 date: 2025-09-10 09:00:00 +0530
 categories: system-design
 order: 1
 tags: [system-design, scalability, load-balancing, distributed-systems, dotnet-orleans]
 ---
+
+**TL;DR:** Does adding a tenth server actually help, or does it just move the bottleneck? Only if placement is load-aware — sampling a subset of nodes and scoring them on real-time CPU, memory, and active work count (as Orleans' `ResourceOptimizedPlacementDirector` does) — otherwise naive round-robin placement can leave the new server idle while others still fall over.
+
+**Real repo:** [`dotnet/orleans`](https://github.com/dotnet/orleans)
 
 ## 1. The Engineering Problem: bigger box vs. more boxes
 

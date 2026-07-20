@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does 'delete files older than 30 days' undersell what a lifecycle rule can do?"
+title: "Cloud Storage Lifecycle Rules: Beyond 'Delete Files Older Than 30 Days'"
 date: 2026-01-20 09:00:00 +0530
 categories: gcp
 order: 4
 tags: [gcp, cloud-storage, terraform, cost-optimization]
 ---
+
+**TL;DR:** Why does "delete files older than 30 days" undersell what a Cloud Storage lifecycle rule can do? Lifecycle rules are a real condition-and-action engine — conditions like age, current storage class, and version count compose together, and actions include cost-driven `SetStorageClass` transitions (STANDARD → NEARLINE → COLDLINE) as well as `Delete`, not deletion alone.
+
+**Real repo:** [`terraform-google-modules/terraform-google-cloud-storage`](https://github.com/terraform-google-modules/terraform-google-cloud-storage)
 
 ## 1. The Engineering Problem: data accessed less over time still costs full price without intervention
 

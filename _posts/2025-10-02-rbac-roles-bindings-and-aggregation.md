@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does Kubernetes decide which ServiceAccount can do what?"
+title: "Kubernetes RBAC: How Roles, Bindings, and Aggregation Control ServiceAccount Access"
 date: 2025-10-02 09:00:00 +0530
 categories: kubernetes
 order: 13
 tags: [kubernetes, rbac, security, serviceaccount]
 ---
+
+**TL;DR:** How does Kubernetes decide which ServiceAccount can do what? Through two independent axes — a `Role` or `ClusterRole` defines what's allowed, and a `RoleBinding` or `ClusterRoleBinding` grants that to a specific subject, with built-in roles like `view`/`edit`/`admin` continuously extended by a ClusterRole aggregation controller that merges in any ClusterRole carrying the right label.
+
+**Real repo:** [`kubernetes-sigs/metrics-server`](https://github.com/kubernetes-sigs/metrics-server)
 
 ## 1. The Engineering Problem: every ServiceAccount starts with almost nothing, and "just grant everything" is how clusters get compromised
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does Polly wrap retry, circuit breaker, and timeout around one call without changing it?"
+title: "Decorator Pattern: Wrapping Retry, Circuit Breaker, and Timeout Around One Call"
 date: 2025-12-31 09:00:00 +0530
 categories: design-patterns
 order: 5
 tags: [design-patterns, decorator, polly, resilience]
 ---
+
+**TL;DR:** How does Polly wrap retry, circuit breaker, and timeout around one call without changing it? Each policy implements the same interface as the call it wraps and calls the wrapped delegate internally, so composing policies is just nesting their execution — and the nesting order itself changes the resulting behavior.
+
+**Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: cross-cutting behaviors baked into a method don't compose or reorder cleanly
 

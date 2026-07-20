@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does 'can Alice edit this file' sometimes need more than a role check?"
+title: "RBAC vs ABAC: Why Some Authorization Checks Need More Than a Role"
 date: 2025-11-21 09:00:00 +0530
 categories: security
 order: 7
 tags: [security, rbac, abac, authorization, casbin]
 ---
+
+**TL;DR:** Why does "can Alice edit this file" sometimes need more than a role check? RBAC checks whether a subject holds a role that's been granted a permission — a static, enumerable lookup — while ABAC evaluates an expression over live attributes of the subject and resource (like "is the requester the resource's owner"), covering every case without a new policy row per resource.
+
+**Real repo:** [`casbin/casbin`](https://github.com/casbin/casbin)
 
 ## 1. The Engineering Problem: static roles don't scale to permission logic that depends on the specific resource
 

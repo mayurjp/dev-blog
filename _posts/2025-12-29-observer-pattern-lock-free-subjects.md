@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do you notify 1,000 subscribers without a lock blocking every notification?"
+title: "Observer Pattern: Notifying Subscribers Lock-Free with Copy-on-Write Arrays"
 date: 2025-12-29 09:00:00 +0530
 categories: design-patterns
 order: 4
 tags: [design-patterns, observer, rxnet, concurrency]
 ---
+
+**TL;DR:** How do you notify 1,000 subscribers without a lock blocking every notification? By making the observer list an immutable array that's swapped atomically with `Interlocked.CompareExchange` on subscribe/unsubscribe, so publishing a notification only ever needs a single lock-free read of the current array.
+
+**Real repo:** [`dotnet/reactive`](https://github.com/dotnet/reactive)
 
 ## 1. The Engineering Problem: the textbook Observer pattern isn't thread-safe, and locking the hot path is expensive
 

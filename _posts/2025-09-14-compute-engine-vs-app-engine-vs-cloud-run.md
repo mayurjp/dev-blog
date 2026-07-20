@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "When does adding capacity mean provisioning a VM, and when does it mean nothing at all?"
+title: "Compute Engine vs App Engine vs Cloud Run: When Scaling Means a VM vs Nothing at All"
 date: 2025-09-14 09:00:00 +0530
 categories: gcp
 order: 1
 tags: [gcp, compute-engine, gke, cloud-run, serverless, knative]
 ---
+
+**TL;DR:** At what point does a GCP compute platform stop keeping anything running when there's no traffic, and how does it serve a request when that happens? Compute Engine VMs and GKE Autopilot's baseline Pods keep running regardless of traffic, but Cloud Run (built on Knative Serving) treats zero instances as a first-class state, with an activator component that intercepts a request and cold-starts an instance only when one arrives.
+
+**Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo), [`knative/serving`](https://github.com/knative/serving)
 
 ## 1. The Engineering Problem: every layer of "managed" trades control for automation
 

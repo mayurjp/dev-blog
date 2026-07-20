@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does ASP.NET Core build its middleware pipeline in reverse order?"
+title: "Chain of Responsibility: Why ASP.NET Core Builds Its Middleware Pipeline Backwards"
 date: 2026-01-14 09:00:00 +0530
 categories: design-patterns
 order: 12
 tags: [design-patterns, chain-of-responsibility, middleware, dotnet]
 ---
+
+**TL;DR:** Why does ASP.NET Core build its middleware pipeline in reverse order? Because building backwards — each middleware wrapping the terminal handler or whatever was built so far — is what makes the first-registered middleware end up as the outermost layer, so forward execution order emerges from nested closures built in reverse, not from a forward-iterating build loop.
+
+**Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore)
 
 ## 1. The Engineering Problem: independently composable handlers need to pass work along without knowing about each other
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How do you run a workload to completion instead of keeping it alive forever?"
+title: "Kubernetes Jobs and CronJobs: Running Workloads to Completion, Not Keeping Them Alive"
 date: 2025-09-24 09:00:00 +0530
 categories: kubernetes
 order: 9
 tags: [kubernetes, jobs, cronjobs, batch, controllers]
 ---
+
+**TL;DR:** How do you run a workload to completion instead of keeping it alive forever? A Job tracks Pod *completions* instead of liveness (`restartPolicy: Never`/`OnFailure`, retries up to `backoffLimit`), and a CronJob is just a scheduler that creates a new Job from its `jobTemplate` on every cron tick — everything a Job does still applies underneath it.
+
+**Real repo:** [`kubernetes-sigs/descheduler`](https://github.com/kubernetes-sigs/descheduler)
 
 ## 1. The Engineering Problem: not every workload wants to stay running
 

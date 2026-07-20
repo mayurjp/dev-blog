@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "When you run docker run, what actually creates the container?"
+title: "Container Runtime: What Actually Creates the Container When You Run docker run"
 date: 2025-08-13 09:00:00 +0530
 categories: docker
 order: 4
 tags: [docker, containerd, runc, oci, runtime]
 published: false
 ---
+
+**TL;DR:** When you run `docker run`, what actually creates the container? `dockerd` delegates over gRPC to `containerd`, which spawns a `containerd-shim-runc-v2` process per container; that shim invokes `runc` to create the Linux namespaces and cgroups and exec the container's PID 1, after which `runc` exits and the shim — not `dockerd` or `runc` — stays behind as the process actually supervising the running container.
+
+**Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: "the Docker daemon does it" isn't an answer
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Where does 'you're logged in' actually live — in the cookie, or on the server?"
+title: "Session-Based Authentication: Why the Cookie Holds a Key, Not Your Identity"
 date: 2025-11-11 09:00:00 +0530
 categories: security
 order: 2
 tags: [security, sessions, cookies, django]
 ---
+
+**TL;DR:** Where does "you're logged in" actually live — in the cookie, or on the server? The cookie carries only an opaque, randomly generated session key; the real identity and permissions live server-side, indexed by that key, so revoking a session is just deleting one row.
+
+**Real repo:** [`django/django`](https://github.com/django/django)
 
 ## 1. The Engineering Problem: HTTP forgets who you are between requests, and the client can't be trusted to remind it
 

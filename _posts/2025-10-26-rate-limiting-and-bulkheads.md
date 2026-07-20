@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What's the difference between limiting how OFTEN you're called and how MANY calls run at once?"
+title: "Rate Limiting vs Bulkheads: Throughput Caps vs Concurrency Caps"
 date: 2025-10-26 09:00:00 +0530
 categories: microservices
 order: 13
 tags: [microservices, rate-limiting, bulkhead, resilience]
 ---
+
+**TL;DR:** What's the difference between limiting how often you're called and how many calls run at once? Rate limiting (a token bucket) caps throughput over time — how often requests are allowed — while a bulkhead caps concurrent occupancy — how many requests can be in flight against a dependency at once — and production systems need both because they defend against different failure modes.
+
+**Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore), [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: two different failure modes need two different defenses
 

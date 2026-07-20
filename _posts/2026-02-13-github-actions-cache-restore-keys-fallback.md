@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Why does cache-hit: false still mean your dependencies got restored?"
+title: "GitHub Actions Caching: restore-keys Fallback and cache-hit"
 date: 2026-02-13 09:00:00 +0530
 categories: cicd
 order: 5
 tags: [cicd, github-actions, caching, actions-cache]
 ---
 {% raw %}
+
+**TL;DR:** Why does `cache-hit: false` still mean your dependencies got restored? `cache-hit` reports `true` only for an exact primary-key match; a `restore-keys` fallback match still restores real files from an older, close-enough cache but reports `cache-hit: false` — the correct signal to run the install step anyway, since a fallback-restored cache is a fast starting point, not a guaranteed-complete substitute.
+
+**Real repo:** [`actions/cache`](https://github.com/actions/cache)
 
 ## 1. The Engineering Problem: a single fixed cache key is either useless or dangerously stale
 

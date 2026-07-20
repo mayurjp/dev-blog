@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Eliminating cold starts by cloning an already-initialized function creates a NEW bug class — what breaks?"
+title: "Serverless SnapStart: What Breaks When You Clone an Already-Initialized Function"
 date: 2026-03-29 09:00:00 +0530
 categories: architecture
 order: 5
 tags: [architecture, serverless, faas, aws-lambda, csharp]
 ---
+
+**TL;DR:** Eliminating cold starts by cloning an already-initialized function creates a new bug class — what breaks? Anything meant to be unique per environment (a random identifier, a fresh network handle) — every environment restored from the same snapshot would otherwise share the exact same value, unless application code registers an explicit "after restore" hook to regenerate it.
+
+**Real repo:** [`aws/aws-lambda-dotnet`](https://github.com/aws/aws-lambda-dotnet)
 
 ## 1. The Engineering Problem: expensive one-time init helps warm reuse but hurts every cold start — until you snapshot it, which creates a new problem
 

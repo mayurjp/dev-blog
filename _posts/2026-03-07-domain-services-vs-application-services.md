@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "A command handler orchestrates; who decides an order's grace period expired?"
+title: "Domain Services vs Application Services: Who Decides the Grace Period Expired?"
 date: 2026-03-07 09:00:00 +0530
 categories: ddd
 order: 5
 tags: [ddd, domain-services, application-services, csharp]
 ---
+
+**TL;DR:** A command handler orchestrates — so who decides an order's grace period expired? In theory, a domain service should; in this codebase's actual production code, it's a raw SQL query run from a separate background worker, while the command handler itself only sequences steps and delegates every real decision to the aggregate's own constructor and methods.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: not all logic fits neatly "on" one aggregate, and orchestration isn't a business rule either
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why shouldn't your read query go through the same model as your write?"
+title: "CQRS: Separating Read and Write Models on the Same Database"
 date: 2025-10-28 09:00:00 +0530
 categories: microservices
 order: 14
 tags: [microservices, cqrs, mediatr, domain-model]
 ---
+
+**TL;DR:** Why shouldn't your read query go through the same model as your write? Because writes need a rich domain model that enforces invariants through methods, while reads need flat, purpose-shaped data with no business logic — CQRS splits the two into separate models against the same database, so neither compromises the other.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: one model can't be both strict and fast at the same time
 

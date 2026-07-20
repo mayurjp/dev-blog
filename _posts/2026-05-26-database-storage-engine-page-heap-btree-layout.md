@@ -10,6 +10,8 @@ tags: [databases, postgres, storage-engine, b-tree, heap-pages, page-layout]
 
 **TL;DR:** What physically IS a "row" and an "index entry" once you're below the SQL layer, and how does a database find one row out of a billion without scanning them all? In Postgres, every table and every B-tree index is built from the exact same fixed-size 8KB **slotted page** — a small header plus an array of indirection pointers ("line pointers") to the actual tuple bytes — and it's that one shared page format, plus a tree of those pages linked by sibling pointers, that both heap storage and index search are built on top of.
 
+**Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
+
 ## 1. The Engineering Problem: something has to hold a row on disk, in place, and findable
 
 Every earlier lesson in this domain has quietly assumed a table already exists as some durable, updatable, searchable thing. "Relational vs NoSQL data models" talked about rows and documents. "Transactions & ACID" talked about a WAL protecting "the data." "Isolation levels" talked about multiple versions of "a row" being visible to different transactions. None of them asked the more basic question: what IS a row, physically, once it's sitting on disk — and how does a change to one row not mean rewriting the whole file?

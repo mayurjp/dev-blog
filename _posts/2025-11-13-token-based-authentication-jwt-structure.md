@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What actually stops someone from editing their own JWT to become admin?"
+title: "JWT Structure: What Stops Someone From Editing Their Own Token to Become Admin"
 date: 2025-11-13 09:00:00 +0530
 categories: security
 order: 3
 tags: [security, jwt, tokens, hmac]
 ---
+
+**TL;DR:** What actually stops someone from editing their own JWT to become admin? The signature is computed over the entire header-plus-payload using a secret or private key only the issuer holds, so changing even one character makes the recomputed signature fail to match and the token gets rejected.
+
+**Real repo:** [`jwt-dotnet/jwt`](https://github.com/jwt-dotnet/jwt)
 
 ## 1. The Engineering Problem: a self-contained token is only safe if forging it is infeasible
 

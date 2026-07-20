@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why don't production load balancers check every server before each request?"
+title: "Load Balancing Algorithms: Why Power-of-Two-Choices Beats Checking Every Server"
 date: 2025-12-03 09:00:00 +0530
 categories: system-design
 order: 2
 tags: [system-design, load-balancing, envoy, algorithms]
 ---
+
+**TL;DR:** Why don't production load balancers check every server before each request? Because true global least-connections requires every proxy instance to have perfectly synchronized state on every backend's connection count; instead, algorithms like Envoy's power-of-two-choices sample just a couple of random healthy hosts and route to whichever has fewer active requests, getting near-optimal load distribution with zero cross-instance coordination.
+
+**Real repo:** [`envoyproxy/envoy`](https://github.com/envoyproxy/envoy)
 
 ## 1. The Engineering Problem: true "least connections" needs perfect global knowledge, which doesn't scale
 

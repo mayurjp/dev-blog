@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Why does a Pub/Sub client automatically extend a message's deadline mid-processing?"
+title: "Pub/Sub Ack Deadlines: Why the Client Auto-Extends Mid-Processing"
 date: 2026-01-24 09:00:00 +0530
 categories: gcp
 order: 6
 tags: [gcp, pubsub, messaging, delivery-semantics]
 ---
+
+**TL;DR:** Why does a Pub/Sub client automatically extend a message's ack deadline mid-processing? Google's client library periodically sends a "modify ack deadline" request before the current deadline expires, keeping a still-processing message's lease alive so it isn't redelivered to a different consumer while the first one is still working on it — with the extension timing calculated with a built-in safety margin.
+
+**Real repo:** [`googleapis/google-cloud-dotnet`](https://github.com/googleapis/google-cloud-dotnet)
 
 ## 1. The Engineering Problem: the broker can't tell "still processing" apart from "consumer died," without help
 

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "Adding a trigger to a table silently disables an unrelated EF Core optimization — why?"
+title: "Stored Procedures & Triggers: Why a Trigger Silently Disables an EF Core Optimization"
 date: 2026-04-30 09:00:00 +0530
 categories: databases
 order: 10
 tags: [databases, triggers, stored-procedures, entity-framework-core, sql-server]
 ---
+
+**TL;DR:** Adding a trigger to a table silently disables an unrelated EF Core optimization — why? SQL Server won't allow the `OUTPUT` clause (which fetches a generated ID in the same round-trip as an `INSERT`) on a table that has `AFTER` triggers, so EF Core's `SqlServerOutputClauseConvention` detects any trigger's presence and automatically falls back to a separate round-trip for that table, regardless of what the trigger's own logic does.
+
+**Real repo:** [`dotnet/efcore`](https://github.com/dotnet/efcore)
 
 ## 1. The Engineering Problem: a trigger's cost isn't limited to what its own logic does
 

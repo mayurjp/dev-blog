@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "What actually happens between git push and 'All checks have passed'?"
+title: "CI Fundamentals: What Happens Between git push and a Green Check"
 date: 2025-09-16 09:00:00 +0530
 categories: cicd
 order: 1
 tags: [cicd, github-actions, ci, dotnet, automation]
 ---
+
+**TL;DR:** What actually happens between `git push` and "All checks have passed"? GitHub Actions matches the push/PR event against a workflow's trigger, provisions a fresh ephemeral runner, executes the defined steps (checkout, install toolchain, build, test) in that clean environment, and reports the pass/fail result back onto the commit or PR as a status check.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "works on my machine" isn't a gate, it's a hope
 

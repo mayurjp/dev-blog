@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "How does Django run the same ORM query against Postgres, MySQL, and SQLite unchanged?"
+title: "Adapter Pattern: Running One ORM Query Unchanged Across Postgres, MySQL, and SQLite"
 date: 2026-01-02 09:00:00 +0530
 categories: design-patterns
 order: 6
 tags: [design-patterns, adapter, django, orm]
 ---
+
+**TL;DR:** How does Django run the same ORM query against Postgres, MySQL, and SQLite unchanged? Because `BaseDatabaseOperations` defines one common interface for dialect-specific details like quoting and date truncation, and each backend implements that same interface to translate calls into its own database's actual syntax.
+
+**Real repo:** [`django/django`](https://github.com/django/django)
 
 ## 1. The Engineering Problem: every database speaks a genuinely different SQL dialect
 

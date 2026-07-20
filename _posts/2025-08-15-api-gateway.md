@@ -1,12 +1,16 @@
 ---
 layout: post
-title: "Should a mobile client know that catalog and ordering are different services?"
+title: "API Gateway: Hiding Internal Service Topology From Clients"
 date: 2025-08-15 09:00:00 +0530
 categories: microservices
 order: 4
 tags: [microservices, api-gateway, yarp, reverse-proxy, bff]
 published: false
 ---
+
+**TL;DR:** Should a mobile client know that catalog and ordering are different services? No — an API gateway (or a backend-for-frontend scoped to one client type) sits at the edge and owns routing, path rewriting, and cross-cutting policy, so clients see one stable surface instead of the internal service topology.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem
 

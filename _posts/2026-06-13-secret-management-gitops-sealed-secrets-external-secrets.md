@@ -10,6 +10,8 @@ tags: [kubernetes, secrets, gitops, sealed-secrets, external-secrets-operator]
 
 **TL;DR:** A Kubernetes `Secret`'s `data` field is base64, not encryption — committing one to a GitOps repo commits the plaintext value in a thin disguise. `bitnami/sealed-secrets` and `external-secrets/external-secrets` solve this with two genuinely different trust models: SealedSecrets encrypts the value client-side into ciphertext that's cryptographically bound to the exact namespace/name it was sealed for, so it's safe to commit; External Secrets Operator skips storing the value in git (or even in etcd at rest) entirely, syncing it live from an external secret store on a refresh interval instead.
 
+**Real repo:** [`bitnami/sealed-secrets`](https://github.com/bitnami/sealed-secrets), [`external-secrets/external-secrets`](https://github.com/external-secrets/external-secrets)
+
 ## 1. The Engineering Problem
 
 A GitOps workflow wants everything — including `Secret` objects — declared in git, so the cluster's state is fully reproducible from the repo. But a Kubernetes `Secret`'s `data` field is base64-encoded, not encrypted: `echo -n mypassword | base64` and `base64 -d` round-trip it instantly, with no key involved at all. Committing a real `Secret` manifest to git commits the plaintext, permanently, in the repo's history — visible to anyone with read access to the repo, its CI logs, or any fork, forever, even if the file is later deleted (git history doesn't forget).

@@ -1,11 +1,15 @@
 ---
 layout: post
-title: "If a domain event handler fails, does the order status change still get saved?"
+title: "Domain Events: Why a Failed Handler Rolls Back the Order Status Change Too"
 date: 2026-03-05 09:00:00 +0530
 categories: ddd
 order: 4
 tags: [ddd, domain-events, mediatr, csharp]
 ---
+
+**TL;DR:** If a domain event handler fails, does the order status change still get saved? No — domain events are dispatched right before `SaveChanges`, in the same transaction as the state change, so if a handler throws, the commit never runs and the order's own change is rolled back along with it.
+
+**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "this happened" needs to reach other code without the aggregate calling that code directly
 
