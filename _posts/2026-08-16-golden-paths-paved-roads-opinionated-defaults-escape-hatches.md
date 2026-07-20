@@ -58,6 +58,7 @@ Three core truths:
 
 A minimal paved-road template: one form field, one action that renders a correct skeleton.
 
+{% raw %}
 ```yaml
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
@@ -76,6 +77,7 @@ spec:
         url: ./skeleton         # ships CI, Dockerfile, catalog-info.yaml
         values: { name: '${{ parameters.name }}' }
 ```
+{% endraw %}
 
 Everything opinionated — the CI pipeline, the base image, the health check — lives in `./skeleton` and comes for free.
 
@@ -92,6 +94,7 @@ Here's the escape-hatch mechanism in a real upstream template. Look at `copyWith
 >     └── catalog-info.yaml    # rendered with owner/name
 > ```
 
+{% raw %}
 ```yaml
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
@@ -129,6 +132,7 @@ spec:
       action: catalog:register       # paved: always in the catalog
   # ...
 ```
+{% endraw %}
 
 **What this teaches:** the golden path enforces the *important* invariants (there must be an owner, there must be CI, it must be registered) while `copyWithoutRender` and the option to fork the template are the escape hatches. The road is opinionated but not a wall — teams with a real need can copy this template and adjust the skeleton.
 

@@ -154,6 +154,7 @@ The commit message is templated — the automation spec includes a `commitTempla
 
 Here's the minimal setup: one `ImagePolicy` that tracks the latest semver tag for `myapp`, and one `ImageUpdateAutomation` that rewrites manifests in `clusters/production/` and pushes to `main`.
 
+{% raw %}
 ```yaml
 # ImagePolicy — tells Flux "the latest image matching this filter is X"
 apiVersion: image.toolkit.fluxcd.io/v1
@@ -205,6 +206,7 @@ spec:
         - name: myapp
           image: myregistry.io/myapp:2.4.0  # <-- Flux rewrites this tag
 ```
+{% endraw %}
 
 When `myapp:2.4.1` appears in the registry, the policy updates, the automation detects the change, rewrites the tag from `2.4.0` to `2.4.1`, commits with the templated message, and pushes. The source-controller picks up the new commit, and the deployment rolls forward.
 

@@ -126,6 +126,7 @@ _config+:: {
 },
 ```
 
+{% raw %}
 ```jsonnet
 {
   // reactive tier: fires on the CURRENT value, no forecasting
@@ -163,6 +164,7 @@ _config+:: {
   },
 },
 ```
+{% endraw %}
 
 What this teaches that a static "disk usage > 90%" dashboard tile can't:
 

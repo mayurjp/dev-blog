@@ -26,6 +26,7 @@ The failure modes at scale: copy-pasted `Application` YAML that drifts, promotio
 
 **Argo CD — ApplicationSet cluster generator.** One `ApplicationSet` with `generators: [{ clusters: {} }]` produces one `Application` per cluster registered in Argo CD, templated by cluster name/server. Verbatim from [argoproj/argo-cd `applicationset/examples/cluster/cluster-example.yaml`](https://github.com/argoproj/argo-cd/blob/master/applicationset/examples/cluster/cluster-example.yaml):
 
+{% raw %}
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -49,6 +50,7 @@ spec:
         server: '{{.server}}'
         namespace: guestbook
 ```
+{% endraw %}
 
 **Flux — layered Kustomize/Helm per environment.** Flux uses `Kustomization` CRs pointing at overlay directories; promotion is a separate overlay (a `staging/` and `prod/` kustomization) rather than a generator. The coordination primitive is the `dependsOn` field between `Kustomization`s.
 
@@ -118,6 +120,7 @@ spec:
 
 The ApplicationSet `clusters` generator is the canonical Argo CD multi-cluster primitive. Verbatim, from [argoproj/argo-cd `applicationset/examples/cluster/cluster-example.yaml`](https://github.com/argoproj/argo-cd/blob/master/applicationset/examples/cluster/cluster-example.yaml):
 
+{% raw %}
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -141,6 +144,7 @@ spec:
         server: '{{.server}}'
         namespace: guestbook
 ```
+{% endraw %}
 
 Flux's reconciliation model is declared in its CRDs — `Kustomization` with `dependsOn` and `spec.path` pointing at overlay dirs. The `tests/image-automation` fixtures in [fluxcd/flux2](https://github.com/fluxcd/flux2) show `Kustomization` resources layering base + environment config.
 

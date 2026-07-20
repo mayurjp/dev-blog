@@ -89,6 +89,7 @@ Here is a verbatim upstream **software template** — the scaffolding pillar. No
 >     └── template.yaml     # adds TechDocs scaffold on top
 > ```
 
+{% raw %}
 ```yaml
 # kind: Template — itself a catalog entity of type website
 apiVersion: scaffolder.backstage.io/v1beta3
@@ -133,6 +134,7 @@ spec:
         catalogInfoPath: "/catalog-info.yaml"
   # ...
 ```
+{% endraw %}
 
 **What this teaches:** scaffolding is not "copy a template folder". It is a typed pipeline where the *last step* registers the new service in the catalog — so the portal is always a truthful map. The `ui:field` widgets (`EntityNamePicker`, `OwnerPicker`) enforce valid input at the form level, which is where guardrails begin.
 

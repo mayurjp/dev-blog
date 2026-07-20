@@ -130,3 +130,135 @@
   background: $grey-color-light;
   border-radius: 4px;
 }
+
+/* Q&A bank pages */
+.qa-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  margin: 16px 0 24px;
+  background: $background-color;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.qa-toolbar #qa-search {
+  flex: 1 1 220px;
+  min-width: 200px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid $grey-color-light;
+  border-radius: 6px;
+  background: $background-color;
+  color: $text-color;
+}
+
+.qa-diff-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qa-diff-buttons button {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid $grey-color-light;
+  border-radius: 6px;
+  background: $background-color;
+  color: $text-color;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.qa-diff-buttons button:hover {
+  border-color: $brand-color;
+}
+
+.qa-diff-buttons button.active {
+  background: $brand-color;
+  border-color: $brand-color;
+  color: #fff;
+}
+
+.qa-shown-line {
+  font-size: 14px;
+  color: $grey-color;
+}
+
+.qa-topic {
+  position: sticky;
+  top: 64px;
+  z-index: 10;
+  margin-top: 28px;
+  padding: 8px 12px;
+  background: $background-color;
+  border-bottom: 2px solid $brand-color;
+  font-size: 20px;
+}
+
+.qa-item {
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  background: $background-color;
+}
+
+.qa-item h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.qa-a {
+  margin: 0 0 10px;
+  line-height: 1.65;
+  color: $text-color;
+}
+
+.qa-a p {
+  margin: 0 0 8px;
+}
+
+.qa-link {
+  margin: 0;
+  font-size: 14px;
+}
+
+.qa-link a {
+  font-weight: 600;
+  color: $brand-color;
+}
+
+.qa-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.qa-beginner {
+  color: #1a7f37;
+  background: rgba(26, 127, 55, 0.12);
+}
+
+.qa-intermediate {
+  color: #9a6700;
+  background: rgba(154, 103, 0, 0.12);
+}
+
+.qa-expert {
+  color: #b42318;
+  background: rgba(180, 35, 24, 0.12);
+}

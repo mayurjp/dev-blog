@@ -102,6 +102,7 @@ These map to `Identifiers.conditionalCreate`, `Identifiers.conditional`, `Identi
 
 A minimal template showing both `@if` and `@for`:
 
+{% raw %}
 ```html
 <!-- template: app-dashboard.component.html -->
 <div class="dashboard">
@@ -118,6 +119,7 @@ A minimal template showing both `@if` and `@for`:
   }
 </div>
 ```
+{% endraw %}
 
 The compiler produces two child views for `@if` and one for `@for` (plus one for `@empty`). The update pass evaluates:
 

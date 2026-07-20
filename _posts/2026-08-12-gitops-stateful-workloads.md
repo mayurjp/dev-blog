@@ -126,6 +126,7 @@ The controller unseals it into a normal `Secret` named `postgresql-secret` — s
 
 Bitnami's PostgreSQL chart renders its primary as a `StatefulSet` and templates the data PVC at the end of the manifest. Verbatim tail from [bitnami/charts `bitnami/postgresql/templates/primary/statefulset.yaml`](https://github.com/bitnami/charts/blob/main/bitnami/postgresql/templates/primary/statefulset.yaml):
 
+{% raw %}
 ```yaml
   {{- if and .Values.primary.persistence.enabled .Values.primary.persistence.existingClaim }}
         - name: {{ .Values.primary.persistence.volumeName }}
@@ -157,6 +158,7 @@ Bitnami's PostgreSQL chart renders its primary as a `StatefulSet` and templates 
         {{- include "common.storage.class" (dict "persistence" .Values.primary.persistence "global" .Values.global) | nindent 8 }}
   {{- end }}
 ```
+{% endraw %}
 
 Note `persistentVolumeClaimRetentionPolicy` — it makes the *operator* behavior explicit so a scale-to-zero or delete doesn't reclaim the data volume.
 

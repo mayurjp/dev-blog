@@ -4,7 +4,7 @@ title: Q&A Bank
 permalink: /qa/
 ---
 
-Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1,513 Q&A pairs across 18 domains**, organized for foundational → mid-level → advanced progression within each topic.
+Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1496 Q&A pairs across 18 domains**, organized for foundational → mid-level → advanced progression within each topic.
 
 ## How to use
 
@@ -14,40 +14,27 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 4. Click the linked post if you want to go deeper
 5. New Q&A is added automatically when new posts are published
 
-## Question types in each domain
-
-- **Concept** — "What is X?" (foundational)
-- **Comparison** — "How does X differ from Y?" (mid-level)  
-- **Scenario** — "When would you use X?" / "What happens if X fails?" (interview-style)
-- **Tradeoff** — "What are the downsides of X?" (architect-level)
-
 ## Available domains
 
 | Domain | Q&A |
 |--------|-----|
-| [Kubernetes]({{ '/qa/kubernetes/' | relative_url }}) | 103 |
-| [Docker]({{ '/qa/docker/' | relative_url }}) | 79 |
-| [Microservices]({{ '/qa/microservices/' | relative_url }}) | 110 |
-| [Security]({{ '/qa/security/' | relative_url }}) | 78 |
-| [System Design]({{ '/qa/system-design/' | relative_url }}) | 80 |
-| [Design Patterns]({{ '/qa/design-patterns/' | relative_url }}) | 73 |
-| [Google Cloud]({{ '/qa/gcp/' | relative_url }}) | 79 |
-| [CI/CD]({{ '/qa/cicd/' | relative_url }}) | 75 |
-| [Domain-Driven Design]({{ '/qa/ddd/' | relative_url }}) | 72 |
-| [Software Architecture]({{ '/qa/architecture/' | relative_url }}) | 73 |
-| [Databases]({{ '/qa/databases/' | relative_url }}) | 76 |
-| [Observability]({{ '/qa/observability/' | relative_url }}) | 77 |
-| [MLOps]({{ '/qa/mlops/' | relative_url }}) | 96 |
-| [Generative AI]({{ '/qa/genai/' | relative_url }}) | 107 |
-| [GitOps]({{ '/qa/gitops/' | relative_url }}) | 88 |
+| [.NET]({{ '/qa/dotnet/' | relative_url }}) | 92 |
 | [Angular]({{ '/qa/angular/' | relative_url }}) | 92 |
-| [Multi-Cloud]({{ '/qa/multicloud/' | relative_url }}) | 68 |
-| [.NET]({{ '/qa/dotnet/' | relative_url }}) | 87 |
-
-## Progress
-
-- **5 fully written domains**: Kubernetes, Docker, Microservices, Security, System Design
-- **13 domains in progress**: Design Patterns, GCP, CI/CD, DDD, Architecture, Databases, Observability, MLOps, GenAI, GitOps, Angular, Multi-Cloud, .NET
-- **18 total domains covered** with 1,513 Q&A pairs
+| [CI/CD]({{ '/qa/cicd/' | relative_url }}) | 73 |
+| [Databases]({{ '/qa/databases/' | relative_url }}) | 78 |
+| [Design Patterns]({{ '/qa/design-patterns/' | relative_url }}) | 73 |
+| [Docker]({{ '/qa/docker/' | relative_url }}) | 79 |
+| [Domain-Driven Design]({{ '/qa/ddd/' | relative_url }}) | 73 |
+| [Generative AI]({{ '/qa/genai/' | relative_url }}) | 94 |
+| [GitOps]({{ '/qa/gitops/' | relative_url }}) | 88 |
+| [Google Cloud]({{ '/qa/gcp/' | relative_url }}) | 68 |
+| [Kubernetes]({{ '/qa/kubernetes/' | relative_url }}) | 109 |
+| [MLOps]({{ '/qa/mlops/' | relative_url }}) | 91 |
+| [Microservices]({{ '/qa/microservices/' | relative_url }}) | 110 |
+| [Multi-Cloud]({{ '/qa/multicloud/' | relative_url }}) | 67 |
+| [Observability]({{ '/qa/observability/' | relative_url }}) | 77 |
+| [Security]({{ '/qa/security/' | relative_url }}) | 78 |
+| [Software Architecture]({{ '/qa/architecture/' | relative_url }}) | 76 |
+| [System Design]({{ '/qa/system-design/' | relative_url }}) | 78 |
 
 New posts automatically generate 5-7 Q&A per post and are appended to the relevant domain.

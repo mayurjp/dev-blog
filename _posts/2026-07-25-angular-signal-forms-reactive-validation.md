@@ -179,6 +179,7 @@ This is the critical architectural insight: **the validator layer is model-level
 
 Here is a minimal reactive form that demonstrates the shared validation engine in action. The same `Validators.required` runs whether you read `control.status` imperatively or bind it in a template:
 
+{% raw %}
 ```ts
 // component.ts
 import { Component } from '@angular/core';
@@ -212,6 +213,7 @@ export class SignalValidationDemoComponent {
   });
 }
 ```
+{% endraw %}
 
 What's happening under the hood when you type in the name field:
 

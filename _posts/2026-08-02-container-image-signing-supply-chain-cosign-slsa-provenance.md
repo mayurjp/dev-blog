@@ -58,6 +58,7 @@ Three core truths to hold:
 
 ## 3. The clean example (concept in isolation)
 
+{% raw %}
 ```bash
 # Build the image, get its digest - provenance is attested against the DIGEST, not a mutable tag
 docker build -t myapp:1.0 .
@@ -84,6 +85,7 @@ cosign attest --yes --predicate provenance.json --type slsaprovenance "$DIGEST"
 cosign verify "$DIGEST"                                     # who signed the bytes
 cosign verify-attestation --type slsaprovenance "$DIGEST"   # what built the bytes
 ```
+{% endraw %}
 
 ---
 
@@ -101,6 +103,7 @@ cosign/
 
 **`.goreleaser.yml`** signs every release binary twice — once with a long-lived KMS key, once keylessly — during the same release:
 
+{% raw %}
 ```yaml
 # .goreleaser.yml
 signs:
@@ -123,9 +126,11 @@ signs:
     signature: "${artifact}.sigstore.json"
     artifacts: checksum
 ```
+{% endraw %}
 
 **`.github/workflows/build.yaml`** grants exactly the permission the keyless flow needs, and nothing more, then signs the container images it just built:
 
+{% raw %}
 ```yaml
 # .github/workflows/build.yaml
 jobs:
@@ -143,6 +148,7 @@ jobs:
           KO_PREFIX: ghcr.io/sigstore/cosign/cosign/ci
           COSIGN_PASSWORD: "${{secrets.COSIGN_PASSWORD}}"
 ```
+{% endraw %}
 
 **`pkg/cosign/attestation/attestation.go`** shows the predicate types the `attest` command understands aren't invented by cosign — they're imported straight from in-toto's own SLSA schema packages:
 

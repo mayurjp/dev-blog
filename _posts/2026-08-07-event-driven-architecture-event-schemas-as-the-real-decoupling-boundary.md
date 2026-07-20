@@ -135,6 +135,7 @@ func (s *SchemaID) FromBytes(payload []byte) (int, error) {
 
 **A real producer using the registry-backed serializer — no schema is hand-encoded in this file at all:**
 
+{% raw %}
 ```go
 // examples/avrov3_producer_example/avrov3_producer_example.go (elided)
 
@@ -156,6 +157,7 @@ err = p.Produce(&kafka.Message{
 	Headers:        []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
 }, deliveryChan)
 ```
+{% endraw %}
 
 **The CloudEvents envelope's required attributes — the fields every producer must set, regardless of broker:**
 

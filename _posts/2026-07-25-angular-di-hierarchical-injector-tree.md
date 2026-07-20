@@ -86,6 +86,7 @@ When `bloomHasToken` returns true, Angular calls `searchTokensOnInjector` which 
 
 A minimal component tree that demonstrates the shadowing behavior:
 
+{% raw %}
 ```typescript
 // ✅ Root-level provider — expected to be the "global" instance
 @Injectable({ providedIn: 'root' })
@@ -111,6 +112,7 @@ export class ChildComponent {
   logger = inject(Logger); // 'parent-override' — inherited from ParentComponent's node injector
 }
 ```
+{% endraw %}
 
 What happens internally:
 

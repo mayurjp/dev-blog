@@ -166,6 +166,7 @@ replicas: 5
 
 ### ApplicationSet Manifest
 
+{% raw %}
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -197,6 +198,7 @@ spec:
           prune: true
           selfHeal: true
 ```
+{% endraw %}
 
 ### Promotion Workflow
 

@@ -28,6 +28,7 @@ The answer lives in Angular's `AsyncPipe` class, its `DestroyRef` integration, a
 
 Angular's `async` pipe wires together two teardown paths: one inside the framework and one inside RxJS.
 
+{% raw %}
 ```mermaid
 flowchart TD
     T["Template\n{{ user$ | async }}"] --> A["AsyncPipe.transform()"]
@@ -40,6 +41,7 @@ flowchart TD
     C --> H["Emit value\n→ markForCheck()"]
     H --> I["Bind to view"]
 ```
+{% endraw %}
 
 When the template re-evaluates (for example, because a parent component pushes a new Observable reference via an `@Input`), `async` pipe tears down the old subscription and subscribes to the new one:
 
@@ -77,6 +79,7 @@ The key insight: **`async` pipe handles the outer subscription lifecycle (subscr
 
 A component that fetches a user profile based on a route parameter, with automatic cleanup on navigation:
 
+{% raw %}
 ```typescript
 @Component({
   selector: 'app-user-profile',
@@ -103,6 +106,7 @@ export class UserProfileComponent {
   ) {}
 }
 ```
+{% endraw %}
 
 What happens step by step:
 

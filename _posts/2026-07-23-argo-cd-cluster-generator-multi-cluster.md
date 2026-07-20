@@ -99,6 +99,7 @@ flowchart TD
 
 Deploy a web stack across all production-labeled clusters:
 
+{% raw %}
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -159,6 +160,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
 ```
+{% endraw %}
 
 With three production clusters registered, this generates six Applications: `prod-us-frontend`, `prod-eu-frontend`, `prod-in-frontend`, `prod-us-api`, `prod-eu-api`, `prod-in-api`. Register a fourth cluster labeled `environment: production` and the next reconciliation creates two more automatically.
 

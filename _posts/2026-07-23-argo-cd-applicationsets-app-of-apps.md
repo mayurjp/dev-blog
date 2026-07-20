@@ -181,6 +181,7 @@ flowchart TD
 
 Deploy a three-tier application across two clusters using a single ApplicationSet:
 
+{% raw %}
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -242,6 +243,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
 ```
+{% endraw %}
 
 This generates **6 Applications**: `frontend-staging`, `frontend-production`, `api-staging`, `api-production`, `worker-staging`, `worker-production`. Add a new cluster to the list, and the controller creates 3 more Applications automatically.
 

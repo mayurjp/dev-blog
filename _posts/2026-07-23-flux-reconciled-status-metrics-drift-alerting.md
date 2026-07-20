@@ -235,6 +235,7 @@ gotk_resource_info{customresource_kind="Kustomization", exported_namespace="prod
 
 A PromQL alert that catches drift — `ready` stuck on `False` for more than 15 minutes:
 
+{% raw %}
 ```yaml
 # prometheus-rule for drift detection
 groups:
@@ -273,6 +274,7 @@ groups:
             but failing. Likely causes: broken manifest, missing source
             artifact, or health check timeout.
 ```
+{% endraw %}
 
 The `for: 15m` and `for: 30m` durations are deliberate. Flux reconciles on a fixed interval (typically 5m), and a single failed reconcile followed by a successful one on the next tick is usually a transient issue (API server hiccup, temporary network partition). Alerting on a single `False` sample creates noise. Alerting on three or six consecutive `False` samples (15m / 5m interval, or 30m / 5m interval) catches persistent drift.
 
