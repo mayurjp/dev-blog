@@ -40,3 +40,12 @@
 - slug: genai
   name: Generative AI
   description: RAG, embeddings, agentic loops, and MCP, taught from real LLM application frameworks.
+- slug: gitops
+  name: GitOps
+  description: Reconciliation loops, sync waves, and progressive delivery, taught from real Argo CD and Flux controllers.
+- slug: angular
+  name: Angular
+  description: Signals, change detection, and dependency injection, taught from the Angular framework's own source.
+- slug: multicloud
+  name: Multi-Cloud
+  description: Cross-provider identity, networking, and cost, taught from real Terraform, Crossplane, and Istio multi-cluster setups.
