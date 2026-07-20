@@ -38,12 +38,26 @@ New post front matter schema:
 ---
 layout: post
 title: "Your title here"
+description: "1-2 sentence real summary of the lesson"
 date: 2026-08-01 09:00:00 +0530
 categories: kubernetes
 order: 9
 tags: [kubernetes, deployments]
 ---
 ```
+
+`description:` (added 2026-07-20, after an external SEO review) is rendered by
+`jekyll-seo-tag`'s `{% seo %}` include in `_includes/head.html` — confirmed by reading the
+plugin's own `lib/jekyll-seo-tag/drop.rb`, not assumed — so it's a real field with a real
+effect on the page's `<meta name="description">` and Open Graph tags, not boilerplate. Don't
+add a `keywords:` field: `jekyll-seo-tag` has no such feature, so it would render nothing.
+
+`title:` (changed 2026-07-20) is now keyword-first — `<Topic Name>: <specific clause>` —
+not phrased as a question. The engineering-question framing that used to be the title now
+opens the post body as a **TL;DR** line instead. See
+`../blog-pipeline/.claude/skills/repo-lesson/SKILL.md`'s "Lesson template" section for the
+full current post structure (TL;DR, Review checklist, FAQ now on by default, Next-in-series
+link) — that file is the source of truth, this is a pointer, not a copy.
 
 `categories:` must be exactly one of the slugs in `_data/topics.yml` (below) — that's
 what drives which topic page and homepage card the post shows up under.
