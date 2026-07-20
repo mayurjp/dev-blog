@@ -16,6 +16,10 @@ layout: default
     <p>{{ topic.description }}</p>
   {%- endif -%}
 
+  {%- if topic.glossary -%}
+  <p class="topic-glossary"><a href="{{ topic.glossary | relative_url }}">📖 Key terms &amp; concepts</a> — definitions for the jargon used across these posts.</p>
+  {%- endif -%}
+
   {%- if topic_posts.size > 0 -%}
     <ul class="post-list">
       {%- for post in topic_posts -%}

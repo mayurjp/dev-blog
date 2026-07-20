@@ -104,6 +104,25 @@
   }
 }
 
+.topic-glossary {
+  margin: 4px 0 18px;
+  padding: 8px 12px;
+  border: 1px solid $brand-color;
+  border-radius: 6px;
+  background: rgba(71, 138, 201, 0.06);
+  font-size: 14px;
+
+  a {
+    font-weight: 600;
+    color: $brand-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .mermaid {
   display: flex;
   justify-content: center;
