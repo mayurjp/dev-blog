@@ -42,6 +42,7 @@ header_pages:
   - learn/index.md
   - challenges/index.md
   - roadmap/index.md
+  - playground/index.md
   - search/index.md
   - faq/index.md
   - about.md

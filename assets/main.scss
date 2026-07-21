@@ -1614,6 +1614,110 @@ pre[class*="language-"]:hover .copy-btn {
 }
 
 /* ===================================================================
+   Playground
+   =================================================================== */
+
+.playground-container {
+  margin: 24px 0;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.playground-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: $grey-color-light;
+  border-bottom: 1px solid $grey-color-light;
+  select {
+    padding: 4px 8px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    font-size: 13px;
+    background: #fff;
+  }
+}
+
+.playground-run-btn {
+  padding: 4px 14px;
+  background: #1a7f37;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  &:hover { background: #156d2c; }
+  &:focus-visible { outline: 2px solid $brand-color; outline-offset: 2px; }
+}
+
+.playground-clear-btn {
+  padding: 4px 10px;
+  background: transparent;
+  color: $grey-color;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  &:hover { background: #f6f8fa; }
+}
+
+.playground-editor-wrap {
+  border-bottom: 1px solid $grey-color-light;
+}
+
+.playground-editor {
+  display: block;
+  width: 100%;
+  min-height: 200px;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: #fff;
+  color: $text-color;
+  tab-size: 2;
+}
+
+.playground-output-wrap {
+  background: #0d1117;
+}
+
+.playground-output-header {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #21262d;
+}
+
+.playground-output {
+  margin: 0;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #c9d1d9;
+  min-height: 80px;
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  .log-line { color: #c9d1d9; }
+  .warn-line { color: #d29922; }
+  .error-line { color: #f85149; }
+  .done-line { color: #8b949e; font-style: italic; }
+  .dim-line { color: #6e7681; }
+}
+
+/* ===================================================================
    Accessibility: skip link, focus-visible, reduced motion
    =================================================================== */
 
