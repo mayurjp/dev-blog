@@ -291,7 +291,7 @@ spec:
 </div>
 
 <div class="challenge" data-category="kubernetes">
-  <h3>Challenge #10 — Pod Evicted Under Memory Pressure</h3>
+  <h3>Challenge #10 — Pod Evicted Under Disk Pressure</h3>
   <div class="challenge-yaml" markdown="1">
 ```yaml
 apiVersion: v1
