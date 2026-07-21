@@ -1,0 +1,9 @@
+- slug: kubernetes
+  title: "Kubernetes: Pods to RBAC"
+  description: The full control-plane stack — scheduling, networking, security, and autoscaling — taught from Google's microservices-demo manifests.
+- slug: system-design
+  title: "System Design for Interviews"
+  description: Scalability, caching, sharding, consistency, and the tradeoffs that show up in every system design interview.
+- slug: security
+  title: "Security: Hashing to mTLS"
+  description: Password hashing, OAuth2/OIDC, RBAC, API keys, mTLS, SSO, and MFA — from first principles to production.

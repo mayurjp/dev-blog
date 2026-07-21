@@ -35,11 +35,16 @@
       /* Theme toggle button */
       var toggle = document.getElementById('theme-toggle');
       if (toggle) {
+        var resolved = document.documentElement.getAttribute('data-theme');
+        var isDark = resolved === 'dark' || (resolved === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        toggle.setAttribute('aria-pressed', String(isDark));
         toggle.addEventListener('click', function () {
           var current = document.documentElement.getAttribute('data-theme');
           var next = (current === 'dark') ? 'light' : 'dark';
           document.documentElement.setAttribute('data-theme', next);
           localStorage.setItem('theme', next);
+          var nextIsDark = next === 'dark' || (next === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          toggle.setAttribute('aria-pressed', String(nextIsDark));
         });
       }
 
@@ -65,10 +70,22 @@
         securityLevel: "loose"
       });
       mermaid.run();
+      /* Make mermaid diagrams accessible */
+      document.querySelectorAll('.mermaid').forEach(function (svg) {
+        if (svg.tagName !== 'svg') return;
+        if (!svg.getAttribute('role')) svg.setAttribute('role', 'img');
+        var title = svg.querySelector('title');
+        if (!title) {
+          var t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+          t.textContent = 'Diagram';
+          svg.prepend(t);
+        }
+      });
 
       /* Reading progress bar */
       var bar = document.createElement("div");
       bar.className = "reading-progress";
+      bar.setAttribute("aria-hidden", "true");
       document.body.prepend(bar);
       window.addEventListener("scroll", function () {
         var h = document.documentElement.scrollHeight - window.innerHeight;
@@ -78,7 +95,7 @@
       /* Back to top button */
       var btt = document.createElement("button");
       btt.className = "back-to-top";
-      btt.innerHTML = "&#8679;";
+      btt.textContent = "\u21E7";
       btt.setAttribute("aria-label", "Back to top");
       btt.setAttribute("title", "Back to top");
       document.body.appendChild(btt);
@@ -86,7 +103,8 @@
         btt.classList.toggle("visible", window.scrollY > 400);
       }, { passive: true });
       btt.addEventListener("click", function () {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" });
       });
     });
   </script>

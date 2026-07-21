@@ -282,13 +282,13 @@ What this teaches that a hello-world can't:
 
 - **The controller distinguishes between "no change" and "change" at multiple levels** — the `syncNeeded` flag, the `IsConcreteCommit` check, and the `len(policyResult.FileChanges) == 0` check are three independent short-circuit gates. This isn't defensive coding; it's what prevents the controller from creating empty commits when the registry hasn't changed but the reconcile interval has elapsed.
 - **The `latestImageChangePredicate` on the ImagePolicy watch means the automation only re-reconciles when the resolved image actually changes** — not on any status update, not on metadata changes, not on annotations. This is why Flux doesn't thrash with unnecessary reconciliation loops even when dozens of policies are being reflected.
-- **The commit message template is a Go template, not a static string** — `{{range .Updated.Images}}{{println .}}{{end}}` iterates over all images that were updated in a single reconciliation, so a batch update to five services produces one commit with five image references in the message, not five separate commits.
+- **The commit message template is a Go template, not a static string** — `{% raw %}{{range .Updated.Images}}{{println .}}{{end}}{% endraw %}` iterates over all images that were updated in a single reconciliation, so a batch update to five services produces one commit with five image references in the message, not five separate commits.
 
 ## 5. Review Checklist
 
 - **Does every `image:` field in your manifests have a `# image: <name>` marker comment?** Without the marker, the automation can't find the field to rewrite — it will silently skip the manifest, and you'll have a policy that resolves correctly but never actually updates anything.
 - **Is the `update.path` scoped narrowly enough?** A path of `./` means the automation scans the entire repo for markers on every tick. For large monorepos, scope it to `./clusters/production` or `./apps/myapp` to keep reconciliation fast.
-- **Does your `commitTemplate` include the image tag for auditability?** A generic message like "automated update" makes `git bisect` useless. Include `{{range .Updated.Images}}{{println .}}{{end}}` so each commit's message tells you exactly what changed.
+- **Does your `commitTemplate` include the image tag for auditability?** A generic message like "automated update" makes `git bisect` useless. Include `{% raw %}{{range .Updated.Images}}{{println .}}{{end}}{% endraw %}` so each commit's message tells you exactly what changed.
 - **Is the automation's `interval` aligned with your registry's tag cadence?** If you push new tags every 10 minutes but the automation polls every 1 hour, you'll have up to 50 minutes of unnecessary staleness. Set the interval to something shorter than your expected minimum time between image updates.
 - **Are you using `strategy: Setters` (the only production-ready strategy) rather than `strategy: Setters` with custom templates?** Flux's image update strategies have evolved — `Setters` uses marker comments, which is the recommended approach. Earlier strategies like `Json` or `Yaml` are less precise and more fragile.
 

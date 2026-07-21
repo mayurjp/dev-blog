@@ -6,10 +6,10 @@ layout: default
   <div class="hero">
     <h1 class="hero-title">Notes on how real systems actually work</h1>
     <p class="hero-subtitle">Each one starting from a real engineering problem and taught through an actual production repository's code, not hello-world examples.</p>
-    <div class="hero-search">
+    <form class="hero-search" role="search" onsubmit="window.location='{{ '/qa/' | relative_url }}?q=' + encodeURIComponent(document.getElementById('hero-search-input').value); return false;">
       <input type="text" id="hero-search-input" placeholder="Search 1,636 Q&As across 22 domains…" aria-label="Search Q&As" />
-      <button type="button" id="hero-search-btn" onclick="window.location='{{ '/qa/' | relative_url }}?q=' + encodeURIComponent(document.getElementById('hero-search-input').value)">Search</button>
-    </div>
+      <button type="submit" id="hero-search-btn">Search</button>
+    </form>
   </div>
 
   {{ content }}
@@ -17,38 +17,16 @@ layout: default
   <div class="learning-paths">
     <h2 class="section-heading">Start learning</h2>
 
-    <div class="path-card">
-      <div class="path-header">
-        <h3><a href="{{ '/kubernetes/' | relative_url }}">Kubernetes: Pods to RBAC</a></h3>
-        <span class="path-count">20 posts</span>
+    {%- for path in site.data.learning_paths -%}
+      {%- assign post_count = site.categories[path.slug].size | default: 0 -%}
+      <div class="path-card">
+        <div class="path-header">
+          <h3><a href="{{ '/' | append: path.slug | append: '/' | relative_url }}">{{ path.title }}</a></h3>
+          <span class="path-count">{{ post_count }} post{% unless post_count == 1 %}s{% endunless %}</span>
+        </div>
+        <p class="path-desc">{{ path.description }}</p>
       </div>
-      <p class="path-desc">The full control-plane stack — scheduling, networking, security, and autoscaling — taught from Google's microservices-demo manifests.</p>
-      <div class="path-progress">
-        <div class="path-progress-bar" style="width: 100%"></div>
-      </div>
-    </div>
-
-    <div class="path-card">
-      <div class="path-header">
-        <h3><a href="{{ '/system-design/' | relative_url }}">System Design for Interviews</a></h3>
-        <span class="path-count">18 posts</span>
-      </div>
-      <p class="path-desc">Scalability, caching, sharding, consistency, and the tradeoffs that show up in every system design interview.</p>
-      <div class="path-progress">
-        <div class="path-progress-bar" style="width: 100%"></div>
-      </div>
-    </div>
-
-    <div class="path-card">
-      <div class="path-header">
-        <h3><a href="{{ '/security/' | relative_url }}">Security: Hashing to mTLS</a></h3>
-        <span class="path-count">19 posts</span>
-      </div>
-      <p class="path-desc">Password hashing, OAuth2/OIDC, RBAC, API keys, mTLS, SSO, and MFA — from first principles to production.</p>
-      <div class="path-progress">
-        <div class="path-progress-bar" style="width: 100%"></div>
-      </div>
-    </div>
+    {%- endfor -%}
   </div>
 
   <div class="topic-grid">
@@ -67,19 +45,19 @@ layout: default
 
   <div class="home-secondary-links">
     <a class="home-link-card" href="{{ '/archive/' | relative_url }}">
-      <span class="home-link-icon">📚</span>
+      <span class="home-link-icon" aria-hidden="true">📚</span>
       <span>Browse all {{ site.posts.size }} posts</span>
     </a>
     <a class="home-link-card" href="{{ '/faq/' | relative_url }}">
-      <span class="home-link-icon">❓</span>
+      <span class="home-link-icon" aria-hidden="true">❓</span>
       <span>FAQ — common questions answered</span>
     </a>
     <a class="home-link-card" href="{{ '/search/' | relative_url }}">
-      <span class="home-link-icon">🔍</span>
+      <span class="home-link-icon" aria-hidden="true">🔍</span>
       <span>Search across all posts</span>
     </a>
     <a class="home-link-card" href="{{ '/feed.xml' | relative_url }}">
-      <span class="home-link-icon">📡</span>
+      <span class="home-link-icon" aria-hidden="true">📡</span>
       <span>Subscribe via RSS</span>
     </a>
   </div>

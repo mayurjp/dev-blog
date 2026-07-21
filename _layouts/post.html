@@ -7,10 +7,10 @@ layout: default
     {%- assign topic = site.data.topics | where: "slug", page.categories.first | first -%}
     <nav class="breadcrumbs" aria-label="Breadcrumb">
       <a href="{{ '/' | relative_url }}">Home</a>
-      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <a href="{{ '/' | append: page.categories.first | append: '/' | relative_url }}">{{ topic.name | default: page.categories.first }}</a>
-      <span class="breadcrumb-sep">›</span>
-      <span class="breadcrumb-current">{{ page.title | escape }}</span>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span class="breadcrumb-current" aria-current="page">{{ page.title | escape }}</span>
     </nav>
   {%- endif -%}
 
@@ -41,7 +41,7 @@ layout: default
   </header>
 
   <div class="post-toc-wrapper">
-    <nav class="post-toc" id="post-toc"></nav>
+    <nav class="post-toc" id="post-toc" aria-label="Table of contents"></nav>
     <div class="post-content" itemprop="articleBody">
       {{ content }}
     </div>
@@ -100,11 +100,14 @@ layout: default
 <div class="newsletter-box">
   <p class="newsletter-title">📬 {{ site.newsletter_label }}</p>
   <form action="{{ site.newsletter_action }}" method="POST" class="newsletter-form" target="_blank">
-    <input type="email" name="email" placeholder="your@email.com" required aria-label="Email address" />
+    <label for="newsletter-email" class="sr-only">Email address</label>
+    <input type="email" id="newsletter-email" name="email" placeholder="your@email.com" required aria-label="Email address" />
     <button type="submit">Subscribe</button>
   </form>
 </div>
 {%- endif -%}
+
+{%- include comments.html -%}
 
 <!-- Structured data (JSON-LD) -->
 <script type="application/ld+json">
@@ -160,6 +163,7 @@ layout: default
     btn.className = 'copy-btn';
     btn.textContent = 'Copy';
     btn.type = 'button';
+    btn.setAttribute('aria-label', 'Copy code to clipboard');
     block.style.position = 'relative';
     block.appendChild(btn);
   });
@@ -172,13 +176,42 @@ layout: default
   document.querySelectorAll('.code-tabs').forEach(function (tabs) {
     var buttons = tabs.querySelectorAll('.code-tab-btn');
     var panels = tabs.querySelectorAll('.code-tab-panel');
+
+    buttons.forEach(function (btn, i) {
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
+      btn.setAttribute('tabindex', btn.classList.contains('active') ? '0' : '-1');
+      if (!btn.id) btn.id = 'tab-' + Math.random().toString(36).slice(2, 8);
+    });
+    panels.forEach(function (panel) {
+      panel.setAttribute('role', 'tabpanel');
+      var对应btn = tabs.querySelector('[data-tab="' + panel.id + '"]');
+      if (对应btn) {
+        panel.setAttribute('aria-labelledby', 对应btn.id);
+      }
+    });
+
     buttons.forEach(function (btn) {
       btn.addEventListener('click', function () {
-        buttons.forEach(function (b) { b.classList.remove('active'); });
+        buttons.forEach(function (b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+          b.setAttribute('tabindex', '-1');
+        });
         panels.forEach(function (p) { p.classList.remove('active'); });
         btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        btn.setAttribute('tabindex', '0');
         var target = tabs.querySelector('#' + btn.getAttribute('data-tab'));
         if (target) target.classList.add('active');
+      });
+      btn.addEventListener('keydown', function (e) {
+        var arr = Array.from(buttons);
+        var idx = arr.indexOf(btn);
+        var next = null;
+        if (e.key === 'ArrowRight') next = arr[(idx + 1) % arr.length];
+        if (e.key === 'ArrowLeft') next = arr[(idx - 1 + arr.length) % arr.length];
+        if (next) { e.preventDefault(); next.click(); next.focus(); }
       });
     });
   });
@@ -214,7 +247,10 @@ layout: default
       if (h.offsetTop <= scrollY) current = h.id;
     });
     links.forEach(function (a) {
-      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      var isActive = a.getAttribute('href') === '#' + current;
+      a.classList.toggle('active', isActive);
+      if (isActive) { a.setAttribute('aria-current', 'true'); }
+      else { a.removeAttribute('aria-current'); }
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true });

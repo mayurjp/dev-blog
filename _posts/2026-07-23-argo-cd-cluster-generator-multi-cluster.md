@@ -279,7 +279,7 @@ func (p *paramHolder) consolidate() []map[string]any {
 }
 ```
 
-This is the difference between generating one Application per cluster and generating one Application that knows about all of them — the template receives `{{range .clusters}}` instead of `{{.name}}`.
+This is the difference between generating one Application per cluster and generating one Application that knows about all of them — the template receives `{% raw %}{{range .clusters}}{% endraw %}` instead of `{% raw %}{{.name}}{% endraw %}`.
 
 ### No automatic requeue
 
@@ -298,11 +298,11 @@ This means the cluster generator is purely reactive — it does not poll. When s
 
 - [ ] **Cluster Secrets exist and are labeled** — Every target cluster must have a Secret in the Argo CD namespace with `argocd.argoproj.io/secret-type: cluster`
 - [ ] **Label selectors match intentionally** — A `selector` excludes the local `in-cluster` by default; verify this is the desired behavior
-- [ ] **Template uses `nameNormalized` where needed** — If cluster names contain underscores or special characters, `{{.nameNormalized}}` produces valid Kubernetes resource names
-- [ ] **`values` field is templated correctly** — Custom values from `generators.clusters.values` are accessed as `{{.values.key}}`, not `{{.key}}`
+- [ ] **Template uses `nameNormalized` where needed** — If cluster names contain underscores or special characters, `{% raw %}{{.nameNormalized}}{% endraw %}` produces valid Kubernetes resource names
+- [ ] **`values` field is templated correctly** — Custom values from `generators.clusters.values` are accessed as `{% raw %}{{.values.key}}{% endraw %}`, not `{% raw %}{{.key}}{% endraw %}`
 - [ ] **`flatList` vs standard mode is deliberate** — Standard mode generates N Applications; `flatList` generates one Application with an embedded cluster array
 - [ ] **Sync policy handles cluster removal** — When a cluster Secret is deleted, the generator stops producing parameters for it; verify the Application is cleaned up (not just orphaned)
-- [ ] **Go template mode is consistent** — Mixed usage of `goTemplate: true` and old-style `{{name}}` templating in the same ApplicationSet produces errors
+- [ ] **Go template mode is consistent** — Mixed usage of `goTemplate: true` and old-style `{% raw %}{{name}}{% endraw %}` templating in the same ApplicationSet produces errors
 - [ ] **Progressive syncs tested** — If using `RollingSync` with cluster generator output, verify step ordering against cluster names which are now dynamic
 
 ## 6. FAQ

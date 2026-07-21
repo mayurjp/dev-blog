@@ -238,7 +238,7 @@ Both. Angular registers a teardown with `DestroyRef.onDestroy()` — so if the c
 
 **Q: Can I use `async` pipe with multiple Observables in the same template?**
 
-Yes. Each `async` pipe creates and manages its own independent subscription. `{{ user$ | async }}` and `{{ orders$ | async }}` do not interfere with each other. The `async` pipe stores each subscription internally and unsubscribes all of them on destroy.
+Yes. Each `async` pipe creates and manages its own independent subscription. `{% raw %}{{ user$ | async }}{% endraw %}` and `{% raw %}{{ orders$ | async }}{% endraw %}` do not interfere with each other. The `async` pipe stores each subscription internally and unsubscribes all of them on destroy.
 
 **Q: What happens if I use `async` pipe with a Subject that never completes?**
 

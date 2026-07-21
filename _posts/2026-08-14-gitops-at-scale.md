@@ -82,7 +82,7 @@ flowchart TD
 
 ## 3. The clean example
 
-**Argo CD multi-cluster fan-out** (from the verbatim example above): register clusters as `Secret`s in the Argo CD namespace; the `clusters: {}` generator discovers them and renders one `Application` per cluster, substituting `{{.name}}` and `{{.server}}`. Add a `list` or `matrix` generator to also vary by app or environment.
+**Argo CD multi-cluster fan-out** (from the verbatim example above): register clusters as `Secret`s in the Argo CD namespace; the `clusters: {}` generator discovers them and renders one `Application` per cluster, substituting `{% raw %}{{.name}}{% endraw %}` and `{% raw %}{{.server}}{% endraw %}`. Add a `list` or `matrix` generator to also vary by app or environment.
 
 **Flux env promotion** — a base plus overlays, with ordering:
 

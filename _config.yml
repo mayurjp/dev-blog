@@ -31,6 +31,10 @@ twitter_username: mayurjp
 linkedin_username: mayurjp
 logo: /assets/logo.svg
 
+# Default image for Open Graph / Twitter Card previews when sharing
+# (jekyll-seo-tag uses this as fallback when a post has no image: in front matter)
+image: /assets/logo.svg
+
 # Explicit header nav whitelist -- without this, minima lists every page with
 # a `title:` (including the topic pages under topics/ and domain pages under qa/).
 header_pages:
@@ -59,6 +63,13 @@ google_analytics: ""  # e.g. G-XXXXXXXXXX
 # Newsletter (set to your form action URL to enable)
 newsletter_action: ""  # e.g. https://formspree.io/f/xxxxx
 newsletter_label: "Get new posts in your inbox"
+
+# Comments — Giscus (GitHub Discussions backend)
+# Setup: https://giscus.app — enter your repo + category, then paste the values here.
+giscus_repo: ""          # e.g. mayurjp/dev-blog
+giscus_repo_id: ""       # e.g. R_kgDO...
+giscus_category: ""      # e.g. Announcements
+giscus_category_id: ""   # e.g. DIC_kwDO...
 
 # --- Housekeeping ------------------------------------------------------------
 exclude:

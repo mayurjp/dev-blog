@@ -8,13 +8,13 @@ order: 7
 tags: [gitops, kustomize, kubernetes, helm, config-management]
 ---
 
-**TL;DR:** Why do Kustomize overlays produce cleaner environment diffs than Helm template conditionals? Because Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no Go template syntax, no `{{ if .Values.env }}` sprawl — so the diff between `dev` and `prod` is a small patch file instead of a whole re-rendered manifest.
+**TL;DR:** Why do Kustomize overlays produce cleaner environment diffs than Helm template conditionals? Because Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no Go template syntax, no `{% raw %}{{ if .Values.env }}{% endraw %}` sprawl — so the diff between `dev` and `prod` is a small patch file instead of a whole re-rendered manifest.
 
 **Real repo:** [`kubernetes-sigs/kustomize`](https://github.com/kubernetes-sigs/kustomize)
 
 ## 1. The Engineering Problem: templating an entire manifest tree to change three values
 
-Helm's approach to multi-environment config is to re-render the *entire* template tree with different `values.yaml` inputs. This works when environments differ by a handful of scalars — but in practice, environments diverge in subtler ways: dev gets a `ConfigMap` that prod does not, staging adds an extra container to a `Deployment` spec, production hardens `securityContext` fields while dev leaves them permissive. Each divergence pushes you toward more `{{ if }}` / `{{ else }}` blocks inside the template, turning what should be a three-line patch into a conditional labyrinth that is hard to read, hard to diff, and hard to trust during review.
+Helm's approach to multi-environment config is to re-render the *entire* template tree with different `values.yaml` inputs. This works when environments differ by a handful of scalars — but in practice, environments diverge in subtler ways: dev gets a `ConfigMap` that prod does not, staging adds an extra container to a `Deployment` spec, production hardens `securityContext` fields while dev leaves them permissive. Each divergence pushes you toward more `{% raw %}{{ if }}{% endraw %}` / `{% raw %}{{ else }}{% endraw %}` blocks inside the template, turning what should be a three-line patch into a conditional labyrinth that is hard to read, hard to diff, and hard to trust during review.
 
 The core issue: **templates are not diffs.** A Helm template describes the *complete* desired state for every environment simultaneously, with runtime conditionals selecting which branches to render. A merge patch describes only the *difference* between a known base and the desired overlay. When your goal is "same deployment, different resource limits and an extra sidecar," a patch is the naturally aligned abstraction — and a template is an encoding mismatch.
 
@@ -224,7 +224,7 @@ spec:
               memory: 128Mi
 ```
 
-Compare this to the Helm equivalent: a single `deployment.yaml` template with `{{ if eq .Values.env "prod" }}replicas: 5{{ else }}replicas: 1{{ end }}`, `{{ .Values.resources }}`, and so on. The Kustomize version has no conditionals because there is nothing to condition on — each overlay is its own complete, declarative patch set. The `git diff` between `overlays/dev/` and `overlays/prod/` shows exactly what differs, not a template that obscures the answer.
+Compare this to the Helm equivalent: a single `deployment.yaml` template with `{% raw %}{{ if eq .Values.env "prod" }}replicas: 5{{ else }}replicas: 1{{ end }}{% endraw %}`, `{% raw %}{{ .Values.resources }}{% endraw %}`, and so on. The Kustomize version has no conditionals because there is nothing to condition on — each overlay is its own complete, declarative patch set. The `git diff` between `overlays/dev/` and `overlays/prod/` shows exactly what differs, not a template that obscures the answer.
 
 ---
 
@@ -324,7 +324,7 @@ type Kustomization struct {
 }
 ```
 
-Notable: **Kustomize itself supports `HelmCharts` and `HelmGlobals` as a first-class Kustomization field** — this is not "Kustomize vs. Helm" in an absolute sense. Kustomize can *inflate* Helm charts as part of its build, treating rendered chart output as input to its own patch pipeline. The architectural distinction is that Helm's `{{ }}` templates are resolved at `helm template` time (before Kustomize sees the YAML), while Kustomize's patches are resolved at `kustomize build` time (after the base YAML is already pure Kubernetes resources). You get Helm's chart ecosystem *and* Kustomize's diff-friendly overlay model in a single pipeline when you use the `helmCharts` field.
+Notable: **Kustomize itself supports `HelmCharts` and `HelmGlobals` as a first-class Kustomization field** — this is not "Kustomize vs. Helm" in an absolute sense. Kustomize can *inflate* Helm charts as part of its build, treating rendered chart output as input to its own patch pipeline. The architectural distinction is that Helm's `{% raw %}{{ }}{% endraw %}` templates are resolved at `helm template` time (before Kustomize sees the YAML), while Kustomize's patches are resolved at `kustomize build` time (after the base YAML is already pure Kubernetes resources). You get Helm's chart ecosystem *and* Kustomize's diff-friendly overlay model in a single pipeline when you use the `helmCharts` field.
 
 ---
 
@@ -332,7 +332,7 @@ Notable: **Kustomize itself supports `HelmCharts` and `HelmGlobals` as a first-c
 
 - **Does the overlay only declare what differs from the base?** If your overlay repeats `selector.matchLabels` or `containerPort` from the base, the patch is too broad — strip it back to the delta.
 - **Can you `kustomize build overlays/dev/ | kubectl diff -f -` cleanly?** The diff against live cluster state should show only the intentional changes. If you see unrelated resources, your overlay has implicit ordering dependencies.
-- **Is the base free of `{{ }}` template syntax?** If the base itself contains Helm conditionals, you are mixing paradigms. Use the `helmCharts` field to inflate the chart first, then patch the output.
+- **Is the base free of `{% raw %}{{ }}{% endraw %}` template syntax?** If the base itself contains Helm conditionals, you are mixing paradigms. Use the `helmCharts` field to inflate the chart first, then patch the output.
 - **Does the overlay's `kustomization.yaml` list patches explicitly?** Inline patches (`patch: |`) are fine for small diffs; file patches (`path:`) are better for anything over five lines because they show cleanly in `git diff --stat`.
 - **Are resource output orders correct?** Run `kustomize build` and verify `Namespace` appears before `Deployment`, `CRD` before `CustomResource`. If not, add a `sortOptions` field.
 

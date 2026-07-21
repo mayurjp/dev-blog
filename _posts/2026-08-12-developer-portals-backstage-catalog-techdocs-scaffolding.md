@@ -84,7 +84,7 @@ Here is a verbatim upstream **software template** — the scaffolding pillar. No
 > scaffolder-templates/
 > ├── react-ssr-template/
 > │   ├── template.yaml     # the Template entity (form + steps)
-> │   └── skeleton/         # files rendered with ${{ parameters.* }}
+> │   └── skeleton/         # files rendered with {% raw %}${{ parameters.* }}{% endraw %}
 > └── docs-template/
 >     └── template.yaml     # adds TechDocs scaffold on top
 > ```
