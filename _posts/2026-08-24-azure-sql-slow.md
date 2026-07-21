@@ -4,8 +4,8 @@ title: "Azure: Why Are My Azure SQL Queries Slow After 1 PM Every Day?"
 description: "A scenario-based debugging walkthrough: an API backed by Azure SQL that is fast in the morning but degrades sharply after 1 PM. The root cause is the DTU service tier's resource governor throttling the database under sustained load combined with an implicit table scan on a frequently queried indexed view. Trace the fix through Query Performance Insight, sys.dm_db_resource_stats, and index tuning."
 date: 2026-08-24 09:00:00 +0530
 categories: azure
-order: 2
-tags: [azure, debugging, sql, performance, dtu]
+order: 91
+tags: [azure, troubleshooting, debugging, sql, performance, dtu]
 ---
 
 ## The symptom

@@ -4,8 +4,8 @@ title: "ASP.NET WebAPI: Why Does the Authorized Endpoint Return 401 When the Tok
 description: "A scenario-based debugging walkthrough: a JWT-protected WebAPI endpoint rejects every request with 401 even though the same token works against the identity server's introspection endpoint. The root cause is misordered middleware — authentication runs before the JWT bearer handler has been registered. Trace the fix through middleware order, Minimal API vs controller divergence, and capture the pipeline with IStartupFilter."
 date: 2026-08-23 09:00:00 +0530
 categories: aspnet-webapi
-order: 2
-tags: [aspnet-webapi, debugging, authentication, jwt, middleware]
+order: 91
+tags: [aspnet-webapi, troubleshooting, debugging, authentication, jwt, middleware]
 ---
 
 ## The symptom

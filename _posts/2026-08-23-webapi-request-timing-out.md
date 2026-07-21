@@ -4,8 +4,8 @@ title: "ASP.NET WebAPI: Why Is This Request Timing Out After 30 Seconds?"
 description: "A scenario-based debugging walkthrough: a WebAPI endpoint that reliably hangs for 30 seconds then returns 502 from the load balancer. The root cause is a synchronous blocking call inside an async endpoint, which exhausts the ASP.NET thread pool. Trace the fix through Kestrel connection logs, thread-pool counters, and adding ConfigureAwait."
 date: 2026-08-23 09:00:00 +0530
 categories: aspnet-webapi
-order: 1
-tags: [aspnet-webapi, debugging, async, threading, performance]
+order: 90
+tags: [aspnet-webapi, troubleshooting, debugging, async, threading, performance]
 ---
 
 ## The symptom

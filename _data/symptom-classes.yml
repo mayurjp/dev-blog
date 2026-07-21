@@ -1,0 +1,41 @@
+# Symptom classes for the /troubleshooting/ index.
+#
+# Each troubleshooting post carries a `symptom_class:` front-matter field whose value is
+# one of the slugs below. `troubleshooting/index.md` groups posts by it to build the
+# "By Symptom Pattern" view — so that view is generated, never hand-maintained. The
+# previous hand-written list accumulated three dead links to posts that never existed.
+#
+# Adding a class: add a row here and set `symptom_class:` on the relevant posts. No
+# other file needs editing.
+
+- slug: timeouts-and-latency
+  name: Timeouts & Latency
+  description: A request that hangs, times out, or is mysteriously slower in one environment than another.
+
+- slug: auth-and-permissions
+  name: Authentication & Authorization
+  description: Credentials that look correct but are rejected — 401s, 403s, token and certificate failures.
+
+- slug: resource-exhaustion
+  name: Resource Exhaustion
+  description: Pools, queues, memory, and disk running out — often while the resource looks idle.
+
+- slug: config-and-deployment
+  name: Configuration & Deployment
+  description: A change that does not take effect, a rollout that never finishes, or an environment that drifts.
+
+- slug: data-correctness
+  name: Data Correctness
+  description: Duplicates, lost writes, stale reads, and ordering violations — the failures that do not throw.
+
+- slug: networking-and-connectivity
+  name: Networking & Connectivity
+  description: DNS, TLS, load balancers, and the connection-level failures underneath an HTTP error code.
+
+- slug: caching-and-staleness
+  name: Caching & Staleness
+  description: Caches that never hit, never expire, or stampede all at once after a deploy.
+
+- slug: observability-gaps
+  name: Observability Gaps
+  description: The telemetry itself failing — broken traces, exploded cardinality, and logs that vanish.

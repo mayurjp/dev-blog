@@ -4,8 +4,8 @@ title: "Azure: Why Is My App Service Returning 503 Service Unavailable Every 10 
 description: "A scenario-based debugging walkthrough: an ASP.NET Core app on Azure App Service that returns 503 every 10 minutes on the dot. The root cause is the default App Service auto-heal recycling combined with a process-wide singleton that cannot recover from an unrecoverable state. Trace the fix through App Service diagnostic logs, Kudu process dumps, and WinDBG analysis."
 date: 2026-08-24 09:00:00 +0530
 categories: azure
-order: 1
-tags: [azure, debugging, app-service, performance, dotnet]
+order: 90
+tags: [azure, troubleshooting, debugging, app-service, performance, dotnet]
 ---
 
 ## The symptom

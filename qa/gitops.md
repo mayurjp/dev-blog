@@ -429,7 +429,7 @@ Nothing — revisions 4, 5, 6, and 7 remain in the Secret store unchanged. Revis
 <div class="qa-item" data-diff="Expert">
   <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: Why do Kustomize overlays produce cleaner diffs than Helm template conditionals? <span class="qa-badge qa-expert">[Expert]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
   <div class="qa-a" markdown="1">
-Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no `{% raw %}{{ if }}{% endraw %}` / `{% raw %}{{ else }}{% endraw %}` sprawl. The diff between dev and prod is a small patch file describing only what changes, instead of a whole re-rendered manifest with conditional branches. Templates describe complete desired state for every environment simultaneously; patches describe only the delta.
+Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no `{{ if }}` / `{{ else }}` sprawl. The diff between dev and prod is a small patch file describing only what changes, instead of a whole re-rendered manifest with conditional branches. Templates describe complete desired state for every environment simultaneously; patches describe only the delta.
 
 <p class="qa-link">[Full post →]({{ '/gitops/kustomize-overlays-vs-helm-templates/' | relative_url }})</p>
   </div>
@@ -1216,7 +1216,7 @@ The controller attempted a reconciliation (`lastAttemptedRevision` is set) but i
       "name": "Why do Kustomize overlays produce cleaner diffs than Helm template conditionals?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no `{% raw %}{{ if }}{% endraw %}` / `{% raw %}{{ else }}{% endraw %}` sprawl. The diff between dev and prod is a small patch file describing only what changes, instead of a whole re-rendered manifest with conditional branches. Templates describe complete desired state for every environment simultaneously; patches describe only the delta."
+        "text": "Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no `{{ if }}` / `{{ else }}` sprawl. The diff between dev and prod is a small patch file describing only what changes, instead of a whole re-rendered manifest with conditional branches. Templates describe complete desired state for every environment simultaneously; patches describe only the delta."
       }
     },
     {

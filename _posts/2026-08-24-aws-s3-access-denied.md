@@ -4,8 +4,8 @@ title: "AWS: Why Does My EC2 Instance Get S3 Access Denied When the Role Looks C
 description: "A scenario-based debugging walkthrough: an EC2 instance with an IAM role that should have full S3 read access consistently returns AccessDenied. The root cause is an S3 bucket policy that grants access by IAM user principal ARN but the EC2 role uses a role principal ARN, which does not match. Trace the fix through IAM policy evaluation logic, the S3 Access Analyzer, and CloudTrail event history."
 date: 2026-08-24 09:00:00 +0530
 categories: aws
-order: 1
-tags: [aws, debugging, iam, s3, security]
+order: 90
+tags: [aws, troubleshooting, debugging, iam, s3, security]
 ---
 
 ## The symptom
