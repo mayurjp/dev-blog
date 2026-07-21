@@ -10,6 +10,8 @@ tags: [gitops, argocd, self-heal, auto-sync, reconciliation]
 
 **TL;DR:** Argo CD's auto-sync uses a reconciliation loop that compares desired state against live state, decides whether to sync based on status and revision changes, and gates self-heal with exponential backoff to prevent infinite sync loops.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The Engineering Problem
 
 Manual `kubectl apply` is a fire-and-forget operation. You push manifests to a cluster, and then reality drifts.
@@ -332,3 +334,7 @@ This post is based on the following files from the [`argoproj/argo-cd`](https://
 
 - [`controller/appcontroller.go`](https://github.com/argoproj/argo-cd/blob/master/controller/appcontroller.go) — The main application controller with `autoSync`, `selfHealRemainingBackoff`, and the reconciliation loop (`processAppRefreshQueueItem`)
 - [`pkg/apis/application/v1alpha1/types.go`](https://github.com/argoproj/argo-cd/blob/master/pkg/apis/application/v1alpha1/types.go) — The CRD types including `SyncPolicy`, `SyncPolicyAutomated`, `SyncOperation`, and `SelfHealAttemptsCount`
+
+
+
+

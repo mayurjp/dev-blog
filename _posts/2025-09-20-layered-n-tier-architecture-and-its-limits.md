@@ -9,6 +9,8 @@ tags: [software-architecture, layered-architecture, n-tier, dotnet, dependency-i
 
 **TL;DR:** If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because the fix isn't strict downward dependencies — Domain defines the interface it needs (like `IOrderRepository`) and Infrastructure implements it, so the compile-time reference points inward toward Domain even though the runtime call still flows outward to persistence.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: strict downward dependencies eventually can't hold
@@ -178,3 +180,7 @@ What this teaches that a boxes-and-arrows layer diagram can't:
 - **Concept:** Layered (N-tier) architecture — the default and its limits
 - **Domain:** architecture
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Domain/Ordering.Domain.csproj`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/Ordering.Domain.csproj), [`src/Ordering.Infrastructure/Ordering.Infrastructure.csproj`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Infrastructure/Ordering.Infrastructure.csproj), [`src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs) — Microsoft's own .NET microservices reference app
+
+
+
+

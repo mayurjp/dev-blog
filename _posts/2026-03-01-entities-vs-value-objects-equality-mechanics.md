@@ -9,6 +9,8 @@ tags: [ddd, entities, value-objects, csharp]
 
 **TL;DR:** Why does one field on `Order` (its `Address`) get its own class with no ID, while everything else doesn't? Because `Address` is a Value Object — equal only if every one of its fields matches, with no identity concept at all — while `Order` is an Entity, equal only by its `Id` regardless of what its other fields say, so each needs a different equality rule implemented as a different base class.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "are these two the same thing?" has two different correct answers in one domain model
@@ -156,3 +158,7 @@ Known-stale fact: value objects are sometimes implemented as simple structs or p
 - **Concept:** Entities vs value objects
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Domain/SeedWork/Entity.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/SeedWork/Entity.cs), [`ValueObject.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/SeedWork/ValueObject.cs), [`AggregatesModel/OrderAggregate/Order.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/Order.cs), [`Address.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/Address.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

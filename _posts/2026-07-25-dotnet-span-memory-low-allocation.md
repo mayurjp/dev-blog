@@ -10,6 +10,8 @@ tags: [dotnet, span, memory, performance, buffers]
 
 **TL;DR:** Why do hot-path parsers, JSON serializers, and network parsers in .NET avoid `string` and `T[]` slicing? Because `Span<T>` lives entirely on the stack — a `ref T` pointer plus an `int` length — so creating a slice, passing a sub-range to a helper, or renting from `ArrayPool<T>` never touches the GC heap at all.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime) — the Span<T> and ArrayPool<T> implementations.
 
 ---
@@ -276,3 +278,7 @@ No. `Span<T>` where `T` is a reference type is blocked at construction — the r
 | `ArrayPool<T>` abstract base | `src/libraries/System.Private.CoreLib/src/System/Buffers/ArrayPool.cs` |
 | `SharedArrayPool<T>` | `src/libraries/System.Private.CoreLib/src/System/Buffers/OverlappingArraysBucket.cs` (internal) |
 | `MemoryMarshal.GetArrayDataReference` | `src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/MemoryMarshal.cs` |
+
+
+
+

@@ -9,6 +9,8 @@ tags: [databases, acid, transactions, postgresql, c]
 
 **TL;DR:** Postgres has a setting that can make a committed transaction not actually durable — why does that setting exist? Durability normally costs a real `fsync` flush to disk before the client is told "committed"; when `synchronous_commit` is set to `off`, Postgres skips that flush and returns immediately, trading guaranteed durability for lower write latency on workloads that can tolerate losing the last few transactions in a crash.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: durability has a real, measurable cost, and "always pay it" isn't free for everyone
@@ -110,3 +112,7 @@ Known-stale fact: ACID's Durability guarantee is sometimes assumed to be a fixed
 - **Concept:** Transactions & ACID
 - **Domain:** databases
 - **Repo:** [postgres/postgres](https://github.com/postgres/postgres) → [`src/backend/access/transam/xact.c`](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xact.c) — the actual PostgreSQL server source, `RecordTransactionCommit()`.
+
+
+
+

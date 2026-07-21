@@ -9,6 +9,8 @@ tags: [kubernetes, networkpolicy, cni, security]
 
 **TL;DR:** Why can every Pod in your cluster talk to every other Pod by default? Kubernetes networking starts fully open with no NAT between Pods, and a NetworkPolicy only locks that down once a CNI plugin that implements the NetworkPolicy API (like Calico or Cilium) enforces the `podSelector`-based rules you define — an empty `ingress: []` on a selected Pod means deny all inbound.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`ahmetb/kubernetes-network-policy-recipes`](https://github.com/ahmetb/kubernetes-network-policy-recipes)
 
 ## 1. The Engineering Problem: Kubernetes networking starts fully open
@@ -148,3 +150,7 @@ Known-stale fact: a common misconception is that Kubernetes namespaces provide n
 - **Concept:** NetworkPolicy
 - **Domain:** kubernetes
 - **Repo:** [ahmetb/kubernetes-network-policy-recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes) → [`01-deny-all-traffic-to-an-application.md`](https://github.com/ahmetb/kubernetes-network-policy-recipes/blob/master/01-deny-all-traffic-to-an-application.md), [`02-limit-traffic-to-an-application.md`](https://github.com/ahmetb/kubernetes-network-policy-recipes/blob/master/02-limit-traffic-to-an-application.md), [`06-allow-traffic-from-a-namespace.md`](https://github.com/ahmetb/kubernetes-network-policy-recipes/blob/master/06-allow-traffic-from-a-namespace.md) — the community-canonical NetworkPolicy recipe collection.
+
+
+
+

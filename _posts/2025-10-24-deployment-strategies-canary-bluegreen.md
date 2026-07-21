@@ -9,6 +9,8 @@ tags: [microservices, canary, blue-green, argo-rollouts]
 
 **TL;DR:** How do you roll out a new version without betting the whole fleet on it at once? Argo Rollouts replaces the plain Kubernetes Deployment with canary (ramping a percentage of traffic through explicit weighted steps with pause/promote gates) and blue-green (running two full environments and cutting over via a Service selector switch) strategies, both offering traffic control and explicit promotion gates that a rolling update lacks.
 
+> **In plain English (30 sec):** Declare 'I want 3 copies' — K8s keeps 3 running.
+
 **Real repo:** [`argoproj/argo-rollouts`](https://github.com/argoproj/argo-rollouts)
 
 ## 1. The Engineering Problem: a plain rolling update has no traffic control and no gate
@@ -152,3 +154,7 @@ Known-stale fact: a common misconception is that careful tuning of a plain `Depl
 - **Concept:** Deployment strategies (blue-green/canary)
 - **Domain:** microservices
 - **Repo:** [argoproj/argo-rollouts](https://github.com/argoproj/argo-rollouts) → [`examples/rollout-canary.yaml`](https://github.com/argoproj/argo-rollouts/blob/master/examples/rollout-canary.yaml), [`examples/rollout-bluegreen.yaml`](https://github.com/argoproj/argo-rollouts/blob/master/examples/rollout-bluegreen.yaml) — the CNCF progressive-delivery controller for Kubernetes.
+
+
+
+

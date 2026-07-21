@@ -10,6 +10,8 @@ tags: [genai, mem0, agent-memory, vector-search, memory-management, hybrid-retri
 
 **TL;DR:** A single `Memory` class in mem0 silently manages three fundamentally different memory types — long-term semantic facts (vector DB + embeddings), short-term working context (SQLite message history), and procedural execution summaries (LLM-generated trajectory logs) — each requiring a different storage backend, retrieval strategy, and lifecycle policy. Mixing them into one store breaks because long-term facts need semantic search and deduplication, working memory needs fast sequential reads of the last *k* messages, and procedural memory needs verbatim trajectory preservation that resists summarization.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ---
 
 ## 1. The Engineering Problem
@@ -383,3 +385,7 @@ This post examines the memory management implementation from the [mem0ai/mem0](h
 - [`mem0/configs/base.py`](https://github.com/mem0ai/mem0/blob/main/mem0/configs/base.py) — `MemoryConfig`, `MemoryItem` schema
 - [`mem0/utils/scoring.py`](https://github.com/mem0ai/mem0/blob/main/mem0/utils/scoring.py) — `score_and_rank()` (additive scoring formula), `normalize_bm25()` (sigmoid normalization), `ENTITY_BOOST_WEIGHT`
 - [`mem0/configs/prompts.py`](https://github.com/mem0ai/mem0/blob/main/mem0/configs/prompts.py) — `ADDITIVE_EXTRACTION_PROMPT` (long-term fact extraction), `PROCEDURAL_MEMORY_SYSTEM_PROMPT` (verbatim trajectory extraction), `DEFAULT_UPDATE_MEMORY_PROMPT` (memory update decisions)
+
+
+
+

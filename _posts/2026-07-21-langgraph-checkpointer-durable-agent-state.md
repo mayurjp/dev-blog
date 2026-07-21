@@ -10,6 +10,8 @@ tags: [genai, langgraph, checkpointing, durable-state, persistence, agent-infra]
 
 **TL;DR:** Every agent superstep (LLM call, tool execution, conditional branch) must produce a persistent snapshot of the full graph state — not just a final result. LangGraph enforces this via `BaseCheckpointSaver`, which stores a `Checkpoint` TypedDict (channel values, channel versions, per-node version tracking) after every superstep. This means a crash at superstep 47 out of 100 resumes from superstep 47, not from scratch; time-travel debugging works because every intermediate state exists; and human-in-the-loop interrupts can pause mid-graph and resume later because the state is durable. The checkpointer is not an optional feature bolted onto LangGraph — it is the foundation that makes durable agents possible.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ---
 
 ## 1. The Engineering Problem
@@ -355,3 +357,7 @@ This post examines the checkpoint persistence implementation from the [langchain
 
 - [`libs/checkpoint/langgraph/checkpoint/base/__init__.py`](https://github.com/langchain-ai/langgraph/blob/main/libs/checkpoint/langgraph/checkpoint/base/__init__.py) — `BaseCheckpointSaver`, `Checkpoint` TypedDict, `CheckpointMetadata`, `CheckpointTuple`, `create_checkpoint`, `WRITES_IDX_MAP`
 - [`libs/checkpoint-sqlite/langgraph/checkpoint/sqlite/aio.py`](https://github.com/langchain-ai/langgraph/blob/main/libs/checkpoint-sqlite/langgraph/checkpoint/sqlite/aio.py) — `AsyncSqliteSaver`, `setup`, `aput`, `aget_tuple`, `put_writes` implementation
+
+
+
+

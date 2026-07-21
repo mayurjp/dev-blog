@@ -10,6 +10,8 @@ tags: [mlops, hyperparameter-optimization, bayesian-optimization, optuna]
 
 **TL;DR:** Why does TPE (Tree-structured Parzen Estimator) find good hyperparameters in 50 trials where grid search needs thousands? TPE splits completed trials into "good" and "bad" sets, fits a separate Gaussian Mixture Model to each, then samples the point that maximizes the ratio `l(x)/g(x)` — the likelihood of being good relative to being bad. This is Bayesian optimization without a surrogate model, and Optuna's `TPESampler` implements it with multivariate correlations, constant-liar handling for parallel workers, and constrained search space support.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`optuna/optuna`](https://github.com/optuna/optuna)
 
 ## 1. The Engineering Problem: grid search wastes budget by treating every region of the space equally
@@ -234,3 +236,7 @@ A: PostgreSQL or MySQL via `RDBStorage` — never SQLite for parallel optimizati
 - **Concept:** Tree-structured Parzen Estimator (TPE) — Bayesian hyperparameter optimization via dual density models
 - **Domain:** mlops
 - **Repo:** [optuna/optuna](https://github.com/optuna/optuna) → [`optuna/samplers/_tpe/sampler.py`](https://github.com/optuna/optuna/blob/master/optuna/samplers/_tpe/sampler.py) (`TPESampler`, `_sample`, `_split_trials`), [`optuna/samplers/_tpe/parzen_estimator.py`](https://github.com/optuna/optuna/blob/master/optuna/samplers/_tpe/parzen_estimator.py) (`_ParzenEstimatorParameters`), [`optuna/importance/__init__.py`](https://github.com/optuna/optuna/blob/master/optuna/importance/__init__.py) (`get_param_importances`) — the production hyperparameter optimization framework used by 14K+ GitHub stars.
+
+
+
+

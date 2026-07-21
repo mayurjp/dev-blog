@@ -10,6 +10,8 @@ tags: [observability, tracing, dotnet, asynclocal, correlation-id]
 
 **TL;DR:** Does keeping a request's correlation ID or trace context attached across a chain of `async`/`await` calls require passing a context object through every method signature? No — .NET's `AsyncLocal<T>` already flows its current value across `await` automatically, following the *logical* call even when the actual continuation resumes on a different thread-pool thread. `System.Diagnostics.Activity.Current` is built directly on this primitive, and every new `Activity` automatically reads it as its own parent — producing a correctly-nested trace tree from ordinary async code, with zero explicit correlation-ID threading anywhere in application logic.
 
+> **In plain English (30 sec):** Logs with traceId that follows request across services.
+
 ## 1. The Engineering Problem
 
 Correlating everything that happens during one logical request — across multiple async method calls, possibly hopping between thread-pool threads along the way — needs some notion of "the current operation" that's reachable from deep inside a call chain without every intermediate method explicitly accepting and forwarding a context parameter. Two naive approaches both fail:
@@ -165,3 +167,7 @@ A: Yes — since `Activity.Current` is a mutable, settable property, code that m
 - **Concept:** Automatic trace-context propagation across async boundaries via `AsyncLocal<T>`
 - **Domain:** observability
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Activity.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Activity.cs) — the real, first-party .NET tracing primitive OpenTelemetry's .NET SDK is built on
+
+
+
+

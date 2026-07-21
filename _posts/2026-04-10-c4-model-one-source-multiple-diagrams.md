@@ -6,6 +6,8 @@ categories: architecture
 order: 11
 tags: [architecture, c4-model, diagramming, structurizr]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: hand-drawn diagrams at different zoom levels inevitably drift apart
 
@@ -122,3 +124,7 @@ Known-stale fact: architecture diagrams are sometimes treated as a documentation
 - **Concept:** C4 model & architecture diagramming
 - **Domain:** architecture
 - **Repo:** [structurizr/structurizr.github.io](https://github.com/structurizr/structurizr.github.io) → [`dsl/tutorial/1.dsl`](https://github.com/structurizr/structurizr.github.io/blob/master/dsl/tutorial/1.dsl), [`dsl/tutorial/5.dsl`](https://github.com/structurizr/structurizr.github.io/blob/master/dsl/tutorial/5.dsl) — the official tutorial source from the creators of the C4 model and Structurizr, the reference DSL/tooling implementation.
+
+
+
+

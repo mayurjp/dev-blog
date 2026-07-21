@@ -10,6 +10,8 @@ tags: [genai, fine-tuning, lora, peft, huggingface, transformers, adapters]
 
 **TL;DR:** When you fine-tune a 7B-parameter model, do you really need to update — and store — all 7 billion weights? No. LoRA (Low-Rank Adaptation) freezes the original model weights entirely and injects tiny trainable low-rank matrices into specific layers, producing an adapter checkpoint that is typically 0.1-1% the size of the full model. Hugging Face's `Trainer` integrates this transparently through PEFT's `PeftAdapterMixin` — when it detects a PEFT model, it saves only adapter weights, skips loading full model weights on checkpoint resume, and reports the correct parameter count. The base model never moves; only the adapter does.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ---
 
 ## 1. The Engineering Problem
@@ -317,3 +319,7 @@ A: Yes — this is the QLoRA approach (Dettmers et al., 2023). Load the base mod
 - **Concept:** LoRA fine-tuning — why adapter checkpoints are orders of magnitude smaller than full model weights
 - **Domain:** genai
 - **Repo:** [huggingface/transformers](https://github.com/huggingface/transformers) → [`src/transformers/trainer.py`](https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py) (PEFT-aware checkpoint save/load, `_set_signature_columns_if_needed`, DeepSpeed frozen-parameter exclusion), [`src/transformers/integrations/peft.py`](https://github.com/huggingface/transformers/blob/main/src/transformers/integrations/peft.py) (`PeftAdapterMixin`, `load_adapter`, `add_adapter`, `set_adapter`, `enable_peft_hotswap`), [`src/transformers/training_args.py`](https://github.com/huggingface/transformers/blob/main/src/transformers/training_args.py) (`use_cache` documentation for PEFT, `neftune_noise_alpha` for PeftModel support)
+
+
+
+

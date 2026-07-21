@@ -9,6 +9,8 @@ tags: [databases, query-plans, explain-analyze, postgresql, c]
 
 **TL;DR:** What does the "cost=0.00..1234.56" number in `EXPLAIN` actually measure? It's a literal arithmetic formula — the table's page count times a tunable per-page I/O cost constant, plus its tuple count times a tunable per-tuple CPU cost constant — computed from statistics gathered by `ANALYZE`, not a live measurement or an opaque heuristic score.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: EXPLAIN's cost numbers look like a black-box score with no visible unit
@@ -109,3 +111,7 @@ Known-stale fact: `EXPLAIN`'s cost numbers are sometimes read as if they were pr
 - **Concept:** Query plans & EXPLAIN ANALYZE
 - **Domain:** databases
 - **Repo:** [postgres/postgres](https://github.com/postgres/postgres) → [`src/backend/optimizer/path/costsize.c`](https://github.com/postgres/postgres/blob/master/src/backend/optimizer/path/costsize.c) — the actual PostgreSQL server source, `cost_seqscan()`.
+
+
+
+

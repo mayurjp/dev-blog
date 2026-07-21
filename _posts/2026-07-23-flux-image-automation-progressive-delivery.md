@@ -10,6 +10,8 @@ tags: [gitops, flux, progressive-delivery, image-automation, kubernetes, gitops-
 
 **TL;DR:** When a new container image tag appears in your registry, who updates the Deployment manifest? If the answer is "a developer runs `kubectl set image`" or "a CI pipeline opens a PR," you have a manual step in the middle of your GitOps loop — the cluster's desired state is no longer derived purely from Git. Flux's `ImageUpdateAutomation` closes this gap: it watches `ImagePolicy` objects for the latest image matching a filter, rewrites the YAML manifests in a Git repository, and pushes the commit. The reconciliation loop then picks up the change like any other Git commit. No `kubectl`, no CI step, no human in the loop.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ---
 
 ## 1. The Engineering Problem
@@ -317,3 +319,7 @@ A: Yes, if you use `strategy: Setters` with marker comments in your Helm values 
 - **Domain:** gitops
 - **Repo:** [fluxcd/image-automation-controller](https://github.com/fluxcd/image-automation-controller) → [`internal/controller/imageupdateautomation_controller.go`](https://github.com/fluxcd/image-automation-controller/blob/main/internal/controller/imageupdateautomation_controller.go) — the reconciler that watches ImagePolicy changes, rewrites manifests, and pushes commits
 - **Also:** [fluxcd/flux2](https://github.com/fluxcd/flux2) → [`pkg/manifestgen/kustomization/kustomization.go`](https://github.com/fluxcd/flux2/blob/main/pkg/manifestgen/kustomization/kustomization.go) — the kustomization generation and build logic that the source-controller uses to construct working directories for the automation's checkout
+
+
+
+

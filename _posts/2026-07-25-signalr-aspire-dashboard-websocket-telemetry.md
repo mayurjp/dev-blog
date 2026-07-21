@@ -10,6 +10,8 @@ tags: [dotnet, signalr, aspire, blazor, websockets, telemetry]
 
 **TL;DR:** Why does the Aspire Dashboard show live-updating traces, structured logs, and resource state without ever hitting F5 — and what happens when the WebSocket behind the Blazor circuit drops?
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 The Aspire Dashboard must display four high-frequency telemetry streams simultaneously: resource state changes, structured logs, distributed traces, and metrics. Each stream is **server-initiated** — the back-end receives data from OTel exporters in each service and pushes it to the browser. HTTP long-polling would work, but it creates one request per stream per browser tab, doubles latency on every update (the browser must re-request after each response), and forces the server to hold open HTTP connections while waiting for new data.
@@ -231,3 +233,7 @@ A: Yes. SignalR falls back to Server-Sent Events (one-way server-to-client) with
 - **Concept:** SignalR as Blazor Server transport for real-time telemetry streaming
 - **Domain:** dotnet
 - **Repo:** [dotnet/aspire](https://github.com/dotnet/aspire) → [`src/Aspire.Dashboard/Components/App.razor`](https://github.com/dotnet/aspire/blob/main/src/Aspire.Dashboard/Components/App.razor) — the root Blazor component that configures `InteractiveServerRenderMode(prerender: false)`, and [`src/Aspire.Dashboard/wwwroot/js/app-reconnect.js`](https://github.com/dotnet/aspire/blob/main/src/Aspire.Dashboard/wwwroot/js/app-reconnect.js) — the dual-mode reconnect handler for Blazor circuits and resource service connections
+
+
+
+

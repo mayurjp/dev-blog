@@ -10,6 +10,8 @@ tags: [gitops, kustomize, kubernetes, helm, config-management]
 
 **TL;DR:** Why do Kustomize overlays produce cleaner environment diffs than Helm template conditionals? Because Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no Go template syntax, no `{% raw %}{{ if .Values.env }}{% endraw %}` sprawl — so the diff between `dev` and `prod` is a small patch file instead of a whole re-rendered manifest.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kubernetes-sigs/kustomize`](https://github.com/kubernetes-sigs/kustomize)
 
 ## 1. The Engineering Problem: templating an entire manifest tree to change three values
@@ -362,3 +364,7 @@ For any realistic cluster (under a few thousand resources), no. Kustomize's `Res
 - **Repo:** [kubernetes-sigs/kustomize](https://github.com/kubernetes-sigs/kustomize) → [`api/krusty/kustomizer.go`](https://github.com/kubernetes-sigs/kustomize/blob/master/api/krusty/kustomizer.go) — the core `Kustomizer.Run` method that walks the overlay DAG, applies transformers, and produces the final `ResMap`.
 - **Repo:** [kubernetes-sigs/kustomize](https://github.com/kubernetes-sigs/kustomize) → [`api/types/kustomization.go`](https://github.com/kubernetes-sigs/kustomize/blob/master/api/types/kustomization.go) — the `Kustomization` struct that defines the full operator surface including `HelmCharts`, `Patches`, and `SortOptions`.
 - **Repo:** [kubernetes-sigs/kustomize](https://github.com/kubernetes-sigs/kustomize) → [`api/internal/builtins/PatchTransformer.go`](https://github.com/kubernetes-sigs/kustomize/blob/master/api/internal/builtins/PatchTransformer.go) — the `PatchTransformerPlugin` that enforces unambiguous patch format detection and applies strategic merge or JSON 6902 patches.
+
+
+
+

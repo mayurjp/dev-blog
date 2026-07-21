@@ -7,6 +7,8 @@ categories: angular
 order: 8
 tags: [angular, control-flow, template-compiler, viewcontainerref, ivy]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -427,3 +429,7 @@ The `generateConditionalExpressions` phase assigns a temporary variable to store
 - [`packages/compiler/src/template/pipeline/src/phases/reify.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/phases/reify.ts) — `reify`
 - [`packages/compiler/src/template/pipeline/src/instruction.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/instruction.ts) — `conditionalCreate`, `conditional`, `repeaterCreate`, `repeater`
 - [`packages/compiler/src/template/pipeline/src/emit.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/emit.ts) — `emitView`, `emitTemplateFn`
+
+
+
+

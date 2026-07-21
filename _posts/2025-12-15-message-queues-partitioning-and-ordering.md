@@ -9,6 +9,8 @@ tags: [system-design, kafka, message-queues, partitioning]
 
 **TL;DR:** Why does a message with the same key always land on the same partition? Kafka routes each keyed message via `hash(key) % numPartitions`, deterministically landing the same key on the same partition every time to guarantee per-key ordering, while different keys spread across partitions for parallel processing — unkeyed messages instead use load-aware "sticky" batching rather than pure round-robin.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`apache/kafka`](https://github.com/apache/kafka)
 
 ## 1. The Engineering Problem: parallelism and ordering pull in opposite directions
@@ -109,3 +111,7 @@ Known-stale fact: "add more consumers for more throughput" is a common but incom
 - **Concept:** Message queues & async processing
 - **Domain:** system-design
 - **Repo:** [apache/kafka](https://github.com/apache/kafka) → [`clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java`](https://github.com/apache/kafka/blob/trunk/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java) — the real, production log-based streaming platform.
+
+
+
+

@@ -7,6 +7,8 @@ categories: angular
 order: 4
 tags: [angular, dependency-injection, injector-tree, providedIn, di]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -363,3 +365,7 @@ All code in this post is verbatim from the `angular/angular` repository on GitHu
 - [`packages/core/src/render3/di.ts`](https://github.com/angular/angular/blob/main/packages/core/src/render3/di.ts) — node injector, bloom filter, and DI traversal
 - [`packages/core/src/di/injector.ts`](https://github.com/angular/angular/blob/main/packages/core/src/di/injector.ts) — abstract `Injector` class and `Injector.create()`
 - [`packages/core/src/di/injector_compatibility.ts`](https://github.com/angular/angular/blob/main/packages/core/src/di/injector_compatibility.ts) — `inject()`, `ɵɵinject()`, and flag conversion
+
+
+
+

@@ -10,6 +10,8 @@ tags: [angular, change-detection, zonejs, zoneless, signals]
 
 **TL;DR:** Does Angular trigger change detection because it specifically knows which component's state just changed, or because *something* async finished somewhere in the whole application? With Zone.js, it's the second one — any of the dozens of global async APIs Zone.js monkey-patches (`setTimeout`, `Promise`, event listeners) emptying its microtask queue triggers a full, application-wide check, with zero information about what actually changed. Zoneless replaces that blanket trigger with typed, explicit notifications — a `NotificationSource` enum value that sets a *specific* dirty flag — so the scheduler knows something closer to what actually needs checking, not just that time passed.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Angular needs to know when to re-render a component tree after its state changes — but the naive options are both bad. Constantly polling for changes wastes CPU checking things that never changed. Requiring developers to manually call `detectChanges()` after every state mutation is exactly the kind of easy-to-forget discipline that produces stale-UI bugs the moment someone writes an async callback and doesn't remember the manual call.
@@ -180,3 +182,7 @@ A: It's a real, deliberate tradeoff — a microtask-scheduled tick runs sooner (
 - **Concept:** Zone.js-based vs. zoneless Angular change detection scheduling
 - **Domain:** angular
 - **Repo:** [angular/angular](https://github.com/angular/angular) → [`packages/core/src/change_detection/scheduling/ng_zone_scheduling.ts`](https://github.com/angular/angular/blob/main/packages/core/src/change_detection/scheduling/ng_zone_scheduling.ts), [`packages/core/src/change_detection/scheduling/zoneless_scheduling_impl.ts`](https://github.com/angular/angular/blob/main/packages/core/src/change_detection/scheduling/zoneless_scheduling_impl.ts) — the Angular framework's own source
+
+
+
+

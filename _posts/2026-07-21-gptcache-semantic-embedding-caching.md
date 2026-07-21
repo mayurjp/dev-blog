@@ -5,6 +5,8 @@ categories: [genai]
 tags: [gptcache, llm-caching, embedding-similarity, cost-optimization, semantic-cache, rag-cost]
 order: 17
 ---
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 
 ## TL;DR
 
@@ -286,3 +288,7 @@ A: Not directly. Each request in a batch would go through the cache pipeline ind
 - [`gptcache/adapter/adapter.py`](https://github.com/zilliztech/GPTCache/blob/main/gptcache/adapter/adapter.py) — core `adapt()` and `aadapt()` orchestration
 - [`gptcache/processor/pre.py`](https://github.com/zilliztech/GPTCache/blob/main/gptcache/processor/pre.py) — prompt pre-processing strategies
 - [GPTCache GitHub](https://github.com/zilliztech/GPTCache) — full project repository
+
+
+
+

@@ -10,6 +10,8 @@ tags: [genai, vector-database, hnsw, qdrant, embeddings]
 
 **TL;DR:** When your vector collection grows beyond ~10k points, brute-force cosine search becomes linearly slower with every new embedding — HNSW solves this by organizing vectors into a layered navigable graph that achieves logarithmic-time approximate nearest neighbor search with sub-millisecond latency.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ---
 
 ## The Engineering Problem
@@ -547,3 +549,7 @@ This post examines the HNSW implementation from the [qdrant/qdrant](https://gith
 - [`lib/segment/src/index/hnsw_index/graph_layers_builder.rs`](https://github.com/qdrant/qdrant/blob/master/lib/segment/src/index/hnsw_index/graph_layers_builder.rs) — Graph construction (`link_new_point`, `link_with_heuristic`)
 - [`lib/segment/src/index/hnsw_index/search_context.rs`](https://github.com/qdrant/qdrant/blob/master/lib/segment/src/index/hnsw_index/search_context.rs) — `SearchContext` priority queue core
 - [`lib/segment/src/index/hnsw_index/entry_points.rs`](https://github.com/qdrant/qdrant/blob/master/lib/segment/src/index/hnsw_index/entry_points.rs) — Entry point management and fallback pools
+
+
+
+

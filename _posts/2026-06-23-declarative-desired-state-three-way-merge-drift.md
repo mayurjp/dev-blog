@@ -10,6 +10,8 @@ tags: [gitops, argo-cd, kubernetes, drift-detection, three-way-merge]
 
 **TL;DR:** Does "declarative desired state as the single source of truth" mean a GitOps controller reverts *any* manual change to a resource it manages? No — editing a field the git manifest actually declares gets silently reverted, but adding a field git never mentioned (another controller's label, a manually-added annotation) is often left completely alone. That's not inconsistent behavior — it's the same three-way-merge mechanism `kubectl apply` has always used: a merge patch computed from what was *previously* declared, what's *currently* declared, and what's *live*, which structurally excludes anything that was never declared in the first place.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 "The GitOps controller reverts manual changes" sounds like a simple, absolute rule — but it doesn't match what teams actually observe. A `kubectl edit` that changes a `replicas` field or a container image tag declared in the git manifest gets reverted within a sync cycle. A `kubectl edit` that adds a brand-new label, or an unrelated mutating webhook injecting a sidecar container into a Pod spec, often survives indefinitely without being flagged as drift at all.
@@ -165,3 +167,7 @@ A: A one-off `kubectl apply` computes this three-way merge once, at apply time, 
 - **Concept:** Declarative desired state, drift detection, and the three-way merge patch mechanism
 - **Domain:** gitops
 - **Repo:** [argoproj/gitops-engine](https://github.com/argoproj/gitops-engine) → [`pkg/diff/diff.go`](https://github.com/argoproj/gitops-engine/blob/master/pkg/diff/diff.go) — the shared diff/sync library Argo CD's own controller is built on
+
+
+
+

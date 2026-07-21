@@ -9,6 +9,8 @@ tags: [microservices, grpc, streaming, http2]
 
 **TL;DR:** Why does gRPC define four different shapes for a single RPC call? Because request/response doesn't fit every interaction — gRPC lets a `.proto` contract declare unary, client-streaming, server-streaming, or bidirectional streaming, all riding the same HTTP/2 connection's native multiplexed framing instead of needing polling or a separate WebSocket layer.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`grpc/grpc-dotnet`](https://github.com/grpc/grpc-dotnet)
 
 ## 1. The Engineering Problem: request/response doesn't fit every real interaction
@@ -163,3 +165,7 @@ Known-stale fact: gRPC streaming fundamentally depends on HTTP/2's multiplexed f
 - **Concept:** gRPC streaming modes (unary vs server/client/bidi streaming)
 - **Domain:** microservices
 - **Repo:** [grpc/grpc-dotnet](https://github.com/grpc/grpc-dotnet) → [`examples/Aggregator/Server/Services/AggregatorService.cs`](https://github.com/grpc/grpc-dotnet/blob/master/examples/Aggregator/Server/Services/AggregatorService.cs), [`testassets/FunctionalTestsWebsite/Services/ChatterService.cs`](https://github.com/grpc/grpc-dotnet/blob/master/testassets/FunctionalTestsWebsite/Services/ChatterService.cs) — the official gRPC implementation for .NET.
+
+
+
+

@@ -7,6 +7,8 @@ categories: microservices
 order: 90
 tags: [microservices, troubleshooting, debugging, distributed-tracing, opentelemetry, dotnet]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -155,3 +157,7 @@ var tenantId = Baggage.GetBaggage("tenant-id");
 
 - `open-telemetry/opentelemetry-dotnet` — `Activity.Current` semantics: [github.com/open-telemetry/opentelemetry-dotnet](https://github.com/open-telemetry/opentelemetry-dotnet)
 - W3C Trace Context spec: [w3c.github.io/trace-context](https://w3c.github.io/trace-context/)
+
+
+
+

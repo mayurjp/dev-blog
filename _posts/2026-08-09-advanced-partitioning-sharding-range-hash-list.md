@@ -10,6 +10,8 @@ tags: [databases, partitioning, sharding, postgresql, range-partitioning, hash-p
 
 **TL;DR:** "Partition the table" hides a real per-row decision that runs on every single `INSERT` — which partition does *this* row belong to — and Postgres answers it with three genuinely different algorithms depending on the declared strategy: a range comparison walk for `RANGE`, a binary search over sorted list values for `LIST`, and a modulo over a computed hash for `HASH` — the same engine, three distinct routing mechanisms, each with a different failure mode under skewed data.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: picking a partitioning strategy is really picking which skew you're willing to accept
@@ -194,3 +196,7 @@ A: For list and range, a row must first fail to match any explicit bound (a full
 - **Concept:** Advanced partitioning & sharding strategies (range vs hash vs list, composite keys, hot-spot avoidance)
 - **Domain:** databases
 - **Repo:** [postgres/postgres](https://github.com/postgres/postgres) → [`src/backend/executor/execPartition.c`](https://github.com/postgres/postgres/blob/master/src/backend/executor/execPartition.c), [`src/backend/partitioning/partbounds.c`](https://github.com/postgres/postgres/blob/master/src/backend/partitioning/partbounds.c) — the actual PostgreSQL server source, showing per-row partition routing at the database-engine level, distinct from Vitess's distributed shard-routing layer covered separately in System Design.
+
+
+
+

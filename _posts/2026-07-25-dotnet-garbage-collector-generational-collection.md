@@ -10,6 +10,8 @@ tags: [dotnet, garbage-collector, gc, memory-management, runtime]
 
 **TL;DR:** Does the .NET GC scan the entire managed heap every time it runs? No — it divides objects into generations (gen0, gen1, gen2) based on survival age, collecting the youngest generation most frequently because short-lived objects die fast, while long-lived objects are promoted upward and collected rarely. This is why a gen0 collection takes microseconds, not milliseconds.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Without generational collection, every garbage collection must walk the entire managed heap — every live object, every dead object, every pointer. For a process with 200 MB of managed memory, that means scanning 200 MB of pointers on *every* collection, even if 90% of the garbage was created in the last millisecond.
@@ -328,3 +330,7 @@ A: Workstation GC uses a single heap with one GC thread, optimized for low-laten
 - **Concept:** Generational garbage collection in the .NET CLR — the weak generational hypothesis applied to managed memory
 - **Domain:** dotnet
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/coreclr/gc/gc.cpp`](https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp) — the CLR GC implementation containing generation initialization, allocation state machine, and GC trigger logic; [`docs/design/coreclr/botr/garbage-collection.md`](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/garbage-collection.md) — the official GC design document by Maoni Stephens explaining generational architecture, the allocation budget, and the mark/plan/compact/sweep phases.
+
+
+
+

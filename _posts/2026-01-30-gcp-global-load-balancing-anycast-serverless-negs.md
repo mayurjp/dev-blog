@@ -9,6 +9,8 @@ tags: [gcp, load-balancing, anycast, cloud-run]
 
 **TL;DR:** How does one global IP address route users to the nearest regional backend? A single global anycast IP is announced from many of Google's edge locations at once, so BGP routes each user to the nearest one with no DNS involved; Serverless NEGs then let the load balancer reference a Cloud Run service by name rather than a fixed IP, so it stays correctly routed even as instances scale to zero and back.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`terraform-google-modules/terraform-google-lb-http`](https://github.com/terraform-google-modules/terraform-google-lb-http)
 
 ## 1. The Engineering Problem: regional load balancers need a global routing layer, and serverless backends have no fixed IP to target
@@ -133,3 +135,7 @@ Known-stale fact: a common assumption carried over from other platforms is that 
 - **Concept:** Cloud Load Balancing (global HTTP(S) LB, backend services)
 - **Domain:** gcp
 - **Repo:** [terraform-google-modules/terraform-google-lb-http](https://github.com/terraform-google-modules/terraform-google-lb-http) → [`main.tf`](https://github.com/terraform-google-modules/terraform-google-lb-http/blob/main/main.tf), [`modules/serverless_negs/main.tf`](https://github.com/terraform-google-modules/terraform-google-lb-http/blob/main/modules/serverless_negs/main.tf) — Google's own real, versioned Terraform global HTTP(S) load balancer module.
+
+
+
+

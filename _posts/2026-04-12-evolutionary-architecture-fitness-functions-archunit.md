@@ -6,6 +6,8 @@ categories: architecture
 order: 12
 tags: [architecture, evolutionary-architecture, fitness-functions, archunit, java]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: an architecture rule enforced only by human vigilance decays the moment vigilance lapses once
 
@@ -114,3 +116,7 @@ Known-stale fact: architecture is sometimes treated as a static, one-time analys
 - **Concept:** Evolutionary/fitness-function-driven architecture
 - **Domain:** architecture
 - **Repo:** [TNG/ArchUnit](https://github.com/TNG/ArchUnit) → [`archunit-example/example-junit5/.../LayeredArchitectureTest.java`](https://github.com/TNG/ArchUnit/blob/main/archunit-example/example-junit5/src/test/java/com/tngtech/archunit/exampletest/junit5/LayeredArchitectureTest.java), [`archunit-self-test/.../ArchUnitArchitectureTest.java`](https://github.com/TNG/ArchUnit/blob/main/archunit-self-test/src/test/java/com/tngtech/archunit/ArchUnitArchitectureTest.java) — a real, widely used Java architecture-testing library that enforces its own architecture with itself.
+
+
+
+

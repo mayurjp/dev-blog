@@ -9,6 +9,8 @@ tags: [observability, opentelemetry, metrics, logs, traces, csharp]
 
 **TL;DR:** Why does turning on OpenTelemetry require three separate configuration calls instead of one? Because logs, metrics, and traces are three structurally different instrumentation APIs (`Logging.AddOpenTelemetry`, `WithMetrics`, `WithTracing`) that only converge at the final export step, so each pillar needs its own explicit registration even though they all end up going to the same OTLP collector.
 
+> **In plain English (30 sec):** Logs with traceId that follows request across services.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "observability" sounds like one concern, but it has to answer three structurally different questions
@@ -125,3 +127,7 @@ Known-stale fact: "just instrument everything with OpenTelemetry" is sometimes t
 - **Concept:** The three pillars of observability (metrics, logs, traces)
 - **Domain:** observability
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.ServiceDefaults/Extensions.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.ServiceDefaults/Extensions.cs) — a real, actively maintained reference application's shared OpenTelemetry configuration, applied consistently across every service.
+
+
+
+

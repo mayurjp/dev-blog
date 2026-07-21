@@ -9,6 +9,8 @@ tags: [design-patterns, observer, rxnet, concurrency]
 
 **TL;DR:** How do you notify 1,000 subscribers without a lock blocking every notification? By making the observer list an immutable array that's swapped atomically with `Interlocked.CompareExchange` on subscribe/unsubscribe, so publishing a notification only ever needs a single lock-free read of the current array.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/reactive`](https://github.com/dotnet/reactive)
 
 ## 1. The Engineering Problem: the textbook Observer pattern isn't thread-safe, and locking the hot path is expensive
@@ -137,3 +139,7 @@ Known-stale fact: the classic GoF-era Observer pattern diagram typically shows a
 - **Concept:** Observer pattern (in-process event subscription/pub-sub)
 - **Domain:** design-patterns
 - **Repo:** [dotnet/reactive](https://github.com/dotnet/reactive) → [`Rx.NET/Source/src/System.Reactive/Subjects/Subject.cs`](https://github.com/dotnet/reactive/blob/main/Rx.NET/Source/src/System.Reactive/Subjects/Subject.cs) — Rx.NET's real, production `IObservable<T>`/`IObserver<T>` implementation.
+
+
+
+

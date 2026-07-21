@@ -10,6 +10,8 @@ tags: [docker, production, logging-drivers, secrets-management, docker-compose, 
 
 **TL;DR:** Why does the exact `docker-compose.yml` that works fine on a laptop turn into a full disk and an exposed credential in production? Docker's default logging driver (`json-file`) never rotates or caps a container's log file unless `max-size`/`max-file` are set explicitly, environment-variable "secrets" are always visible via `docker inspect` regardless of which compose key set them, and neither problem shows up on a laptop where containers run for minutes and get thrown away — only in production, where the same container runs for weeks.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repos:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted), [`moby/moby`](https://github.com/moby/moby)
 
 ## 1. The Engineering Problem: dev and prod run the *same* compose file under *different* physics
@@ -241,3 +243,7 @@ A: No — they solve different parts of the same problem and combine well. `dock
 - **Domain:** docker
 - **Repo:** [getsentry/self-hosted](https://github.com/getsentry/self-hosted) → [`docker-compose.yml`](https://github.com/getsentry/self-hosted/blob/master/docker-compose.yml), [`.env`](https://github.com/getsentry/self-hosted/blob/master/.env), [`install/generate-secret-key.sh`](https://github.com/getsentry/self-hosted/blob/master/install/generate-secret-key.sh), [`install/ensure-relay-credentials.sh`](https://github.com/getsentry/self-hosted/blob/master/install/ensure-relay-credentials.sh) — Sentry's real self-hosted production deployment.
 - **Repo:** [moby/moby](https://github.com/moby/moby) → [`daemon/logger/jsonfilelog/jsonfilelog.go`](https://github.com/moby/moby/blob/master/daemon/logger/jsonfilelog/jsonfilelog.go) — the Docker Engine's own default logging driver implementation.
+
+
+
+

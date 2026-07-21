@@ -10,6 +10,8 @@ tags: [multicloud, glossary, terraform, crossplane, istio]
 
 **TL;DR:** This is the shared vocabulary for every multi-cloud post on this blog — provisioning, identity, networking, and portability terms, each defined at the mechanism level so later posts can reference them without re-explaining.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Provisioning
 
 ### multi-cloud
@@ -94,3 +96,7 @@ A pre-approved, policy-bound baseline environment (accounts, networks, IAM, logg
 The charge a provider bills to move data OUT of its network to the internet or another cloud. Cross-provider traffic is the expensive axis of multi-cloud; chatty east-west calls that leave one cloud to hit another can dominate the bill.
 
 **Closing:** Keep this page open while reading the 101 and follow-ups — every term here shows up again as a concrete component or a trap to avoid.
+
+
+
+

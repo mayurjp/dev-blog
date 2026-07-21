@@ -10,6 +10,8 @@ tags: [genai, embeddings, vector-search, hnsw, qdrant, cosine-similarity]
 
 **TL;DR:** Does finding the "closest" embedding to a query really mean computing `dot(a,b) / (|a| * |b|)` fresh against every stored vector, and comparing the query to the entire index one by one? Neither, in a real production vector database: cosine similarity is normalized away into a plain dot product by pre-processing every vector to unit length *once*, at insert time — so there's no division or square root left to compute per comparison — and approximate nearest-neighbor search (HNSW) replaces a full linear scan with a greedy descent through a small, hierarchical graph, only doing a real wide search at the very end.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Semantic search needs to find, out of potentially millions of stored embeddings, the ones closest in meaning to a query embedding. The naive approach does two expensive things by default:
@@ -202,3 +204,7 @@ A: HNSW is one real, widely-used approach (also used by this domain's curated `r
 - **Concept:** Cosine-similarity normalization and HNSW approximate nearest-neighbor search
 - **Domain:** genai
 - **Repo:** [qdrant/qdrant](https://github.com/qdrant/qdrant) → [`lib/segment/src/spaces/simple.rs`](https://github.com/qdrant/qdrant/blob/master/lib/segment/src/spaces/simple.rs), [`lib/segment/src/index/hnsw_index/graph_layers.rs`](https://github.com/qdrant/qdrant/blob/master/lib/segment/src/index/hnsw_index/graph_layers.rs) — a real, open-source vector database with genuine ANN index internals
+
+
+
+

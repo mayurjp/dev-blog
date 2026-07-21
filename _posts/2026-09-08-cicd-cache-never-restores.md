@@ -10,6 +10,8 @@ tags: [cicd, troubleshooting, debugging, github-actions, actions-cache, build-pe
 
 **TL;DR:** The cache is being *saved* fine — it is never *found*, because the primary key embeds `$&#123;&#123; github.sha &#125;&#125;`, which is unique to a commit that has never existed before, and the `restore-keys` list repeats that same SHA-bearing string, so the prefix fallback has nothing broader to match against.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 ## The symptom
 
 > "We added `actions/cache` three weeks ago and `npm ci` still takes the full 2m40s on every run. The restore step always logs `Cache not found for input keys`. But the save step at the end of the job clearly works — Settings → Actions → Caches shows 180 entries, 9.4 GB, all created by this workflow. It writes caches nobody ever reads. Two consecutive pushes to the same branch, no dependency changes, still a miss."
@@ -255,3 +257,7 @@ You can, from Settings → Actions → Caches or via the REST API, and it is wor
 - **Docs/Repo:** [actions/cache](https://github.com/actions/cache) — the action's own `src/restoreImpl.ts` and `src/saveImpl.ts` are the source for the exact `Cache not found for input keys: ...`, `Cache restored from key: ...`, `Cache saved with key: ...` and `Cache hit occurred on the primary key ..., not saving cache.` log strings, and for `cache-hit` being set from an exact-match comparison
 - **Docs/Repo:** [Dependency caching reference — GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching) — establishes the restore-keys prefix search and "most recently created cache" tiebreak, the current-branch / default-branch / base-branch read scope, the merge-ref scoping of PR-created caches, the 10 GB repository limit, the last-access eviction order, and the 7-day unused-cache removal
 - **Docs/Repo:** [actions/toolkit — `packages/cache`](https://github.com/actions/toolkit/tree/main/packages/cache) — `getCacheVersion` in `src/internal/cacheUtils.ts` shows the cache version is a SHA-256 over the `path` inputs, compression method and version salt, which is why editing `path:` invalidates entries under an unchanged key
+
+
+
+

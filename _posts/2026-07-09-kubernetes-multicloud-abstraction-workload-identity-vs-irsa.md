@@ -10,6 +10,8 @@ tags: [multicloud, kubernetes, gke, eks, workload-identity, irsa]
 
 **TL;DR:** Does "Kubernetes is the multi-cloud abstraction layer" mean a ServiceAccount that grants a pod cloud IAM permissions works identically on GKE and EKS? The Kubernetes-side object is genuinely the same — a `ServiceAccount` with an annotation — but what happens on the cloud side of that annotation is structurally different. GKE's Workload Identity is a *bidirectional* binding: a separate GCP service account, plus an explicit IAM policy grant naming the exact Kubernetes ServiceAccount allowed to impersonate it. AWS's IRSA is a *unilateral* trust policy: the IAM role itself trusts any token whose subject claim matches a specific `namespace:name` string, issued by a per-cluster OIDC provider. Same Kubernetes API surface, genuinely different security architecture underneath.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 The pitch for Kubernetes as a multi-cloud abstraction layer is real as far as it goes: a `Deployment`, a `Service`, a `ServiceAccount` are the same API objects whether the cluster is GKE, EKS, or AKS. But a real workload usually needs more than compute — it needs to call cloud-native services (an object storage bucket, a managed database, a secrets manager) with real, scoped permissions. "How does a pod get cloud credentials" is exactly the kind of integration where a thin API-surface abstraction runs out fastest: a team that assumes "grant the ServiceAccount permissions" works the same way everywhere hits a wall the first time it tries to port that specific piece of config between clouds.
@@ -183,3 +185,7 @@ A: An abstraction can hide the *authoring* difference behind one interface, simi
 - **Concept:** Kubernetes ServiceAccount-to-cloud-IAM identity binding across providers
 - **Domain:** multicloud
 - **Repo:** [terraform-google-modules/terraform-google-kubernetes-engine](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine) → [`modules/workload-identity/main.tf`](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine/blob/master/modules/workload-identity/main.tf); [terraform-aws-modules/terraform-aws-iam](https://github.com/terraform-aws-modules/terraform-aws-iam) → [`modules/iam-role-for-service-accounts/main.tf`](https://github.com/terraform-aws-modules/terraform-aws-iam/blob/master/modules/iam-role-for-service-accounts/main.tf) — real, widely-used Terraform modules for GKE Workload Identity and AWS IRSA
+
+
+
+

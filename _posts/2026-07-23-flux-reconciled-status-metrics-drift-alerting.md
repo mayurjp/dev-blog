@@ -10,6 +10,8 @@ tags: [gitops, flux, observability, drift-detection, prometheus, kube-state-metr
 
 **TL;DR:** Did Flux break your drift alerts in v2.6? Not exactly — but it removed the shortcut. `gotk_reconcile_condition` no longer exists as a controller-emitted metric, and `gotk_reconcile_duration_seconds_count` no longer carries a `result` label. If your Prometheus alerts counted "error reconciliations" by filtering on that label, they now fire on nothing. The actual signal was never in the controller's metric output — it's in the Kubernetes status conditions on the Kustomization object itself, which kube-state-metrics can surface as `gotk_resource_info` with the `ready` label, or more precisely via custom `customResourceState` config that reads `status.conditions`.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The Engineering Problem
 
 When Flux v2.6 shipped, several teams discovered their Grafana dashboards and PagerDuty alerts went silent. The old PromQL pattern was straightforward:
@@ -454,3 +456,7 @@ This post is based on the following files from the [`fluxcd/kustomize-controller
 - [Flux Prometheus metrics docs](https://fluxcd.io/flux/monitoring/metrics/) — Official documentation for controller and resource metrics, including kube-state-metrics `gotk_resource_info` configuration
 - [Flux alerts docs](https://fluxcd.io/flux/monitoring/alerts/) — Notification controller event routing, severity levels, and commit status providers
 - [Discussion #5653](https://github.com/fluxcd/flux2/discussions/5653) — Community report confirming `gotk_reconcile_condition` removal and `result` label absence in Flux v2.6
+
+
+
+

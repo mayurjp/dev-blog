@@ -10,6 +10,8 @@ tags: [microservices, fundamentals, architecture]
 
 **TL;DR:** A microservice is one deployable unit that owns one job and its own data, and talks to others over the network. Google's real **Online Boutique** demo is 11 such services (cart, checkout, payment, shipping…) in 5 languages — a perfect worked example. The hard part isn't splitting the code; it's that every call can fail, every service owns its own database, and one purchase now spans five network hops.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. What is a microservice (and what it isn't)
 
 A **monolith** is one process: the cart, the catalog, and the checkout are functions that call each other in memory and share one database. A **microservice** breaks that into independent deployable units — each owns a single responsibility and exposes it over the network, usually via an API.
@@ -107,3 +109,7 @@ Example system and service topology from Google's real [microservices-demo (Onli
 ## Next in the series
 
 → [Service Decomposition & Bounded Contexts]({{ '/microservices/service-decomposition-and-bounded-contexts/' | relative_url }})
+
+
+
+

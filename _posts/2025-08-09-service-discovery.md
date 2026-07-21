@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** How does a caller find a service instance whose IP changes every restart? A service registry turns discovery into a heartbeat protocol — instances register and keep re-announcing themselves on an interval, and callers query the registry for the current instance list instead of reading a static config file.
 
+> **In plain English (30 sec):** Like DNS for services — ask 'where is payment-service?'
+
 **Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
@@ -233,3 +235,7 @@ What this teaches that a hello-world can't:
 - **Concept:** Service discovery
 - **Domain:** microservices
 - **Repo:** [spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices) → [`spring-petclinic-discovery-server/src/main/java/org/springframework/samples/petclinic/discovery/DiscoveryServerApplication.java`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-discovery-server/src/main/java/org/springframework/samples/petclinic/discovery/DiscoveryServerApplication.java) and [spring-petclinic/spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config) → [`application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/application.yml), [`customers-service.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/customers-service.yml) — Spring Cloud reference microservices architecture
+
+
+
+

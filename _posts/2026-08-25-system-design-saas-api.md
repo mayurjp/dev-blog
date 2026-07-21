@@ -7,6 +7,8 @@ categories: aspnet-webapi
 order: 4
 tags: [aspnet-webapi, system-design, api-design, multi-tenant, saas]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The problem
 
@@ -344,3 +346,7 @@ public class AuditLogMiddleware
 - ASP.NET Core ProblemDetails: [learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors#problem-details](https://learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors#problem-details)
 - FluentValidation: [docs.fluentvalidation.net](https://docs.fluentvalidation.net/)
 - RFC 7807 Problem Details: [tools.ietf.org/html/rfc7807](https://tools.ietf.org/html/rfc7807)
+
+
+
+

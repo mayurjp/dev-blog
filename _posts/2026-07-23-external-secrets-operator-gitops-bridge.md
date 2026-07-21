@@ -10,6 +10,8 @@ tags: [gitops, secrets, external-secrets-operator, kubernetes, secret-management
 
 **TL;DR:** If your GitOps repo needs database passwords, API keys, or TLS certs, where do those values actually live? Encrypting them into the repo (SealedSecrets) still means ciphertext sits in git history forever. External Secrets Operator takes a different path: never store the value in git at all, just a reference to an external store, and let the operator's reconcile loop fetch the live value on a periodic refresh interval — the secret's real home stays outside git entirely.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 **Real repo:** [`external-secrets/external-secrets`](https://github.com/external-secrets/external-secrets)
 
 ## 1. The Engineering Problem
@@ -251,3 +253,7 @@ A: `SecretStore` is namespace-scoped — the auth credentials it references (ser
 - **Concept:** External Secrets Operator — bridging GitOps repos to external secret stores without storing plaintext in git
 - **Domain:** gitops
 - **Repo:** [external-secrets/external-secrets](https://github.com/external-secrets/external-secrets) → [`pkg/controllers/externalsecret/externalsecret_controller.go`](https://github.com/external-secrets/external-secrets/blob/main/pkg/controllers/externalsecret/externalsecret_controller.go) — the reconcile loop, refresh logic, and Secret lifecycle management; [`providers/v1/aws/parameterstore/parameterstore.go`](https://github.com/external-secrets/external-secrets/blob/main/providers/v1/aws/parameterstore/parameterstore.go) — AWS SSM Parameter Store provider with GetSecret, PushSecret, and gjson property extraction
+
+
+
+

@@ -8,6 +8,8 @@ order: 13
 source_repo: dotnet/runtime
 tags: [dotnet, native-aot, trimming, serialization, source-generation]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -312,3 +314,7 @@ A: No. There is no feature switch or trim attribute that says "keep all STJ refl
 - [`JsonSerializerOptions.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializerOptions.cs) — Options class with `[RequiresUnreferencedCode]` and `[RequiresDynamicCode]` on reflection-dependent properties.
 - [`DefaultJsonTypeInfoResolver.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Metadata/DefaultJsonTypeInfoResolver.cs) — Reflection-based resolver; the class the trimmer flags as unsafe.
 - [`JsonSerializerContext.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/JsonSerializerContext.cs) — Base class for source-generated contexts; `GetTypeInfo(Type)` is the trim-safe entry point.
+
+
+
+

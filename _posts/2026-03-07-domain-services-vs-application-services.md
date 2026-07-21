@@ -9,6 +9,8 @@ tags: [ddd, domain-services, application-services, csharp]
 
 **TL;DR:** A command handler orchestrates — so who decides an order's grace period expired? In theory, a domain service should; in this codebase's actual production code, it's a raw SQL query run from a separate background worker, while the command handler itself only sequences steps and delegates every real decision to the aggregate's own constructor and methods.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: not all logic fits neatly "on" one aggregate, and orchestration isn't a business rule either
@@ -128,3 +130,7 @@ Known-stale fact: many introductions to DDD present domain services as a routine
 - **Concept:** Domain services vs application services
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.API/Application/Commands/CreateOrderCommandHandler.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/Commands/CreateOrderCommandHandler.cs), [`src/OrderProcessor/Services/GracePeriodManagerService.cs`](https://github.com/dotnet/eShop/blob/main/src/OrderProcessor/Services/GracePeriodManagerService.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

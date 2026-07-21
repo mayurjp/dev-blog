@@ -9,6 +9,8 @@ tags: [docker, buildkit, caching, dockerfile]
 
 **TL;DR:** Why does `docker build --no-cache` still redownload nothing? A BuildKit cache mount (`RUN --mount=type=cache`) is a persistent scratch directory tracked by mount ID rather than layer digest, so unlike a regular layer's contents it's never baked into an image layer and survives even a `--no-cache` build that discards the entire layer graph.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [`grafana/grafana`](https://github.com/grafana/grafana)
 
 ## 1. The Engineering Problem: layer caching only helps until the first thing changes
@@ -119,3 +121,7 @@ Known-stale fact: BuildKit has been the default builder in current Docker Engine
 - **Concept:** BuildKit & build caching
 - **Domain:** docker
 - **Repo:** [grafana/grafana](https://github.com/grafana/grafana) → [`Dockerfile`](https://github.com/grafana/grafana/blob/main/Dockerfile) — Grafana's real multi-stage, multi-module build.
+
+
+
+

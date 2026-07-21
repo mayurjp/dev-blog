@@ -10,6 +10,8 @@ tags: [api-design, versioning, rest, api-governance]
 
 **TL;DR:** Which versioning scheme should an API use? URL path versioning (`/v1/...`) is the most interoperable and cache-friendly, while header and query-param versioning keep URLs clean but complicate caching and observability.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) — its API versioning middleware supports `UrlSegmentApiVersionReader`, `HeaderApiVersionReader`, and `QueryStringApiVersionReader`, making all three schemes first-class.
 
 ## 1. The Engineering Problem
@@ -115,3 +117,7 @@ What this teaches: versioning is a *routing concern*, not a business-logic conce
 - **Concept:** API versioning (path / header / query)
 - **Domain:** api-design
 - **Repo:** dotnet/aspnetcore → [src/Mvc/Mvc.Core](https://github.com/dotnet/aspnetcore/tree/main/src/Mvc/Mvc.Core) — ApiVersioning middleware with UrlSegment/Header/QueryString readers.
+
+
+
+

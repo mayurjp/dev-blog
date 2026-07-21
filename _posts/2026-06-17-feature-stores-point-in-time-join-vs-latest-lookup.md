@@ -10,6 +10,8 @@ tags: [mlops, feature-store, feast, training-serving-skew, point-in-time-correct
 
 **TL;DR:** Shouldn't "the feature value at prediction time" for training and "the feature value right now" for serving just be the same lookup, evaluated at different moments? No — because a training example's "prediction time" is a specific historical timestamp already baked into the training data, and naively joining a feature's *latest* value onto that historical example lets the model see data from *after* the label happened (a leak, not a feature). Feast implements this as two genuinely different queries: `get_historical_features` does a point-in-time join that explicitly excludes anything newer than each example's own timestamp; `get_online_features` has no such constraint at all — it just returns whatever the latest value is right now, because production serving only ever has "now."
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`feast-dev/feast`](https://github.com/feast-dev/feast)
 
 ## 1. The Engineering Problem
@@ -192,3 +194,7 @@ A: General — it's the defining problem any feature store claiming to solve tra
 - **Concept:** Point-in-time correct feature joins vs. latest-value online lookups
 - **Domain:** mlops
 - **Repo:** [feast-dev/feast](https://github.com/feast-dev/feast) → [`sdk/python/feast/feature_store.py`](https://github.com/feast-dev/feast/blob/master/sdk/python/feast/feature_store.py), [`sdk/python/feast/infra/offline_stores/dask.py`](https://github.com/feast-dev/feast/blob/master/sdk/python/feast/infra/offline_stores/dask.py) — the canonical open-source feature store
+
+
+
+

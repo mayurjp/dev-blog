@@ -9,6 +9,8 @@ tags: [security, oauth2, refresh-tokens, token-rotation]
 
 **TL;DR:** What happens when a stolen refresh token gets used after the real client already used it? Every refresh rotates the token — issuing a new one and invalidating the old — so if that already-consumed old token is ever replayed, the server can't tell attacker from legitimate retry and revokes the entire token family instead.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 
 ## 1. The Engineering Problem: short-lived access tokens push the risk onto a long-lived secret
@@ -128,3 +130,7 @@ Known-stale fact: a common assumption is that refresh tokens need less protectiv
 - **Concept:** Refresh tokens & revocation/rotation
 - **Domain:** security
 - **Repo:** [ory/hydra](https://github.com/ory/hydra) → [`fosite/handler/oauth2/flow_refresh.go`](https://github.com/ory/hydra/blob/master/fosite/handler/oauth2/flow_refresh.go) — Ory's real, production OAuth2/OIDC server.
+
+
+
+

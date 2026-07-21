@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** Why shouldn't changing a timeout require rebuilding the service? Because externalized configuration moves settings out of the build entirely — a dedicated config server serves configuration from git (or another store) keyed by application name and profile, and services fetch it over the network at startup instead of shipping it inside the artifact.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
@@ -238,3 +240,7 @@ What this teaches that a hello-world can't:
 - **Concept:** Externalized configuration
 - **Domain:** microservices
 - **Repo:** [spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices) → [`spring-petclinic-config-server/src/main/java/org/springframework/samples/petclinic/config/ConfigServerApplication.java`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-config-server/src/main/java/org/springframework/samples/petclinic/config/ConfigServerApplication.java), [`spring-petclinic-config-server/src/main/resources/application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-config-server/src/main/resources/application.yml) and [spring-petclinic/spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config) → [`application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/application.yml), [`customers-service.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/customers-service.yml) — Spring Cloud Config server and its git-backed config repo
+
+
+
+

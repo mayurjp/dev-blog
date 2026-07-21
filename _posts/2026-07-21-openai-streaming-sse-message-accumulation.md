@@ -10,6 +10,8 @@ tags: [genai, streaming, sse, openai, python-sdk, server-sent-events]
 
 **TL;DR:** Streaming from the OpenAI API sends tokens one at a time over Server-Sent Events, but the wire protocol delivers raw bytes that arrive in arbitrary chunk sizes -- a single HTTP chunk might contain half an SSE event, multiple events, or a fragment that spans two events. The SDK's `SSEDecoder` must buffer bytes until it sees the double-newline delimiter (`\n\n`) that marks a complete SSE frame, only then deserializing the JSON payload into a `ChatCompletionChunk`. Each chunk carries a *delta* (a partial token or tool-call fragment), not a complete message. The SDK's `Stream.__stream__` method feeds these deltas into `process_response_data`, which Pydantic-parses them into typed objects. For the Assistants API, a separate `accumulate_event` function merges each delta into an in-memory snapshot so that by the time the stream ends, you have a full `Message` object -- deltas were never the final product; the accumulated snapshot was. Understanding this two-layer buffering (protocol-level chunking in `SSEDecoder`, semantic-level accumulation in `Stream.__stream__`) is what separates "I can stream text" from "I can build reliable streaming applications."
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 When you call `client.chat.completions.create(stream=True)`, you expect tokens to appear one by one. And they do -- in the UI. But under the hood, three layers of buffering stand between the TCP byte stream and the string you print.
@@ -505,3 +507,7 @@ A: Structurally, no. `AsyncStream` uses `async for` and `aiter_bytes` instead of
 - [`openai/openai-python` -- `src/openai/lib/streaming/_assistants.py`](https://github.com/openai/openai-python/blob/main/src/openai/lib/streaming/_assistants.py) -- `accumulate_event`, `accumulate_delta`, and the `AssistantEventHandler` snapshot accumulation
 - [`openai/openai-python` -- `src/openai/types/chat/chat_completion_chunk.py`](https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion_chunk.py) -- `ChatCompletionChunk`, `Choice`, and `ChoiceDelta` types
 - [`openai/openai-python` -- `src/openai/_base_client.py`](https://github.com/openai/openai-python/blob/main/src/openai/_base_client.py) -- `SyncAPIClient._make_sse_decoder` and the stream lifecycle management
+
+
+
+

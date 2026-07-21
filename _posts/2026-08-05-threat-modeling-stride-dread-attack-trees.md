@@ -10,6 +10,8 @@ tags: [security, threat-modeling, stride, dread, attack-trees]
 
 **TL;DR:** Why do threat modeling exercises so often turn into a shallow six-box checklist that gets filled in once and never questioned? Because STRIDE isn't "ask these six questions about the whole system" — it's six threat categories, each of which only applies to *specific kinds* of diagram elements (an actor can be spoofed, a data store cannot), and skipping that element-type filter is exactly what produces the generic, low-signal threat lists this exercise gets a bad reputation for.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`OWASP/threat-dragon`](https://github.com/OWASP/threat-dragon)
 
 ## 1. The Engineering Problem: security review that happens after the design is already built
@@ -168,3 +170,7 @@ A: It maps onto real components directly: an `actor` is typically an end user or
 ---
 
 **Next in the Security series:** [API Security Hardening: Why Broken Object Level Authorization Tops the OWASP API Top 10]({{ '/security/api-security-hardening-owasp-api-top-10-bola/' | relative_url }})
+
+
+
+

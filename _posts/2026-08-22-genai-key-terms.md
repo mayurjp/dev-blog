@@ -10,6 +10,8 @@ tags: [genai, glossary, llm, rag, agents]
 
 **TL;DR:** This is the vocabulary reference for every GenAI post on this blog — read it once, then skip back here whenever a term like *embedding*, *RAG*, or *MCP* shows up. Each entry is a 2-4 sentence, mechanism-level definition, grouped by theme.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Foundations
 
 ### LLM (Large Language Model)
@@ -103,3 +105,7 @@ Guardrails are checks placed around model input and output — input validation,
 Evaluation is the systematic measurement of output quality — faithfulness to retrieved context, answer correctness, latency, and cost — usually via scored rubrics, LLM-judges, or held-out datasets. It is how you know a RAG or agent change actually helped rather than shifted the failure mode.
 
 **Closing:** Keep this page bookmarked — every other GenAI post on this blog assumes the terms above, and the [Generative AI 101]({{ '/genai/genai-101/' | relative_url }}) post puts them to work in a real RAG build.
+
+
+
+

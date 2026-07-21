@@ -9,6 +9,8 @@ tags: [docker, registries, oci, manifests]
 
 **TL;DR:** What actually happens when you run `docker push`? Every layer and image config is stored as a content-addressed blob keyed by its SHA-256 digest, and a manifest simply lists the digests making up one image, so pushing a rebuilt image only uploads blobs the registry doesn't already have — and a single tag can point to different manifests for different platforms via an image index.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`distribution/distribution`](https://github.com/distribution/distribution), [`opencontainers/image-spec`](https://github.com/opencontainers/image-spec)
 
 ## 1. The Engineering Problem: "upload the image" is the wrong mental model
@@ -143,3 +145,7 @@ Known-stale fact: Docker Hub's anonymous and free-tier pull rate limits (introdu
 - **Concept:** Registries & image distribution
 - **Domain:** docker
 - **Repo:** [distribution/distribution](https://github.com/distribution/distribution) → [`cmd/registry/config-example.yml`](https://github.com/distribution/distribution/blob/main/cmd/registry/config-example.yml) — the reference open-source OCI registry server; [opencontainers/image-spec](https://github.com/opencontainers/image-spec) → [`image-index.md`](https://github.com/opencontainers/image-spec/blob/main/image-index.md) — the canonical OCI Image Index specification.
+
+
+
+

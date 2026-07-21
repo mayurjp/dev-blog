@@ -9,6 +9,8 @@ tags: [architecture, modular-monolith, microservices, csharp]
 
 **TL;DR:** What would actually have to change to split this modular monolith into real microservices? Only the concrete class wired to `IEventsBus` — modules already communicate solely through published integration-event contracts and an event-bus interface, so swapping `InMemoryEventBusClient` for a real network client (RabbitMQ, Kafka) is a composition-root-only change, with no module's business logic touched.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kgrzybek/modular-monolith-with-ddd`](https://github.com/kgrzybek/modular-monolith-with-ddd)
 
 ## 1. The Engineering Problem: splitting into microservices too early pays a real distributed-systems tax for a boundary problem that doesn't need one yet
@@ -133,3 +135,7 @@ Known-stale fact: "microservices" and "good architecture" are often treated as s
 - **Concept:** Modular monolith vs microservices (when to actually split a system)
 - **Domain:** architecture
 - **Repo:** [kgrzybek/modular-monolith-with-ddd](https://github.com/kgrzybek/modular-monolith-with-ddd) → [`src/Modules/Meetings/IntegrationEvents/`](https://github.com/kgrzybek/modular-monolith-with-ddd/tree/master/src/Modules/Meetings/IntegrationEvents), [`src/Modules/Administration/Infrastructure/Configuration/EventsBus/EventsBusStartup.cs`](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/Modules/Administration/Infrastructure/Configuration/EventsBus/EventsBusStartup.cs), [`src/BuildingBlocks/Infrastructure/EventBus/InMemoryEventBusClient.cs`](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/src/BuildingBlocks/Infrastructure/EventBus/InMemoryEventBusClient.cs) — a real, widely cited, actively maintained modular monolith reference application.
+
+
+
+

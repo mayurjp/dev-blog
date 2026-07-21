@@ -9,6 +9,8 @@ tags: [system-design, scalability, load-balancing, distributed-systems, dotnet-o
 
 **TL;DR:** Does adding a tenth server actually help, or does it just move the bottleneck? Only if placement is load-aware — sampling a subset of nodes and scoring them on real-time CPU, memory, and active work count (as Orleans' `ResourceOptimizedPlacementDirector` does) — otherwise naive round-robin placement can leave the new server idle while others still fall over.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/orleans`](https://github.com/dotnet/orleans)
 
 ## 1. The Engineering Problem: bigger box vs. more boxes
@@ -176,3 +178,7 @@ What this teaches that a "just add more replicas" diagram can't:
 - **Concept:** Scalability fundamentals (vertical vs horizontal scaling)
 - **Domain:** system-design
 - **Repo:** [dotnet/orleans](https://github.com/dotnet/orleans) → [`src/Orleans.Runtime/Placement/ResourceOptimizedPlacementDirector.cs`](https://github.com/dotnet/orleans/blob/main/src/Orleans.Runtime/Placement/ResourceOptimizedPlacementDirector.cs) — Microsoft's actor-framework runtime, distributing grain activations across a live cluster
+
+
+
+

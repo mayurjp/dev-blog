@@ -10,6 +10,8 @@ tags: [mlops, glossary, machine-learning, production]
 
 **TL;DR:** This is the shared vocabulary for every MLOps post on this blog — a model is a learned function, a feature is the input you feed it, and the rest of the terms describe how you train, store, serve, and keep that function honest in production. Bookmark it; the 101 and the deeper posts link back here.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Training
 
 ### Model
@@ -108,3 +110,7 @@ Rollback switches serving back to the previous known-good model version when the
 Monitoring for ML watches three layers at once: infrastructure (latency, error rate, saturation of the serving pod), data (feature and prediction distributions for drift), and quality (prediction accuracy against delayed ground truth). It is broader than app monitoring because a model can be healthy on every system metric and still be silently wrong.
 
 That's the vocabulary. The [MLOps 101]({{ '/mlops/mlops-101/' | relative_url }}) post puts these terms into one worked example, and the deeper posts reference this glossary directly.
+
+
+
+

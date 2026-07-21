@@ -10,6 +10,8 @@ tags: [dotnet, caching, redis, idistributedcache, distributed-systems]
 
 **TL;DR:** How do you share cache across multiple app instances without stale data? Put an `IDistributedCache` abstraction in front of a single pooled `ConnectionMultiplexer`, and invalidate with explicit key removal plus a pub/sub broadcast for cross-node tag invalidation.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [dotnet/runtime](https://github.com/dotnet/runtime) (IDistributedCache) and [StackExchange/StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) (connection pooling)
 
 ## 1. The Engineering Problem
@@ -158,3 +160,7 @@ What this teaches:
 - **Domain:** dotnet
 - **Repo:** dotnet/runtime → [src/libraries/Microsoft.Extensions.Caching.Abstractions/src/IDistributedCache.cs](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Caching.Abstractions/src/IDistributedCache.cs) — the distributed cache abstraction
 - **Repo:** StackExchange/StackExchange.Redis → [src/StackExchange.Redis/ConnectionMultiplexer.cs](https://github.com/StackExchange/StackExchange.Redis/blob/main/src/StackExchange.Redis/ConnectionMultiplexer.cs) — pooled multiplexer + pub/sub subscriber
+
+
+
+

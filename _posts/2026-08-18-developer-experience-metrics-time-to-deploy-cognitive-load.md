@@ -10,6 +10,8 @@ tags: [platform-engineering, developer-experience, dx-metrics, dora, aspire]
 
 **TL;DR:** *How do you know if your platform is actually making developers faster, or just adding another layer?* Measure DX: time-to-first-deploy, inner-loop latency, and cognitive load — not just DORA's four keys.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [microsoft/aspire](https://github.com/microsoft/aspire)
 
 ## 1. The Engineering Problem
@@ -150,3 +152,7 @@ builder.Build().Run();
 - **Domain:** platform-engineering
 - **Repo:** [microsoft/aspire](https://github.com/microsoft/aspire) → [playground/waitfor/WaitForSandbox.AppHost/AppHost.cs](https://github.com/microsoft/aspire/blob/main/playground/waitfor/WaitForSandbox.AppHost/AppHost.cs) — single-file distributed app definition with ordering, health checks, replicas
 - **Repo:** [microsoft/aspire](https://github.com/microsoft/aspire) → [README.md](https://github.com/microsoft/aspire/blob/main/README.md) — code-first local dev + built-in OpenTelemetry dashboard
+
+
+
+

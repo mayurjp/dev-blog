@@ -10,6 +10,8 @@ tags: [platform-engineering, idp, kubernetes, backstage, cnoe]
 
 **TL;DR:** *How do you give 200 developers safe access to Kubernetes without turning each of them into a cluster operator?* You build an Internal Developer Platform — a product-managed abstraction over infrastructure — instead of handing everyone `kubectl`.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [cnoe-io/idpbuilder](https://github.com/cnoe-io/idpbuilder)
 
 ## 1. The Engineering Problem
@@ -143,3 +145,7 @@ spec:
 - **Domain:** platform-engineering
 - **Repo:** [cnoe-io/idpbuilder](https://github.com/cnoe-io/idpbuilder) → [README.md](https://github.com/cnoe-io/idpbuilder/blob/main/README.md) — single-binary IDP reference (Kubernetes + Argo CD + Backstage + Gitea)
 - **Repo:** [backstage/backstage](https://github.com/backstage/backstage) → [packages/catalog-model/examples/components/artist-lookup-component.yaml](https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/components/artist-lookup-component.yaml) — the catalog Component entity developers work with
+
+
+
+

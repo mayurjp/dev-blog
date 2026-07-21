@@ -9,6 +9,8 @@ tags: [mlops, ml-pipelines, kubeflow, dag, caching, python, go]
 
 **TL;DR:** A notebook trains a great model once — why does scheduling it as a nightly job fall apart, and what actually replaces it? A notebook's correctness depends on leftover kernel state, ad hoc installed packages, and click-order execution that a scheduler can't reproduce, and it has no way to skip re-running a step whose inputs didn't change; a real ML pipeline tool instead compiles the notebook into a DAG of independently containerized, content-addressed steps, so each step gets its own isolated image and dependencies, and a per-step fingerprint hash lets unchanged steps be skipped and reused from cache.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kubeflow/pipelines`](https://github.com/kubeflow/pipelines)
 
 ## 1. The Engineering Problem: a notebook's correctness depends on things a production job can't guarantee
@@ -210,3 +212,7 @@ Known-stale fact: "MLOps is just running your notebook on a schedule" is a commo
 - **Concept:** ML pipeline fundamentals (DAG-of-containers vs. notebook execution)
 - **Domain:** mlops
 - **Repo:** [kubeflow/pipelines](https://github.com/kubeflow/pipelines) → [`sdk/python/kfp/dsl/component_decorator.py`](https://github.com/kubeflow/pipelines/blob/master/sdk/python/kfp/dsl/component_decorator.py), [`backend/src/v2/driver/cache.go`](https://github.com/kubeflow/pipelines/blob/master/backend/src/v2/driver/cache.go), [`backend/src/v2/cacheutils/cache.go`](https://github.com/kubeflow/pipelines/blob/master/backend/src/v2/cacheutils/cache.go) — the real DAG-based ML pipeline orchestrator for Kubernetes.
+
+
+
+

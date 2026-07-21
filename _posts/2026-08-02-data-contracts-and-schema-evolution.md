@@ -10,6 +10,8 @@ tags: [microservices, kafka, schema-registry, avro, protobuf, data-contracts]
 
 **TL;DR:** What stops a producer's innocent field rename from silently corrupting every consumer reading the same Kafka topic? A schema registry that sits between producer and broker, rejects incompatible schema changes at publish time, and — when a break really is necessary — lets a registered migration rule transform old records into the new shape on read, so producer and consumer teams never have to deploy in lockstep.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`confluentinc/confluent-kafka-dotnet`](https://github.com/confluentinc/confluent-kafka-dotnet)
 
 ## 1. The Engineering Problem: the broker doesn't know or care what's inside a message
@@ -185,3 +187,7 @@ A: `SchemaRegistryConfig.Url` accepts a comma-separated list of registry URLs sp
 ---
 
 **Next in the Microservices series:** [Advanced Resilience Patterns: Load Shedding, Adaptive Concurrency, and Why Naive Retry Causes Cascading Failure]({{ '/microservices/advanced-resilience-patterns-load-shedding-adaptive-concurrency/' | relative_url }})
+
+
+
+

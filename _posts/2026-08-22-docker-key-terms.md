@@ -10,6 +10,8 @@ tags: [docker, glossary, containers]
 
 **TL;DR:** This is the reference page for the Docker vocabulary used throughout this blog's image, build, runtime, and operations posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
+> **In plain English (30 sec):** Like Git commits for filesystem — each Dockerfile line is cached layer.
+
 The posts in this domain assume you already know what an image layer or a `depends_on` condition is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Image, layers & the Dockerfile
@@ -118,3 +120,7 @@ A `cosign` signature proves *which identity produced a set of bytes* (via a keyl
 ---
 
 This page is a reference, not a lesson — each term above links to the post that takes it from definition to mechanism. If you read a post and hit an unfamiliar word, it should now resolve here.
+
+
+
+

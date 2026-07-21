@@ -11,6 +11,8 @@ source_files:
   - packages/forms/src/validators.ts
   - packages/forms/src/directives/reactive_directives/form_control_directive.ts
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -337,3 +339,7 @@ A: It's read by the `RequiredValidator` directive to bind `aria-required` on the
 - [`packages/forms/src/directives/shared.ts` -- `setUpValidators()` and `setUpControlValueAccessor()`](https://github.com/angular/angular/blob/main/packages/forms/src/directives/shared.ts)
 - [`packages/forms/src/validators.ts` -- `composeValidators()`, `mergeValidators()`, built-in validators](https://github.com/angular/angular/blob/main/packages/forms/src/validators.ts)
 - [`packages/forms/src/directives/reactive_directives/form_control_directive.ts` -- `FormControlDirective`](https://github.com/angular/angular/blob/main/packages/forms/src/directives/reactive_directives/form_control_directive.ts)
+
+
+
+

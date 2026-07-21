@@ -10,6 +10,8 @@ tags: [gcp, security, vpc-service-controls, org-policy, compliance, terraform]
 
 **TL;DR:** Why isn't correct IAM enough to stop a compromised, fully-authorized credential from copying a BigQuery dataset out to a personal Google account? Because IAM only ever answers "is this identity allowed to do this" — never "is this network context allowed to touch this resource at all." VPC Service Controls wraps a security perimeter around a set of projects (`google_access_context_manager_service_perimeter`) so that even a correctly-scoped, fully-authenticated principal is blocked from moving data across the boundary unless an explicit access level admits the request, while Organization Policy constraints (`google_organization_policy`) separately restrict which product-level behaviors are allowed at all, inherited down the org → folder → project hierarchy.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`terraform-google-modules/terraform-google-vpc-service-controls`](https://github.com/terraform-google-modules/terraform-google-vpc-service-controls) + [`terraform-google-modules/terraform-google-org-policy`](https://github.com/terraform-google-modules/terraform-google-org-policy)
 
 ## 1. The Engineering Problem: IAM answers "who," never "from where" or "what's allowed at all"
@@ -251,3 +253,7 @@ A: It still works and remains what most production modules use today, but Google
 - **Concept:** GCP security & compliance — VPC Service Controls perimeters (context-based access, dry-run rollout) and Organization Policy constraints (hierarchical capability restriction)
 - **Domain:** gcp
 - **Repo:** [terraform-google-modules/terraform-google-vpc-service-controls](https://github.com/terraform-google-modules/terraform-google-vpc-service-controls) → [`modules/regular_service_perimeter/main.tf`](https://github.com/terraform-google-modules/terraform-google-vpc-service-controls/blob/main/modules/regular_service_perimeter/main.tf), [`modules/access_level/main.tf`](https://github.com/terraform-google-modules/terraform-google-vpc-service-controls/blob/main/modules/access_level/main.tf) — Google's own real Terraform VPC-SC module; and [terraform-google-modules/terraform-google-org-policy](https://github.com/terraform-google-modules/terraform-google-org-policy) → [`boolean_constraints.tf`](https://github.com/terraform-google-modules/terraform-google-org-policy/blob/main/boolean_constraints.tf) — Google's own real Terraform Organization Policy module.
+
+
+
+

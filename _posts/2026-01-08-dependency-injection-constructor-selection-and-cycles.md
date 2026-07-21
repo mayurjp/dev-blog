@@ -9,6 +9,8 @@ tags: [design-patterns, dependency-injection, ioc, dotnet]
 
 **TL;DR:** How does a DI container decide which constructor to call when a class has three? It sorts constructors by parameter count and tries each from most to fewest parameters, picking the first one whose parameters are all resolvable — and separately tracks a chain of services currently being resolved so it can detect and fail fast on circular dependencies instead of overflowing the stack.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 
 ## 1. The Engineering Problem: a real object graph isn't always one clean constructor per class
@@ -138,3 +140,7 @@ Known-stale fact: many explanations of DI/IoC containers treat "how does it pick
 - **Concept:** Dependency Injection (constructor/setter injection, IoC containers)
 - **Domain:** design-patterns
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteFactory.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteFactory.cs), [`CallSiteChain.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.DependencyInjection/src/ServiceLookup/CallSiteChain.cs) — the real .NET dependency injection container.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [platform-engineering, developer-experience, internal-developer-platforms]
 
 **TL;DR:** Platform engineering exists because `kubectl apply` doesn't scale — not technically, but cognitively. When 200 developers all need to deploy services, configure monitoring, set up CI/CD, and manage secrets, the platform team builds an internal developer platform (IDP) that abstracts the infrastructure complexity into golden paths. The result: developers self-serve in minutes instead of filing tickets that take days.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. What platform engineering is (and what it isn't)
 
 **Platform engineering** is the discipline of building and maintaining an internal developer platform (IDP) that provides self-service infrastructure to development teams. It sits between DevOps/SRE (who manage production infrastructure) and application developers (who write business logic).
@@ -133,3 +135,7 @@ If you take one thing from this post: **a platform team builds a product for dev
 ## Source
 
 Platform engineering patterns verified against Backstage documentation (backstage.io), Google's book "Accelerate" and DORA metrics research, Spotify's engineering blog on Backstage adoption, and real internal platform implementations at companies like Zalando, Netflix, and Thoughtworks.
+
+
+
+

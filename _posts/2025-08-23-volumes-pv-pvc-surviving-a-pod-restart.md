@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** If a Pod is disposable, how does its data ever survive a restart? `emptyDir`, `configMap`, and `secret` volumes are Pod-scoped and die with the Pod, but a volume backed by a `PersistentVolumeClaim` survives — the PVC is just a request, bound to a cluster-scoped `PersistentVolume` that a StorageClass's provisioner creates independently of any one Pod or node.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: a container's filesystem dies with the container
@@ -175,3 +177,7 @@ prometheus+:: {
 - **Concept:** Kubernetes `Volume`, `PersistentVolume`, and `PersistentVolumeClaim` — Pod-scoped vs. durable storage
 - **Domain:** kubernetes
 - **Repo:** [prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus) → [`manifests/grafana-deployment.yaml`](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/grafana-deployment.yaml), [`examples/prometheus-pvc.jsonnet`](https://github.com/prometheus-operator/kube-prometheus/blob/main/examples/prometheus-pvc.jsonnet) — the production Prometheus + Alertmanager + Grafana monitoring stack
+
+
+
+

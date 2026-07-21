@@ -10,6 +10,8 @@ tags: [dotnet, aspire, cloud-native, opentelemetry, orchestration]
 
 **TL;DR:** How do you stand up a multi-service cloud-native app in .NET without hand-wiring service discovery, resilience, and telemetry? Declare resources in an *AppHost* and share a *ServiceDefaults* project so every service gets identical OpenTelemetry, health checks, and HTTP resilience for free.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [microsoft/aspire](https://github.com/microsoft/aspire)
 
 ## 1. The Engineering Problem
@@ -200,3 +202,7 @@ What this teaches:
 - **Domain:** dotnet
 - **Repo:** microsoft/aspire → [src/Aspire.ProjectTemplates/templates/aspire-servicedefaults/Extensions.cs](https://github.com/microsoft/aspire/blob/main/src/Aspire.ProjectTemplates/templates/aspire-servicedefaults/Extensions.cs) — the `AddServiceDefaults`/`ConfigureOpenTelemetry` template
 - **Repo:** microsoft/aspire → [src/Aspire.Hosting/DistributedApplicationBuilder.cs](https://github.com/microsoft/aspire/blob/main/src/Aspire.Hosting/DistributedApplicationBuilder.cs) — AppHost builder, dashboard/OTLP wiring
+
+
+
+

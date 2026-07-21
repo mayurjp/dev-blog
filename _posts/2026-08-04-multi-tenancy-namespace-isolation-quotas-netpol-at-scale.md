@@ -10,6 +10,8 @@ tags: [kubernetes, multi-tenancy, resourcequota, networkpolicy, namespace-isolat
 
 **TL;DR:** Creating a `Namespace` per tenant gives you naming isolation and an RBAC scoping boundary — nothing more. Without a `ResourceQuota`, one tenant's workload can consume the entire cluster's CPU/memory and starve every other tenant; without a default-deny `NetworkPolicy`, every Pod in every namespace can reach every other Pod in the cluster by default, tenant boundaries or not. Real multi-tenant clusters compose namespace-scoped `ResourceQuota`/`LimitRange` objects with namespace-scoped `NetworkPolicy` isolation — two independently-applied mechanisms, not one. From `kubernetes/website`'s real quota examples and `ahmetb/kubernetes-network-policy-recipes`' real isolation recipes.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 A platform team onboarding multiple teams (or, in a SaaS context, multiple customers) onto one cluster often starts with the obvious move: one `Namespace` per tenant. This genuinely buys something — `kubectl` commands, RBAC `Role`/`RoleBinding` scoping, and object naming all become tenant-scoped for free. But a `Namespace` on its own is a naming and API-scoping boundary, not a resource or network boundary. Two concrete failure modes follow directly from this gap:
@@ -191,3 +193,7 @@ A: Only for the narrowest definition of isolation — separate `kubectl` namespa
 - **Concept:** Multi-tenancy patterns — namespace isolation, resource quotas, and network policies at scale
 - **Domain:** kubernetes
 - **Repo:** [kubernetes/website](https://github.com/kubernetes/website) → [`content/en/examples/policy/priority-class-resourcequota.yaml`](https://github.com/kubernetes/website/blob/main/content/en/examples/policy/priority-class-resourcequota.yaml) — the Kubernetes project's own CI-tested reference example; [ahmetb/kubernetes-network-policy-recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes) → [`03-deny-all-non-whitelisted-traffic-in-the-namespace.md`](https://github.com/ahmetb/kubernetes-network-policy-recipes/blob/master/03-deny-all-non-whitelisted-traffic-in-the-namespace.md) — the community-canonical, CI-tested NetworkPolicy recipe collection.
+
+
+
+

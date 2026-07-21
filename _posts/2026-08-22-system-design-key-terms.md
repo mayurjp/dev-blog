@@ -10,6 +10,8 @@ tags: [system-design, glossary, scalability]
 
 **TL;DR:** This is the reference page for the system-design vocabulary used throughout this blog's scalability, consistency, caching, and resilience posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 The posts in this domain assume you already know what a replication backlog or a consistent-hash ring is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Consistency & replication
@@ -119,3 +121,7 @@ Backpressure is a system's way of signaling upstream producers to slow down when
 ---
 
 This page is a reference, not a lesson — each term above links to the post that takes it from definition to mechanism. If you read a post and hit an unfamiliar word, it should now resolve here.
+
+
+
+

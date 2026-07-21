@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** Should a mobile client know that catalog and ordering are different services? No — an API gateway (or a backend-for-frontend scoped to one client type) sits at the edge and owns routing, path rewriting, and cross-cutting policy, so clients see one stable surface instead of the internal service topology.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem
@@ -223,3 +225,7 @@ change-coordination bottleneck decomposition was meant to avoid.
 - **Concept:** API Gateway
 - **Domain:** microservices
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.AppHost/Extensions.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Extensions.cs), [`src/eShop.AppHost/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Program.cs), [`src/WebApp/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/WebApp/Program.cs) — .NET Aspire-orchestrated e-commerce reference architecture, YARP-based mobile BFF
+
+
+
+

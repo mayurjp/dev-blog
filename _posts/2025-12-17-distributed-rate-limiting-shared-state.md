@@ -10,6 +10,8 @@ tags: [system-design, rate-limiting, redis, distributed-systems]
 
 **TL;DR:** How do you rate-limit a client when their requests might hit any of 50 app servers? By moving the counter out of each instance's memory into shared state (Redis) that every instance atomically increments and checks via `INCRBY`/`EXPIRE`, with a local per-instance cache of already-over-limit clients and jittered TTLs to avoid a Redis round-trip on every retry and a thundering herd at window boundaries.
 
+> **In plain English (30 sec):** Like Express rateLimit — allow 100 req/sec, 101st gets 429.
+
 **Real repo:** [`envoyproxy/ratelimit`](https://github.com/envoyproxy/ratelimit)
 
 ## 1. The Engineering Problem: an in-memory counter only sees its own instance's traffic
@@ -206,3 +208,7 @@ The decision: **abuse mitigation at the edge** (Cloud Armor throttles floods bef
 - **Concept:** Rate limiting & throttling
 - **Domain:** system-design
 - **Repo:** [envoyproxy/ratelimit](https://github.com/envoyproxy/ratelimit) → [`src/redis/fixed_cache_impl.go`](https://github.com/envoyproxy/ratelimit/blob/main/src/redis/fixed_cache_impl.go) — the real, production distributed rate-limiting service used with Envoy.
+
+
+
+

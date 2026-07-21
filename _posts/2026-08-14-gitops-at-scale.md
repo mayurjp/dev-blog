@@ -10,6 +10,8 @@ tags: [gitops, argocd, applicationset, multi-cluster, flux, promotion, scale]
 
 **TL;DR:** How do you run GitOps across dozens of clusters and environments? Generate per-cluster `Application` objects with an ApplicationSet cluster generator (Argo CD) or per-tenant Kustomize/Helm overlays (Flux) — and accept that promotion and cross-cluster coordination are organizational problems, not tooling ones.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [argoproj/argo-cd](https://github.com/argoproj/argo-cd) (ApplicationSet cluster generator) and [fluxcd/flux2](https://github.com/fluxcd/flux2).
 
 ## 1. The Engineering Problem
@@ -174,3 +176,7 @@ Flux's reconciliation model is declared in its CRDs — `Kustomization` with `de
 - **Repo:** argoproj/argo-cd → [applicationset/examples/cluster/cluster-example.yaml](https://github.com/argoproj/argo-cd/blob/master/applicationset/examples/cluster/cluster-example.yaml) — ApplicationSet clusters generator fan-out.
 - **Repo:** fluxcd/flux2 → [tests/image-automation/kustomization.yaml](https://github.com/fluxcd/flux2/blob/main/tests/image-automation/kustomization.yaml) — Flux Kustomization layering model.
 - **Repo:** argoproj/argo-cd → [applicationset/examples/](https://github.com/argoproj/argo-cd/tree/master/applicationset/examples) — list/matrix/git generators for multi-dimensional fan-out.
+
+
+
+

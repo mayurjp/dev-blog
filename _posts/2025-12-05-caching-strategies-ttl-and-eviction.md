@@ -8,369 +8,397 @@ order: 3
 tags: [system-design, caching, redis, eviction, ttl]
 ---
 
-**TL;DR:** What happens when your cache fills up, and who's actually responsible for keeping it in sync? Sync is a choice between cache-aside (the app checks the cache, falls back to the DB on a miss, and invalidates on write) and write-through (writes flow through the cache itself); eviction under memory pressure is handled by sampling a handful of random keys and evicting the worst-scored one from a small candidate pool, not by maintaining a perfectly-ordered LRU list.
+**TL;DR:** You put a dict in front of your database to make it fast. Three problems come next: who deletes the old value when DB changes, what do you delete when the dict is full, and how do expired keys actually go away? This post shows cache-aside vs write-through for the first problem, sampled eviction + lazy/active expiry for the other two, and a real prod incident where locks failed with `-OOM` even though `allkeys-lru` was set.
 
-> **In plain English (30 seconds):** you already know this pattern — it's memoization. If `get_user(id)` hits the database on every call, you put a dict in front of it: check the dict first, call the database only on a miss, and store the result for next time. That dict is a cache. This post answers the three questions the pattern raises once it's real: who deletes `cache[id]` when the database row changes (cache-aside vs write-through), what gets thrown out when the dict is full (eviction), and how entries with an expiry time actually disappear (TTL cleanup).
+> **In plain English (30 seconds):** This is memoization you already do. `get_user(id)` hits DB every time, so you add a dict: check dict first, only call DB on miss, store result. That dict is your cache. The rest is details: who deletes `cache[id]` when DB row changes, what to throw out when dict is full, and how keys with expiry actually disappear.
 
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
-## 1. The Engineering Problem: two separate questions hide under "add a cache"
+## 1. The Engineering Problem: two questions hiding under "add a cache"
 
-Start with a function every developer has written:
+Every dev has written this:
 
 ```python
 def get_user(id):
-    return db.query(id)      # ~100ms, every single call
+    return db.query(id)      # ~100ms every time
 ```
 
-Call it a thousand times a second and the database falls over. So you put a dict in front of it:
+Call it 1000 times/sec and DB dies. So you add a dict:
 
 ```python
 cache = {}
 
 def get_user(id):
     if id in cache:
-        return cache[id]     # ~0ms, database not touched
+        return cache[id]     # ~1ms
     user = db.query(id)
     cache[id] = user
     return user
 ```
 
-That dict is a cache, and it works — until two questions show up that the dict can't answer on its own.
+Works until two questions show up:
 
-**Question 1: who keeps the cache and the database saying the same thing?** When the row changes in the database, `cache[id]` still holds the old value. Something has to delete or refresh it — and what that "something" is turns out to be a real design decision with different failure modes, not a detail.
+**Q1: Who keeps cache and DB saying same thing?** When DB row changes, `cache[id]` still has old value. Something must delete it.
 
-**Question 2: what happens when the cache fills up?** Memory is finite, so a new entry eventually needs room — something has to be thrown out, and choosing *what* at thousands of requests per second is its own problem. Entries with an expiry time (TTL) also have to actually disappear, without scanning every key on every pass.
+**Q2: What happens when cache is full?** Memory is limited. When new entry comes, what do you throw out? And how do expired keys actually get deleted?
 
-The two questions are independent: you can pick any answer to the first with any answer to the second. Most "caching is hard" stories are one of them answered badly.
-
----
-
-## 2. The Technical Solution: cache-aside vs write-through for sync; sampled approximation for eviction and expiry
-
-### Part A — who syncs: your app (cache-aside) or the cache itself (write-through)
-
-**Cache-aside: your application owns both steps.** Read: check the cache first, and on a miss read the database and put the result in the cache. Write: write the database first, then *delete* the cache key. The delete-on-write is the part that actually keeps the cache correct — a TTL only limits how long a wrong value can live, it never makes the cache right.
-
-**Write-through: the cache owns the write path.** The app writes only to the cache, and the cache synchronously writes to the database. No stale window, and reads always see the latest write — but every write now pays for two systems, and if the cache is down you can't write at all.
-
-```mermaid
-flowchart TD
-    subgraph CacheAside["Cache-aside - app owns the logic"]
-        CA_R["Read: check cache -> miss -> read DB -> populate cache"]
-        CA_W["Write: write DB -> invalidate cache<br/>(real race window between these two steps)"]
-    end
-    subgraph WriteThrough["Write-through - cache owns the write path"]
-        WT["Write: app writes to CACHE -><br/>cache synchronously writes to DB<br/>reads always see the latest write"]
-    end
-
-    classDef aside fill:#e8f4fd,stroke:#1565c0,color:#0d3a5c;
-    classDef through fill:#fff3cd,stroke:#b8860b,color:#5c4400;
-    class CA_R,CA_W aside;
-    class WT through;
-```
-
-Cache-aside's write path has a real race window, and it's the one that bites in production: a reader can re-fill the cache with a stale value *after* the writer already deleted the key —
-
-```mermaid
-sequenceDiagram
-    participant A2 as App 2, reader
-    participant C as cache
-    participant D as database
-    A2->>C: GET id, miss
-    A2->>D: read, gets v1
-    Note over D: App 1 writes v2, deletes cache key
-    A2->>C: SET id = stale v1
-    Note over C: cache serves v1 while DB has v2
-```
-
-The window is small but it never closes on its own — "we delete on write" is a guarantee about the common case, not about every possible interleaving.
-
-### Part B — when the cache is full: sample a few keys, don't sort them all
-
-The obvious design is a perfect LRU list: track the exact access order of every key and evict the true oldest. At real throughput that's too expensive — every single read would have to update the ordering.
-
-What Redis does instead is cheaper and almost as good: **pick ~5 random keys, score them by idle time, and evict the worst of that tiny sample.** It also keeps a small pool (16 slots) of the best eviction candidates seen *across* rounds, so each eviction decision benefits from keys sampled in previous rounds too. The sample size is a tunable (`maxmemory_samples`): more samples means closer to perfect LRU, at more CPU per eviction.
-
-```mermaid
-flowchart TD
-    KEYS["full keyspace (millions of keys)"]
-    SAMPLE["sample N random keys (N usually ~5)"]
-    SCORE["score each by idle time / inverse frequency"]
-    POOL["insert into a small pool (EVPOOL_SIZE=16)<br/>of the BEST candidates seen SO FAR across calls"]
-    EVICT["evict the worst-scored entry in the pool"]
-
-    KEYS --> SAMPLE --> SCORE --> POOL --> EVICT
-
-    classDef sample fill:#e8f4fd,stroke:#1565c0,color:#0d3a5c;
-    class SAMPLE,POOL sample;
-```
-
-### Part C — expired keys: deleted on read (lazy), and by a background cleaner (active)
-
-A TTL'd key disappears in two independent ways, and you need both:
-
-- **Lazy expiration:** when a key is accessed, Redis checks whether it's past its TTL and deletes it on the spot. Free, but a key nobody ever reads would sit in memory forever.
-- **Active expiration:** a background cycle runs at `server.hz` (default 10 times a second) and checks a small batch of TTL'd keys per pass (`ACTIVE_EXPIRE_CYCLE_KEYS_PER_LOOP`, 20). If more than 10% of a sample turns out to be expired (`ACTIVE_EXPIRE_CYCLE_ACCEPTABLE_STALE`), it puts in extra effort instead of waiting for the next pass — and a fast variant of the cycle is capped at 1000 microseconds, so cleanup can never stall requests. Lazy alone leaks memory; active alone wastes CPU on keys normal access would have cleaned up anyway.
-
-Core truths to hold: **a TTL guarantees eventual removal, not synchronized correctness** — Part A's delete-on-write is the correctness mechanism, TTL is the safety net under it. And **eviction sampling is a deliberate, documented tradeoff** — Redis's own source comments describe it as a constant-memory approximation, not a cut corner.
+These two questions are independent. You can answer each one in different ways.
 
 ---
 
-## 3. The clean example (concept in isolation)
+## 2. The Technical Solution
+
+### Part A — Who syncs: your app (cache-aside) or cache itself (write-through)
+
+**Cache-aside: your app does the work. This is what 90% of teams use.**
+
+Read: check cache first. Miss? Read DB and put in cache.
+Write: write DB first, then delete cache key.
+
+Why delete? TTL only limits how long wrong data lives. Delete is what makes cache correct.
 
 ```python
-# Cache-aside
 def get_product(id):
-    if cached := cache.get(id): return cached
+    if cached := cache.get(id): 
+        return cached
     product = db.query(id)
-    cache.set(id, product, ttl=300)   # TTL bounds worst-case staleness
+    cache.set(id, product, ttl=300)
     return product
 
 def update_product(id, data):
     db.update(id, data)
-    cache.delete(id)                    # explicit invalidation - the REAL correctness mechanism
+    cache.delete(id)  # this is the correctness part
+```
 
-# Write-through
+**Write-through: cache owns the write path.**
+
+App writes only to cache. Cache writes to DB for you.
+
+```python
 def update_product_wt(id, data):
-    cache.set(id, data)                 # cache itself propagates to DB synchronously
+    cache.set(id, data)  # cache writes to DB internally
+```
 
-# Eviction: sampled approximation, not a perfect LRU list
+Pros: No stale window. Reads always get latest.
+Cons: If cache is down, you can't write. Writes are slower because they hit two systems.
+
+**The race that bites in production:**
+
+Cache-aside delete-on-write has a small race window. A reader can put stale data back *after* writer deleted it:
+
+```mermaid
+sequenceDiagram
+    participant R as Reader (App 2)
+    participant C as cache
+    participant D as database
+    R->>C: GET id -> miss
+    R->>D: read -> gets v1 (old)
+    Note over D: Writer (App 1) writes v2 to DB, deletes cache key
+    R->>C: SET id = stale v1
+    Note over C: cache now has v1, DB has v2 -> stale until TTL
+```
+
+The window is small but never closes by itself.
+
+### Part B — When cache is full: pick 5 random keys, don't sort all
+
+Perfect LRU would need to track exact order of every key. Every read would update that order. Too slow at high QPS.
+
+Redis does something cheaper that is almost as good:
+
+1. Pick ~5 random keys (configurable via `maxmemory_samples`)
+2. Score them by idle time (how long since last access)
+3. Put best candidates in a small pool of 16 slots. Pool stays across rounds, so it remembers good candidates from before.
+4. Evict the worst key from that pool.
+
+More samples = closer to perfect LRU but more CPU. Less = faster but less accurate. It's a tunable, not fixed.
+
+```mermaid
+flowchart TD
+    KEYS["millions of keys"]
+    SAMPLE["pick 5 random keys"]
+    SCORE["score by idle time"]
+    POOL["add to pool of 16 best candidates so far"]
+    EVICT["evict worst from pool"]
+    KEYS --> SAMPLE --> SCORE --> POOL --> EVICT
+```
+
+### Part C — Expired keys: deleted on read + by background cleaner
+
+TTL keys need to disappear. Two ways, you need both:
+
+- **Lazy:** When you read a key, Redis checks if TTL passed. If yes, delete it right there. Free, but if no one ever reads it, it stays forever.
+- **Active:** Background job runs 10 times/sec. Each time it picks 20 random keys that have TTL. If expired, delete. If more than 25% were expired, it does extra work instead of waiting.
+
+Lazy alone leaks memory. Active alone wastes CPU on keys that would be cleaned by normal reads anyway.
+
+**Core truths:**
+- TTL guarantees eventual removal, not correctness. `cache.delete(id)` on write is correctness.
+- Eviction sampling is deliberate tradeoff: constant memory and fast, not perfect, by design.
+
+---
+
+## 3. The clean example (copy-paste mental model)
+
+```python
+# Cache-aside - what you use 90% of time
+def get_product(id):
+    if cached := cache.get(id): return cached
+    product = db.query(id)
+    cache.set(id, product, ttl=300)   # TTL = safety net
+    return product
+
+def update_product(id, data):
+    db.update(id, data)
+    cache.delete(id)                 # delete = correctness
+
+# Eviction when full - not perfect LRU
 def evict_to_make_room():
-    sample = random.sample(all_keys, MAXMEMORY_SAMPLES)   # ~5 keys per round
-    pool.insert_by_idle_time(sample)                      # pool persists ACROSS rounds
-    evict(pool.worst())                                   # worst candidate seen so far
+    sample = random.sample(all_keys, 5)        # 5 random keys
+    pool.add_sorted_by_idle(sample)            # pool size 16, persists across calls
+    evict(pool.worst())
 
-# Expiry: two complementary mechanisms for TTL'd keys
-def lazy_expire(key):        # only when the key is accessed
-    if past_ttl(key): delete(key); return MISS
+# Expiry - two ways
+def lazy_expire(key):          # on read
+    if is_expired(key): delete(key)
 
-def active_expire_cycle():   # periodic background cycle, catches keys nobody reads
-    for key in sample_of_keys_with_ttl():
-        if past_ttl(key): delete(key)
+def active_expire_cycle():     # background job, 10 times/sec
+    for key in sample_keys_with_ttl(20):
+        if is_expired(key): delete(key)
 ```
 
 ---
 
-## 4. Production reality (from `redis/redis`)
+## 4. Production reality (from `redis/redis` — real C code)
+
+Now let's see how Redis actually implements Part B and C in production.
 
 ```c
-/* src/evict.c - LRU approximation algorithm
- * Redis uses an approximation of the LRU algorithm that runs in constant
- * memory. Every time there is a key to expire, we sample N keys (with
- * N very small, usually around 5) to populate a pool of best keys to
- * evict of M keys (the pool size is defined by EVPOOL_SIZE). */
+/* src/evict.c - LRU approximation
+ * Redis samples N keys (usually ~5) to fill a pool of M keys (EVPOOL_SIZE=16) */
 int evictionPoolPopulate(redisDb *db, kvstore *samplekvs, struct evictionPoolEntry *pool) {
     dictEntry *samples[server.maxmemory_samples];
     int slot = kvstoreGetFairRandomDictIndex(samplekvs, randomEvictionShouldSkipDictIndex, 1, 0);
     int count = kvstoreDictGetSomeKeys(samplekvs, slot, samples, server.maxmemory_samples);
-
     for (int j = 0; j < count; j++) {
         unsigned long long idle;
-        /* idle = access recency (LRU) or inverse frequency (LFU) */
-        // ... insert into pool at the correct sorted position by idle time ...
+        /* idle = how long since last access (LRU) or inverse frequency (LFU) */
+        // ... insert into pool sorted by idle time ...
     }
     return count;
 }
 ```
 
 ```c
-/* src/expire.c
- * When keys are accessed they are expired on-access. However we need a
- * mechanism in order to ensure keys are eventually removed when expired
- * even if no access is performed on them. */
+/* src/expire.c - active expiry */
 int activeExpireCycleTryExpire(redisDb *db, kvobj *kv, long long now) {
     if (now < kvobjGetExpire(kv))
         return 0;
-    // key IS expired and nobody read it yet - remove it proactively
+    // key is expired and no one read it - delete proactively
     deleteExpiredKeyAndPropagate(db, keyobj);
     server.stat_expiredkeys_active++;
     return 1;
 }
 ```
 
-What this teaches that a hello-world can't:
+What production code teaches you:
 
-- **`server.maxmemory_samples` (the sample count N) is a tunable, not a hardcoded constant** — Redis explicitly exposes the precision/cost tradeoff to operators: a higher sample size gets closer to true LRU accuracy at higher CPU cost per eviction, a lower one is cheaper but a coarser approximation. This isn't a fixed algorithm choice, it's a dial.
-- **The eviction pool (`EVPOOL_SIZE`) persists candidate quality ACROSS multiple `evictionPoolPopulate()` calls**, not just within one — the comment notes this improves approximation quality over sampling completely fresh each time. A single eviction decision benefits from candidates discovered during *previous* eviction rounds too, not just the current sample.
-- **`activeExpireCycleTryExpire` increments `server.stat_expiredkeys_active` as a DISTINCT counter from lazy expirations** — a production Redis deployment can observe, via its own metrics, how many keys were cleaned up by the background cycle versus discovered stale on access. That split is real operational signal: a workload with mostly active-cycle expirations has a lot of "set and forget, never read again" keys; mostly lazy expirations suggests keys are being hit right around their expiry boundary.
-
-Known-stale fact: fixed-TTL invalidation alone is a naive strategy for data where correctness matters — a TTL only bounds *how stale a value can get before it's forced out*, it does nothing to keep the cache correct the moment the underlying data actually changes. The event-driven invalidation shown in the cache-aside write path (`cache.delete(id)` immediately after the DB write) is what provides real correctness; TTL is the fallback net that limits damage if an invalidation is ever missed, not the primary correctness mechanism itself.
+- **`maxmemory_samples` is tunable.** More samples = closer to true LRU, more CPU. It's a dial, not fixed.
+- **Pool persists across calls.** Next eviction benefits from keys sampled last time. Better approximation without scanning everything.
+- **Two different counters.** `stat_expiredkeys_active` vs lazy expirations. If most expirations are active, you have many keys that are set and never read again.
 
 ---
 
-## 5. Production incident: distributed locks get `-OOM` with `allkeys-lru` configured — eviction doesn't run inside a Lua script
+## 5. Production incident: distributed locks get `-OOM` even though `allkeys-lru` is set
 
-**Incident:** On Redis 5.0.x, applications whose writes went through Lua scripts — distributed locks (Redisson, Spring's `RedisLockRegistry`), compare-and-set, stream `APPEND` wrappers — started failing with `-OOM command not allowed when used memory > 'maxmemory'` the moment `used_memory` reached `maxmemory`, even though an eviction policy (`allkeys-lru`) was configured and plain `SET`/`HSET` traffic kept working fine.
+**What happened:** On Redis 5.0.0 to 5.0.9, apps using Lua scripts for locks (Redisson, Spring `RedisLockRegistry`) started failing with `-OOM command not allowed when used memory > 'maxmemory'`. But `allkeys-lru` was configured. And normal `SET`/`HSET` still worked.
 
-**Symptom:** lock acquisition throws in the app — `CannotAcquireLockException: Failed to lock mutex ... ERR Error running script ... -OOM command not allowed when used memory > 'maxmemory'` — while `evicted_keys` stays flat. Cache reads look healthy; only the scripted write paths fail.
+**Symptom you see in app:**
+```
+CannotAcquireLockException: Failed to lock mutex ... 
+ERR Error running script ... -OOM command not allowed when used memory > 'maxmemory'
+```
+And `evicted_keys` metric stays flat. Cache reads look fine. Only lock paths fail.
 
-**Root cause:** section 4's sampled eviction runs via `freeMemoryIfNeeded` *between* commands. Redis 5.0 deliberately disabled eviction *during* Lua script execution (scripts are atomic, and the 5.0 replication rework needed script effects to be deterministic). A user's instrumented server log on the issue shows the exact borderline: `EVALSHA` arrives with `used_memory` at 9,923,008 of a 10,000,000 `maxmemory` — the pre-script check passes, no eviction runs; the script's own setup allocations (~100KB of args plus the Lua stack) push `used_memory` over the limit; the mid-script `HSET` then hits the OOM check with eviction unavailable and aborts.
+**Why:** Redis eviction runs *between* commands via `freeMemoryIfNeeded`. In Redis 5.0, eviction was disabled *inside* a Lua script because scripts must be atomic and deterministic for replication.
 
-**Blast radius:** every write path implemented as a script, fleet-wide, while memory hovers at the limit — lock acquisition fails, so scheduled jobs and mutex-protected sections stop. Plain commands are unaffected because eviction still runs between them, which is exactly what makes the failure so confusing to diagnose. Affected versions: 5.0.0 through 5.0.9 (the same failure was reported in the wild on 5.0.3 via Spring's lock registry).
+Real numbers from the bug report: `EVALSHA` arrives when `used_memory` is 9,923,008 of 10,000,000 `maxmemory`. Pre-script check passes (still under limit), so no eviction. Script setup itself allocates ~100KB for args + Lua stack. Now memory is over limit. Mid-script `HSET` needs memory, hits OOM check, eviction is disabled inside script, so it fails.
 
-The business impact hides behind the exception type: a lock that *throws* on acquisition fails one of two ways. **Fail-closed** — the guarded work simply doesn't run (the scheduled service in the #8623 report). **Fail-open** — the caller treats the error as "not acquired" and proceeds anyway, so two workers execute a section the mutex existed to serialize. Neither direction surfaces as a cache problem on an application dashboard; both are business-visible.
+Plain `SET` works because eviction runs between plain commands.
 
 ```mermaid
 sequenceDiagram
-    participant APP as App instance (lock registry)
-    participant R as Redis 5.0.x, memory at the limit
-    participant POOL as eviction (freeMemoryIfNeeded)
+    participant APP as App (lock registry)
+    participant R as Redis 5.0.x, almost full
+    participant POOL as eviction
 
     APP->>R: EVALSHA lock script, args ~100KB
-    R->>R: pre-script check 9,923,008 < 10,000,000, OK, nothing to free
-    Note over R: script setup allocs push used_memory over maxmemory
+    R->>R: check: 9,923,008 < 10,000,000 OK, no eviction
+    Note over R: script allocations push memory over limit
     R->>R: mid-script HSET needs memory
-    Note over R,POOL: 5.0.0-5.0.9 disable eviction inside scripts (atomicity)
+    Note over R,POOL: eviction disabled inside script in 5.0.0-5.0.9
     R-->>APP: -OOM command not allowed
-    APP->>R: plain SET, another code path
+    APP->>R: plain SET (other code path)
     R->>POOL: eviction runs BETWEEN commands
-    POOL-->>R: sampled pool evicts keys (section 4)
+    POOL-->>R: evicts using sampled pool
     R-->>APP: OK
 ```
 
-The fix landed as [PR #6797](https://github.com/redis/redis/pull/6797) ("Check OOM at script start to get stable lua OOM state"), merged by antirez for 6.0 and backported to 5.0.10: the OOM condition is checked **once at script start** — abort deterministically before executing if already over `maxmemory`, otherwise let the script run to completion with no random mid-script abort. Note what the fix deliberately does *not* do: eviction still doesn't run inside a script, and a long-running script occupies the single main thread, so eviction can't run between *other* clients' commands either — the failure class survives the fix in a different shape (a maintainer makes exactly this point on [#8623](https://github.com/redis/redis/issues/8623): a script that keeps timing out prevents eviction from executing).
+**Blast radius:** Every write that uses Lua script fails fleet-wide when memory is at limit. Locks fail, so scheduled jobs run twice, mutex-protected sections break.
 
-Source: [Eviction does not occur during lua scripts · redis/redis#6565](https://github.com/redis/redis/issues/6565) — confirmed by antirez ("That looks like a bug indeed"), with production reports from Redisson and Spring `RedisLockRegistry` users; the in-the-wild 5.0.3 report is [redis/redis#8623](https://github.com/redis/redis/issues/8623).
+**Fix:** PR #6797 “Check OOM at script start”. Merged in 5.0.10 and 6.0. Check OOM once at script start: if already over limit, fail fast. Otherwise let script finish. Eviction still doesn't run inside script, so long scripts can still starve eviction for everyone else (see #8623).
+
+Source: [redis/redis#6565](https://github.com/redis/redis/issues/6565) confirmed by antirez, [redis/redis#8623](https://github.com/redis/redis/issues/8623) in-the-wild report on 5.0.3.
 
 ---
 
-## 6. Troubleshooting & resolution
+## 6. Troubleshooting & resolution — runbook
 
-1. **Check the version first — this failure is version-gated:**
+**1. Check version first. This bug is version-gated.**
 
-   ```bash
-   redis-cli INFO server | grep redis_version
-   ```
+```bash
+redis-cli INFO server | grep redis_version
+```
+If `5.0.0` to `5.0.9` → you have the bug. Upgrade to `>=5.0.10` or `6.0+`. If other version and same symptom, it's the long-script variant. Keep going.
 
-   `5.0.0`–`5.0.9` means the instance carries the exact bug above; the resolution *is* the upgrade (≥ 5.0.10, or 6.0+). On any other version, the same symptom points at the surviving variant — a long script starving eviction — so keep going.
+**2. Confirm memory is at limit and eviction is stuck:**
 
-2. **Confirm memory is actually at the limit and eviction is stalled:**
+```bash
+redis-cli INFO memory | grep -E 'used_memory_human|maxmemory_human'
+redis-cli INFO stats | grep evicted_keys
+redis-cli CONFIG GET maxmemory-policy
+```
 
-   ```bash
-   redis-cli INFO memory | grep -E 'used_memory_human|maxmemory_human'
-   redis-cli INFO stats | grep evicted_keys
-   redis-cli CONFIG GET maxmemory-policy
-   ```
+Signature: `used_memory` stuck at `maxmemory` and `evicted_keys` not moving, even though policy is `allkeys-lru`. Writes fail but eviction not running.
 
-   `used_memory` pinned at `maxmemory` while `evicted_keys` barely moves — despite a real policy like `allkeys-lru` — is the incident's signature: writes are being refused while eviction isn't executing.
+**3. Find long script blocking main thread:**
 
-3. **Look for the long-running script that blocks the main thread:**
+```bash
+redis-cli SLOWLOG GET 5
+```
 
-   ```bash
-   redis-cli SLOWLOG GET 5
-   ```
+Look for `EVALSHA` with high runtime. While one script runs, main thread is blocked. No eviction can run for any client. Memory keeps going over limit.
 
-   `EVALSHA` entries with multi-millisecond runtimes are the suspect (the default `slowlog-log-slower-than` is 10000µs). While a script runs, no eviction can happen between other clients' commands either — memory overshoots the limit and *every* write path gets closer to `-OOM`, not just scripted ones.
+**4. Fix:**
 
-4. **Resolution:** upgrade past 5.0.10 / 6.0 for the deterministic abort-at-start semantics; keep `used_memory` below `maxmemory` with real headroom so script argument allocations can't straddle the boundary the way the issue's 76KB gap did; and keep scripts short — eviction for the whole fleet waits on the main thread while one runs.
+- Upgrade past 5.0.10 / 6.0 for deterministic fail-at-start behavior.
+- Keep headroom: don't set `maxmemory` equal to instance size. Script args need space. On 10GB instance, set 8GB as maxmemory.
+- Keep scripts short. Eviction for whole fleet waits while one script runs.
 
 ---
 
 ## 7. Prevention & production checklist
 
-- **Pin a version floor of Redis ≥ 5.0.10 (or 6.0+) everywhere scripts touch memory-limited instances.** Enforce it in the base image or the Terraform module's version constraint — the failure is silent until the first script executes against a full instance, so no staging idle-run will catch it.
-- **Alert on divergence between client `-OOM` errors and server `evicted_keys`.** Client-visible OOM errors climbing while the server's eviction counter stays flat means eviction is not executing — an alert on `evicted_keys` alone reads this as "nothing to evict," and an alert on errors alone reads as generic pressure. The pair is the signal. As a concrete expression (oliver006 `redis_exporter` metric names, verified against its exporter source; `and on()` because the two sides carry different label sets):
-
+- **Pin Redis version >=5.0.10 or 6.0+ everywhere you use Lua scripts.** Enforce in base image and Terraform. Staging won't catch it because bug only shows when instance is full AND script arrives.
+- **Alert on client OOM errors + flat evicted_keys.** If clients see OOM but server evicted_keys not increasing, eviction is stuck.
   ```promql
   (sum(rate(redis_errors_total{err="OOM"}[5m])) > 0) and on() (sum(rate(redis_evicted_keys_total[5m])) == 0)
   ```
-
-  The `err="OOM"` label comes from Redis's `errorstat_*` INFO counters, which exist only in Redis 6.2+ (confirmed in `src/server.c` — absent from the 5.0 branch) — on the affected 5.0.x versions the client-side error rate is the only half of this pair you can measure, itself an argument for the version floor. On Memorystore the early-warning half is a native metric: alert on `redis.googleapis.com/keyspace/keys_with_expiration` sitting at zero under a `volatile-*` policy — GCP's docs spell out the consequence, with no expirable keys there is nothing to evict when the instance reaches `maxmemory-gb`.
-- **Set `maxmemory` below instance capacity, not equal to it.** Script setup allocations (arguments plus the Lua stack) land on top of `used_memory` — with zero headroom, a script that passes the pre-script check can still push the instance over mid-execution. GCP's Memorystore docs describe exactly this pattern: on a 10 GB instance, set `maxmemory-gb` to 8 and keep 2 GB as overhead.
-- **Load-test the scripted write path against a *full* instance.** A test that only sends plain `SET`/`HSET` cannot reproduce this failure — eviction runs between those commands and everything looks fine. Reproduction needs `EVALSHA` arriving while `used_memory` sits at `maxmemory`.
-- **Watch `SLOWLOG` for `EVALSHA`, not just for slow reads.** A script exceeding `lua-time-limit` (5000ms, and unmodifiable on Memorystore) doesn't just add latency — it starves eviction fleet-wide for its whole runtime, and on Memorystore an indefinitely-running Lua script even blocks a `limited-data-loss` manual failover.
+  Note: `err="OOM"` exists only in Redis 6.2+ (`errorstat` counters). On 5.0.x, watch client-side errors.
+- **Set maxmemory below instance size.** On 10GB instance, set `maxmemory-gb` to 8, keep 2GB headroom. GCP docs recommend this.
+- **Load test scripted path against FULL instance.** Testing only plain `SET` won't reproduce bug. You need `EVALSHA` when memory is at maxmemory.
+- **Watch SLOWLOG for EVALSHA.** `lua-time-limit` is 5000ms default and unmodifiable on Memorystore. Long script blocks eviction and even blocks manual failover.
 
 ---
 
-## 8. Cloud & library lens: the three layers where production caching actually lives
+## 8. Cloud & library lens: where caching lives in production
 
-This lesson's mechanisms — TTL expiry, sampled eviction, cache-aside invalidation — run at every layer a cache can live, and the production choice is about **where a key's eviction and invalidation semantics actually come from**:
+Caching happens at three layers. You need to pick where eviction and invalidation come from.
 
-| Layer | Real implementation | The deciding gotcha |
-|-------|--------------------|---------------------|
-| In-process | Caffeine (Java), `IMemoryCache` (.NET) | Zero network hop, but each pod holds its own copy — there is no shared invalidation, so section 3's `cache.delete(id)` on write only clears *one* instance's entry, and a cold 50-pod deploy can hit the database 50 times for the same key. Right for read-mostly reference data, wrong as the consistency layer. |
-| Managed shared | [Memorystore for Redis](https://cloud.google.com/memorystore/docs/redis/memorystore-for-redis-overview), Basic vs Standard tier | The tier decides what a failure costs: Basic has **no replication and no failover** — a node failure is a flushed cache. Standard replicates across zones, but replication is asynchronous — even a *manual* failover's default `limited-data-loss` mode proceeds with up to 30 MB of unreplicated writes lost ([failover docs](https://cloud.google.com/memorystore/docs/redis/about-manual-failover)). And the provider owns the config surface: the [default `maxmemory-policy` is `volatile-lru`](https://cloud.google.com/memorystore/docs/redis/supported-redis-configurations), which evicts **only keys with TTLs** — a cache-aside `SET` without `EXPIRE` is unevictable, so a full instance walks straight into section 5's `-OOM` wall under a policy that *looks* correct. `lua-time-limit` is pinned at 5000 and unmodifiable. |
-| Client library | [`StackExchange/StackExchange.Redis`](https://github.com/StackExchange/StackExchange.Redis) (curated repo) | The expiry stampede: a hot key's TTL fires, every instance misses at once, every instance rebuilds from the database. The fix lives in the client — an atomic `SET NX PX` rebuild lock so exactly one caller recomputes. On AWS, ElastiCache for Redis exposes the same `maxmemory-policy` knob through its parameter group ([docs](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/ParameterGroups.Redis.html)) — same decision, different console. |
+| Layer | Real service | What breaks in prod |
+|-------|--------------|---------------------|
+| **In-process** | Caffeine (Java), `IMemoryCache` (.NET) | Zero network hop, super fast. But each pod has its own copy. `cache.delete(id)` on write only clears one pod. 50 pods cold start = 50 DB queries for same key. Good for reference data, bad for consistency. |
+| **Managed shared** | [Memorystore for Redis](https://cloud.google.com/memorystore/docs/redis/memorystore-for-redis-overview) Basic vs Standard | Basic = **no replica, no failover**. Node failure = cache flushed. Standard = async replication, manual failover can lose up to 30 MB. Default `maxmemory-policy` is `volatile-lru` = evicts **only keys with TTL**. If you do `SET` without `EXPIRE`, key is unevictable and you hit Section 5 OOM even though policy looks correct. `lua-time-limit` fixed at 5000. |
+| **Client library** | [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) | Hot key expiry = stampede. TTL fires, 50 pods miss at same time, 50 DB queries. Fix is `SET NX PX` lock so only one pod rebuilds. Same knob on AWS ElastiCache via parameter group. |
 
-The in-process row of the table gets its stampede protection for free, and the real library shows why: Caffeine's `LoadingCache.get` coalesces concurrent loads of the same key into one computation, per its own JavaDoc:
+### Library Lens — real code that prevents stampede
+
+Caffeine coalesces concurrent loads of same key inside one pod (per JavaDoc):
 
 ```java
-// ben-manes/caffeine, caffeine/src/main/java/com/github/benmanes/caffeine/cache/LoadingCache.java
-// JavaDoc on get(K): "If another call to get is currently loading the value
-// for the key, this thread simply waits for that thread to finish and returns
-// its loaded value... the function is applied at most once per key."
+// LoadingCache.get doc: "If another call to get is currently loading the value
+// for the key, this thread simply waits... function is applied at most once per key."
 LoadingCache<String, Product> local = Caffeine.newBuilder()
     .expireAfterWrite(Duration.ofMinutes(5))
-    .build(id -> db.query(id));   // N threads miss together -> ONE db.query, per pod
+    .build(id -> db.query(id));   // 10 threads miss together -> 1 db.query
 ```
 
-"At most once per key" is scoped to the instance — 50 pods still issue 50 queries for the same expired key. The Redis-backed rebuild lock exists precisely because coalescing has to span pods, and it is real code in the curated repo, not a pattern diagram — `LockTake` *is* an atomic set-if-absent:
+But that's per-pod. 50 pods still = 50 queries. For cross-pod, you need Redis lock. Real code from StackExchange.Redis:
 
 ```csharp
-// src/StackExchange.Redis/RedisDatabase.cs
-public bool LockTake(RedisKey key, RedisValue value, TimeSpan expiry, CommandFlags flags = CommandFlags.None)
-{
-    if (value.IsNull) throw new ArgumentNullException(nameof(value));
+// LockTake is SET if not exists - atomic
+public bool LockTake(RedisKey key, RedisValue value, TimeSpan expiry, ...) {
     return StringSet(key, value, expiry, When.NotExists, flags);
 }
+
+// LockRelease deletes only if token matches
+// Behind proxy like twemproxy, token check not possible, so it falls back to KeyDelete
+// That fallback can delete someone else's lock - token check is correctness, not ceremony
 ```
 
-and `LockRelease` deletes only if the token still matches, with a telling fallback:
+### Simple stampede fix (programming pattern you can copy)
 
-```csharp
-// without transactions (twemproxy etc), we can't enforce the "value" part
-return KeyDelete(key, flags);
+```python
+# Only one pod rebuilds, others wait
+def get_with_lock(id):
+    if cached := cache.get(id): return cached
+    
+    lock_key = f"lock:{id}"
+    if cache.set(lock_key, "1", nx=True, px=1000):  # SET NX PX = atomic lock
+        try:
+            data = db.query(id)
+            cache.set(id, data, ex=300)
+            return data
+        finally:
+            cache.delete(lock_key)
+    else:
+        time.sleep(0.05)
+        return get_with_lock(id)  # retry
 ```
 
-That fallback is the production-only detail a hello-world lock never shows: behind a proxy that can't run the token-checking delete, releasing a lock can delete a key *someone else* re-acquired — the compare-the-token step is the correctness mechanism, not ceremony.
+If lock TTL is shorter than DB query time, two pods rebuild. So lock TTL must be longer than slow DB query.
 
-An illustrative Memorystore config (clean example, same status as section 3 — not fetched production code):
+An illustrative Memorystore config:
 
 ```hcl
 resource "google_redis_instance" "cache" {
-  # STANDARD_HA adds the replica; BASIC has no failover at all
-  tier           = "STANDARD_HA"
+  tier           = "STANDARD_HA"  # BASIC has no failover
   memory_size_gb = 10
-
   redis_configs = {
-    # volatile-lru (the default) only evicts keys that have TTLs;
-    # allkeys-lru makes every key evictable, including no-TTL ones
-    maxmemory-policy = "allkeys-lru"
+    maxmemory-policy = "allkeys-lru"  # volatile-lru (default) only evicts keys with TTL
   }
 }
 ```
 
-The decision: **in-process for data that must never leave the pod and can tolerate per-instance staleness, managed shared cache when invalidation has to mean one thing across the fleet** — and whichever layer holds the data, the stampede lock and the incident's `-OOM` failure mode live at the client and the server respectively, which is why "we set an eviction policy" is the beginning of the review, not the end of it.
+**Decision rule:** In-process for data that can be stale per-pod. Shared Redis when invalidation must mean one thing across fleet.
 
-### Production design on GCP (real services, real config)
-
-Wiring the verified pieces together — the same shape as the incident's deployment (a distributed lock registry sharing the cache instance):
+### Production design on GCP (real services)
 
 ```mermaid
 flowchart TD
-    subgraph APP["GKE pods, L1 in-process + L2 shared cache-aside"]
-        P1["pod A: L1 Caffeine miss,<br/>L2 GET miss, LockTake OK, rebuilds"]
-        P2["pod B: L1 miss, L2 GET miss,<br/>LockTake fails, waits"]
+    subgraph APP["GKE pods: L1 Caffeine + L2 Redis cache-aside"]
+        P1["pod A: L1 miss, L2 miss, LockTake OK, reads DB"]
+        P2["pod B: L1 miss, L2 miss, LockTake fails, waits"]
     end
-    MS[("Memorystore STANDARD_HA primary<br/>maxmemory-policy allkeys-lru<br/>maxmemory-gb 8 of 10 GB")]
-    REP[("replica, async replication<br/>failover can lose up to 30MB")]
+    MS[("Memorystore STANDARD_HA<br/>allkeys-lru, maxmemory 8GB of 10GB")]
+    REP[("replica, async<br/>failover can lose 30MB")]
     DB[("Cloud SQL, source of truth")]
 
     P1 -->|"GET / SET EX"| MS
     P2 -->|"GET"| MS
-    P1 -->|"only the lock holder reads"| DB
+    P1 -->|"only lock holder reads"| DB
     MS -.->|"async"| REP
 
     classDef risk fill:#f8d7da,stroke:#c62828,color:#5c1a1a;
     class REP risk;
 ```
 
-- **Placement is a hard constraint, not a tuning knob:** clients must sit in the same authorized VPC as the instance (private IP only) — the GKE cluster and Memorystore are peers in one network, which is also where the sub-millisecond access the service promises comes from.
-- **`maxmemory-gb 8` on a 10 GB instance is section 7's headroom rule expressed as config** — the default is the full capacity, so headroom is a deliberate choice, not something the tier gives you. And on Standard Tier, GCP's right-sizing docs reserve **10% of instance capacity as a replication buffer** — provision for it, because the 10 GB you buy is not the 10 GB you can fill.
-- **On the managed tier, section 5's wall wears a different error string:** at 100% system memory usage ratio, Memorystore blocks writes with `-OOM command not allowed under OOM prevention` and tracks how long in the `system_memory_overload_duration` metric — the documented alert threshold is 80%, and GCP's own docs note eviction is a background process a high write-rate can outpace. The headroom rule above is what keeps you off that wall.
-- **The rebuild lock's TTL must outlive a slow DB rebuild.** If the lock expires before pod A finishes reading Cloud SQL and populating the key, pod B takes the lock and rebuilds a second time — the stampede the lock exists to prevent, one TTL-misconfiguration away.
-- **Locks and cache share one instance here, so memory pressure takes down both.** That is exactly section 5's blast radius: `used_memory` at the limit didn't just risk evicting cached products, it made `EVALSHA` lock acquisition fail. The replica (red) is the second lossy surface: async replication means a failover can drop recent writes — acceptable for cache entries, another reason correctness lives in Cloud SQL plus delete-on-write invalidation, never in Redis.
+Key points:
+
+- **Placement matters:** GKE and Memorystore must be in same VPC, same zone for <1ms. Cross-zone = +30ms p99.
+- **Headroom:** 10GB instance, set `maxmemory-gb` 8. 2GB headroom for Lua args and replication buffer. GCP reserves 10% for replication buffer anyway.
+- **Memorystore OOM looks different:** At 100% system memory, error is `-OOM command not allowed under OOM prevention`, metric `system_memory_overload_duration`. Alert at 80% as per GCP docs.
+- **Locks + cache sharing same instance:** Memory pressure takes down both. That's Section 5 blast radius.
 
 ---
 
@@ -378,4 +406,8 @@ flowchart TD
 
 - **Concept:** Caching strategies (cache-aside, write-through, TTL, eviction)
 - **Domain:** system-design
-- **Repo:** [redis/redis](https://github.com/redis/redis) → [`src/evict.c`](https://github.com/redis/redis/blob/unstable/src/evict.c), [`src/expire.c`](https://github.com/redis/redis/blob/unstable/src/expire.c) — the real, production in-memory data store.
+- **Repo:** [redis/redis](https://github.com/redis/redis) → [`src/evict.c`](https://github.com/redis/redis/blob/unstable/src/evict.c), [`src/expire.c`](https://github.com/redis/redis/blob/unstable/src/expire.c)
+
+
+
+

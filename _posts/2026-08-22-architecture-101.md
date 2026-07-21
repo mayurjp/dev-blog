@@ -10,6 +10,8 @@ tags: [architecture, fundamentals, design]
 
 **TL;DR:** Architecture is not the boxes-and-arrows picture you draw — it's the *direction* your compile-time dependencies point and *where* you let them cross a boundary. Microsoft's real **dotnet/eShop** Ordering service proves it: three projects where `Ordering.Domain` references nothing else, `Ordering.Infrastructure` references `Domain`, and the API wires them — so the database can be swapped without touching business logic.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. What "architecture" actually means
 
 A diagram is a *view* of a system; the architecture is the set of rules that make the system hold together when someone edits it six months from now. The single rule that matters more than any other:
@@ -123,3 +125,7 @@ Example project graph and `IOrderRepository` seam from Microsoft's real [dotnet/
 ## Next in the series
 
 → [Layered (N-Tier) Architecture]({{ '/architecture/layered-n-tier-architecture-and-its-limits/' | relative_url }})
+
+
+
+

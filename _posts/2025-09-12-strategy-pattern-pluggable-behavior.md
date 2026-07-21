@@ -9,6 +9,8 @@ tags: [design-patterns, strategy-pattern, polly, dotnet, resilience]
 
 **TL;DR:** How does the same `Execute()` call run a retry today and a circuit breaker tomorrow? Because the pipeline (the context) only ever holds a reference to a minimal abstract `ResilienceStrategy` interface — never a concrete type — so swapping which strategy is injected changes the behavior without changing a single line of caller code.
 
+> **In plain English (30 sec):** Like a fuse — if service fails 5 times, stop calling for 30s.
+
 **Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: swapping behavior without touching the caller
@@ -181,3 +183,7 @@ What this teaches that a UML box-and-arrow diagram can't:
 - **Concept:** Strategy pattern
 - **Domain:** design-patterns
 - **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly) → [`src/Polly.Core/ResilienceStrategy.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly.Core/ResilienceStrategy.cs) and [`src/Polly.Core/Retry/RetryResilienceStrategy.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly.Core/Retry/RetryResilienceStrategy.cs) — .NET's most widely used resilience library
+
+
+
+

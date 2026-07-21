@@ -10,6 +10,8 @@ tags: [angular, signals, reactivity, dependency-tracking, fine-grained-reactivit
 
 **TL;DR:** Does a `computed()` signal need an explicit list of the signals it depends on? No — there's no dependency array anywhere in Angular's signal implementation. Dependencies are discovered automatically: whenever any signal is read while a `computed()` is actively recomputing (or an `effect()` is actively running), that read itself records the link. And writing to a signal never eagerly recomputes anything downstream — it only marks dependents dirty, cascading that dirty flag through the graph, while the actual recomputation waits until something genuinely reads the stale value again.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Explicit dependency arrays — the pattern many reactive/memoization systems use, where a derived value's function is paired with a hand-written list of "these are the values I depend on" — are a well-known source of bugs. Forget to list a dependency the function actually reads, and the derived value goes stale, silently using an outdated closure. List one that isn't really needed, and the derived value recomputes wastefully on changes that were never relevant to it. Either way, the array has to be kept manually in sync with what the function body actually does, by a human, forever, as the function evolves.
@@ -188,3 +190,7 @@ A: Yes, structurally — any signal read during a computed's execution becomes a
 - **Concept:** Automatic dependency tracking and lazy dirty-propagation in Angular Signals
 - **Domain:** angular
 - **Repo:** [angular/angular](https://github.com/angular/angular) → [`packages/core/primitives/signals/src/signal.ts`](https://github.com/angular/angular/blob/main/packages/core/primitives/signals/src/signal.ts), [`packages/core/primitives/signals/src/graph.ts`](https://github.com/angular/angular/blob/main/packages/core/primitives/signals/src/graph.ts) — the Angular framework's own signals implementation
+
+
+
+

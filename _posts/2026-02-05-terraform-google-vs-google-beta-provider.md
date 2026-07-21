@@ -9,6 +9,8 @@ tags: [gcp, terraform, infrastructure-as-code]
 
 **TL;DR:** Why does a single Terraform module need both the `google` and `google-beta` providers? GCP's stable and beta API surfaces graduate features independently, so a module declares both providers with independent version constraints and opts individual resources into beta explicitly via `provider = google-beta`, while everything else defaults to the stable provider.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`terraform-google-modules/terraform-google-lb-http`](https://github.com/terraform-google-modules/terraform-google-lb-http)
 
 ## 1. The Engineering Problem: GCP's own API has a stable surface and a beta surface, and they don't graduate together
@@ -123,3 +125,7 @@ Known-stale fact: a common assumption is that `google-beta` signals "this whole 
 - **Concept:** Terraform on GCP (infrastructure as code with the `google` provider)
 - **Domain:** gcp
 - **Repo:** [terraform-google-modules/terraform-google-lb-http](https://github.com/terraform-google-modules/terraform-google-lb-http) → [`versions.tf`](https://github.com/terraform-google-modules/terraform-google-lb-http/blob/main/versions.tf), [`main.tf`](https://github.com/terraform-google-modules/terraform-google-lb-http/blob/main/main.tf) — Google's own real, versioned Terraform load balancer module.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [system-design, rpc, retries, timeouts, idempotency, envoy, resilience]
 
 **TL;DR:** What makes calling a remote service fundamentally riskier than calling a local function, and how do production systems make retrying that call safe instead of dangerous? Because a network call has a failure mode a function call doesn't have at all — the request can be lost, the response can be lost, or the call can simply run out of time, and in every one of those cases the caller cannot tell whether the callee actually did the work. Envoy's `RetryPolicy` answers this with three coordinated mechanisms: a **per-try timeout** that bounds how long any one attempt is allowed to run, a **retriable-request gate** that only reissues requests the caller has marked safe to repeat, and a **retry budget** — a percentage cap on concurrent retries relative to active traffic, not just a flat retry count — that stops a wave of retries from amplifying the exact overload that triggered them.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`envoyproxy/envoy`](https://github.com/envoyproxy/envoy)
 
 ## 1. The Engineering Problem: a network call can fail in a way a function call structurally cannot
@@ -352,3 +354,7 @@ A fixed cap (Envoy's fallback `max_retries` circuit breaker, default 3) doesn't 
 ---
 
 **Next in the System Design series:** [Does adding a tenth server actually help, or does it just move the bottleneck? →]({{ '/system-design/scalability-vertical-vs-horizontal-scaling/' | relative_url }})
+
+
+
+

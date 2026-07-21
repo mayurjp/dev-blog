@@ -10,6 +10,8 @@ tags: [design-patterns, microservices, sidecar, ambassador, bff, event-driven]
 
 **TL;DR:** What do "sidecar," "ambassador," "BFF," and "event-driven" actually look like once you stop drawing boxes and arrows and read the code? A sidecar/ambassador is a small companion process the application dials over `localhost` instead of the real remote endpoint; a BFF is one dedicated controller that fans out to several backend calls and hands the client back a single shaped response; and event-driven is a narrow interface — one `Consume` method — that a broker's dispatcher invokes by convention, not a direct method call the producer makes.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Four separate pains, each solved by treating a diagram-level "pattern" as a concrete piece of code rather than a deployment topology alone.
@@ -297,3 +299,7 @@ A: Yes — `ConsumeContext` extends both `IPublishEndpoint` and `ISendEndpointPr
 - **Concept:** Sidecar, Ambassador, BFF, and event-driven patterns as executable code
 - **Domain:** design-patterns
 - **Repo:** [GoogleCloudPlatform/cloud-sql-proxy](https://github.com/GoogleCloudPlatform/cloud-sql-proxy) → [`internal/proxy/proxy.go`](https://github.com/GoogleCloudPlatform/cloud-sql-proxy/blob/main/internal/proxy/proxy.go) — the real sidecar/ambassador proxy Google ships for authenticated Cloud SQL connections; [dotnet-architecture/eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers) → [`src/ApiGateways/Mobile.Bff.Shopping/aggregator/Controllers/OrderController.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/main/src/ApiGateways/Mobile.Bff.Shopping/aggregator/Controllers/OrderController.cs) — the mobile BFF aggregator; [MassTransit/MassTransit](https://github.com/MassTransit/MassTransit) → [`src/MassTransit.Abstractions/IConsumer.cs`](https://github.com/MassTransit/MassTransit/blob/master/src/MassTransit.Abstractions/IConsumer.cs) and [`Contexts/ConsumeContext.cs`](https://github.com/MassTransit/MassTransit/blob/master/src/MassTransit.Abstractions/Contexts/ConsumeContext.cs) — the real consumer interface and context a production message broker dispatches to.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [cicd, iac, terraform, trivy, policy-as-code, terratest, checkov]
 
 **TL;DR:** How do you catch broken or insecure infrastructure before it reaches a cloud account? Run `terraform validate` as a static gate, capture `terraform plan -out`, then scan the plan JSON with Trivy so misconfigurations fail the pipeline pre-apply.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) and [aquasecurity/trivy](https://github.com/aquasecurity/trivy)
 
 ## 1. The Engineering Problem
@@ -166,3 +168,7 @@ No — it catches syntax/type/backend errors only. Misconfigurations like public
 - **Domain:** cicd
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [internal/command/validate.go](https://github.com/hashicorp/terraform/blob/main/internal/command/validate.go) — `ValidateCommand.Run` / `validate` multi-stage static check.
 - **Repo:** [aquasecurity/trivy](https://github.com/aquasecurity/trivy) → [pkg/fanal/analyzer/config/terraformplan/json/json.go](https://github.com/aquasecurity/trivy/blob/main/pkg/fanal/analyzer/config/terraformplan/json/json.go) — `terraformPlanConfigAnalyzer` registration for plan JSON scanning.
+
+
+
+

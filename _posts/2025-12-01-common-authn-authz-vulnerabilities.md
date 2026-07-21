@@ -9,6 +9,8 @@ tags: [security, vulnerabilities, idor, owasp]
 
 **TL;DR:** What does "broken access control" actually look like in real code? It's an endpoint that verifies who's calling but then trusts a client-supplied ID to decide which resource to act on, without an explicit, independent check that the caller is actually allowed to touch that specific resource — an identity comparison is not an authorization decision.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`WebGoat/WebGoat`](https://github.com/WebGoat/WebGoat)
 
 ## 1. The Engineering Problem: verifying WHO someone is doesn't verify WHAT they're allowed to touch
@@ -110,3 +112,7 @@ Known-stale fact: Broken Access Control has moved to the #1 position in the curr
 - **Concept:** Common authN/authZ vulnerabilities (broken access control, JWT alg confusion, session fixation)
 - **Domain:** security
 - **Repo:** [WebGoat/WebGoat](https://github.com/WebGoat/WebGoat) → [`src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java`](https://github.com/WebGoat/WebGoat/blob/main/src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java) — OWASP's own official, self-documented vulnerable-by-design training application.
+
+
+
+

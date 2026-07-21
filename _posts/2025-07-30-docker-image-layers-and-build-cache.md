@@ -9,6 +9,8 @@ tags: [docker, images, layers, buildkit, overlay2, caching]
 
 **TL;DR:** Why do some Docker rebuilds take 10 seconds and others take 10 minutes? Docker images are stacks of cached, content-addressed layers — an unchanged instruction with unchanged inputs reuses its cached layer, but the moment one layer's cache misses, every layer after it must rebuild too, so ordering instructions (dependencies before source code) determines whether a rebuild stays fast or rebuilds from scratch.
 
+> **In plain English (30 sec):** Like Git commits for filesystem — each Dockerfile line is cached layer.
+
 **Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: rebuilding everything to change one line
@@ -123,3 +125,7 @@ COPY --from=gloursdocker/docker / /
 - **Concept:** Docker image layers, the union filesystem (`overlay2`), and the `dockerd` → `containerd` → `runc` chain
 - **Domain:** docker
 - **Repo:** [docker/awesome-compose](https://github.com/docker/awesome-compose) → [`flask/app/Dockerfile`](https://github.com/docker/awesome-compose/blob/master/flask/app/Dockerfile) — Docker's official curated collection of real multi-service Compose stacks
+
+
+
+

@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** If checkout is slow, which of six downstream calls is actually to blame? Distributed tracing assigns a trace ID at the edge and propagates it through every hop so a collector can reassemble all the spans into one call graph with per-span timing, showing exactly which downstream call is the bottleneck.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo), [`istio/istio`](https://github.com/istio/istio)
 
 ## 1. The Engineering Problem
@@ -274,3 +276,7 @@ What this teaches that a hello-world can't:
 - **Concept:** Distributed tracing & observability
 - **Domain:** microservices
 - **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`src/checkoutservice/main.go`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/src/checkoutservice/main.go) (application-level OpenTelemetry instrumentation) and [istio/istio](https://github.com/istio/istio) → [`samples/open-telemetry/tracing/telemetry.yaml`](https://github.com/istio/istio/blob/master/samples/open-telemetry/tracing/telemetry.yaml), [`samples/open-telemetry/tracing/README.md`](https://github.com/istio/istio/blob/master/samples/open-telemetry/tracing/README.md) (mesh-level trace propagation via the Telemetry API)
+
+
+
+

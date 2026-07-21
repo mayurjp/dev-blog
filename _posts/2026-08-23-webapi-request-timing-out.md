@@ -7,6 +7,8 @@ categories: aspnet-webapi
 order: 90
 tags: [aspnet-webapi, troubleshooting, debugging, async, threading, performance]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -122,3 +124,7 @@ The thread returns to the pool while the database query is in flight. With 25 co
 
 - `dotnet/runtime` — ThreadPool source: [github.com/dotnet/runtime](https://github.com/dotnet/runtime)
 - `dotnet/aspnetcore` — Kestrel timeout configuration: [github.com/dotnet/aspnetcore](https://github.com/dotnet/aspnetcore)
+
+
+
+

@@ -10,6 +10,8 @@ tags: [docker, troubleshooting, debugging, buildx, multi-arch, oci]
 
 **TL;DR:** The image is not broken — it is `linux/arm64`. A plain `docker build` on an Apple Silicon Mac builds only for the builder's own platform, the classic image store can't store a manifest list, so what lands in the registry is one arm64 manifest with no platform choice in it. The amd64 CI runner pulls it anyway and the kernel refuses to `execve()` an aarch64 ELF binary.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The symptom
 
 > "I build and push from my MacBook, then the deploy job in CI pulls the exact same tag and the container is dead before it logs anything: `exec /app/server: exec format error`. The image is fine — I run it locally every day. The digest CI reports is byte-for-byte the digest I pushed. It's a static Go binary, so there's no shell and no shebang to get wrong, and `/app/server` definitely exists because the build stage `COPY`d it."
@@ -221,3 +223,7 @@ Not with the classic image store — that is the same limitation. With the conta
 - **Docs/Repo:** [opencontainers/image-spec — image-index.md](https://github.com/opencontainers/image-spec/blob/main/image-index.md) — the canonical `application/vnd.oci.image.index.v1+json` media type and the per-manifest `platform` object that pull-time matching uses
 - **Docs/Repo:** [docker buildx imagetools inspect](https://docs.docker.com/reference/cli/docker/buildx/imagetools/inspect/) — the verbatim `Manifests:` / `Platform:` output format quoted above
 - **Docs/Repo:** [Attestation storage](https://docs.docker.com/build/metadata/attestations/attestation-storage/) — the `unknown/unknown` platform value and `vnd.docker.reference.type` annotation on attestation manifests
+
+
+
+

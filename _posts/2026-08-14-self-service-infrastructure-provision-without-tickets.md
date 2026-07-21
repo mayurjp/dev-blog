@@ -10,6 +10,8 @@ tags: [platform-engineering, self-service, waypoint, guardrails, infrastructure]
 
 **TL;DR:** *How do developers get infrastructure without filing a ticket and waiting three days — without also handing them a loaded gun?* Self-service: an abstraction they control, with guardrails the platform enforces underneath.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [hashicorp/waypoint](https://github.com/hashicorp/waypoint)
 
 ## 1. The Engineering Problem
@@ -160,3 +162,7 @@ app "kubernetes-nodejs-web" {
 - **Domain:** platform-engineering
 - **Repo:** [hashicorp/waypoint-examples](https://github.com/hashicorp/waypoint-examples) → [kubernetes/nodejs/waypoint.hcl](https://github.com/hashicorp/waypoint-examples/blob/main/kubernetes/nodejs/waypoint.hcl) — full build/registry/deploy/release abstraction with guardrails
 - **Repo:** [hashicorp/waypoint-examples](https://github.com/hashicorp/waypoint-examples) → [docker/nodejs/waypoint.hcl](https://github.com/hashicorp/waypoint-examples/blob/main/docker/nodejs/waypoint.hcl) — minimal buildpack self-service declaration
+
+
+
+

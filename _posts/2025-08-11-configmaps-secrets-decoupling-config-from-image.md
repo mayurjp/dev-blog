@@ -9,6 +9,8 @@ tags: [kubernetes, configmaps, secrets, kubelet]
 
 **TL;DR:** Why shouldn't config and credentials live inside the container image? Kubernetes stores configuration as its own API objects — a **ConfigMap** for ordinary config, a **Secret** for sensitive data — separate from any Pod, and the kubelet injects their contents into a container at runtime, either as environment variables or as mounted files.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 **Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: config baked into the image
@@ -238,3 +240,7 @@ Consumed here, in `prometheus-adapter`'s Deployment (probe/resource fields trimm
 - **Concept:** Kubernetes `ConfigMap` and `Secret` — externalized configuration and credentials
 - **Domain:** kubernetes
 - **Repo:** [prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus) → [`manifests/alertmanager-secret.yaml`](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/alertmanager-secret.yaml), [`manifests/prometheusAdapter-configMap.yaml`](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheusAdapter-configMap.yaml), [`manifests/prometheusAdapter-deployment.yaml`](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheusAdapter-deployment.yaml) — the production Prometheus + Alertmanager + Grafana monitoring stack (falling back from `microservices-demo`, which defines no ConfigMap/Secret objects at all)
+
+
+
+

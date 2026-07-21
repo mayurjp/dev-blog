@@ -6,6 +6,8 @@ categories: architecture
 order: 10
 tags: [architecture, non-functional-requirements, quality-attributes, redis]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: "fast" and "durable" are in direct tension, and different applications need genuinely different answers
 
@@ -102,3 +104,7 @@ Known-stale fact: non-functional requirement tradeoffs are sometimes treated as 
 - **Concept:** Non-functional requirements & quality attribute tradeoffs
 - **Domain:** architecture
 - **Repo:** [redis/redis](https://github.com/redis/redis) → [`redis.conf`](https://github.com/redis/redis/blob/unstable/redis.conf) — the actual shipped configuration file of a real, widely deployed production data store.
+
+
+
+

@@ -9,6 +9,8 @@ tags: [ddd, domain-events, mediatr, csharp]
 
 **TL;DR:** If a domain event handler fails, does the order status change still get saved? No — domain events are dispatched right before `SaveChanges`, in the same transaction as the state change, so if a handler throws, the commit never runs and the order's own change is rolled back along with it.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "this happened" needs to reach other code without the aggregate calling that code directly
@@ -139,3 +141,7 @@ Known-stale fact: "domain event" and "integration event" are sometimes used inte
 - **Concept:** Domain events (tactical modeling)
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Infrastructure/MediatorExtension.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Infrastructure/MediatorExtension.cs), [`OrderingContext.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Infrastructure/OrderingContext.cs), [`src/Ordering.Domain/Events/OrderShippedDomainEvent.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/Events/OrderShippedDomainEvent.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

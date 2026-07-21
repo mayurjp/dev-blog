@@ -10,6 +10,8 @@ tags: [cicd, troubleshooting, debugging, github-actions, git, runner-images]
 
 **TL;DR:** The Linux runner's filesystem is case-sensitive and every developer's macOS or Windows filesystem is not, so an import whose casing does not match the file on disk resolves locally and fails on the runner — and Git's `core.ignoreCase`, which `git clone` sets to `true` on those filesystems, is why "I renamed it and `git status` says clean" is a lie.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The symptom
 
 > "CI has been red for four hours on `Module not found: Error: Can't resolve './services/UserService' in '/home/runner/work/payments-api/payments-api/src'`. That file exists. I can open it. Every one of the six people on this team runs `npm test` locally and it passes — three on macOS, two on Windows, one on WSL. It fails on `ubuntu-latest` on every single run, same error, same line. I renamed the file to match the import, committed, pushed. Still failing. `git status` is clean on my machine."
@@ -206,3 +208,7 @@ By determinism. This failure reproduces on every run, at the same import, with t
 - **Docs/Repo:** [GitHub-hosted runners reference — GitHub Docs](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) — establishes the 4-CPU/16 GB standard runner for public repositories versus 2-CPU/8 GB for private ones, the difference that changes test-runner worker counts between CI and a developer machine
 - **Docs/Repo:** [`forceConsistentCasingInFileNames` — TSConfig reference](https://www.typescriptlang.org/tsconfig/forceConsistentCasingInFileNames.html) — establishes the compile-time check: TypeScript "follows the case sensitivity rules of the file system it's running on", and when the option is set "will issue an error if a program tries to include a file by a casing different from the casing on disk"
 - **Docs/Repo:** [actions/runner-images](https://github.com/actions/runner-images) — the source of truth for what is preinstalled on each runner label, and why pinning an action version does not pin the underlying image
+
+
+
+

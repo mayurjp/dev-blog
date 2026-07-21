@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** Why does the browser get REST while services talk gRPC to each other? REST/JSON stays at the edge because browsers and third parties need human-readable payloads without generated code, while gRPC handles internal service-to-service calls because both ends are code you control and a compiler-checked, binary, HTTP/2 contract is cheaper and safer.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem
@@ -303,3 +305,7 @@ internal hop — and both choices are deliberate, not a compromise.
 - **Concept:** Inter-service communication (REST/gRPC)
 - **Domain:** microservices
 - **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`protos/demo.proto`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/protos/demo.proto), [`src/checkoutservice/main.go`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/src/checkoutservice/main.go), [`src/frontend/rpc.go`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/src/frontend/rpc.go) — polyglot 11-service e-commerce demo (Go, Java, Python, C#, Node)
+
+
+
+

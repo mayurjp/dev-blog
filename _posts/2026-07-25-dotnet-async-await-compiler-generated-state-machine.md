@@ -10,6 +10,8 @@ tags: [dotnet, async-await, task, state-machine, compiler]
 
 **TL;DR:** Does `async/await` spin up a new thread for each await? No — the compiler rewrites your method into a heap-allocated state machine that runs synchronously on the current thread up to the first await, then suspends and resumes later via a callback when the awaited task completes, with no thread-per-await cost at all.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Before `async/await`, writing non-blocking I/O in C# meant one of two painful patterns — both with real production costs.
@@ -244,3 +246,7 @@ A: "Unsafe" here means it doesn't capture and flow the current `ExecutionContext
 - **Concept:** The Task-based Asynchronous Pattern — compiler-generated async state machines in C#
 - **Domain:** dotnet
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilder.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/AsyncTaskMethodBuilder.cs) and [`src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs) — the CLR runtime's own async builder and Task implementation.
+
+
+
+

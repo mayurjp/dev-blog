@@ -10,6 +10,8 @@ tags: [observability, chaos-engineering, litmus, resilience-testing, kubernetes]
 
 **TL;DR:** How do you know your deployment's three replicas and rolling-update strategy actually survive a pod dying at 3am, instead of just looking like they should on paper? You don't — until you deliberately kill a pod yourself, in production-like conditions, and verify the system recovers within your own SLA. Litmus's `pod-delete` experiment is that verification, run as a scoped Kubernetes Job instead of a hope.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 ## 1. The Engineering Problem
 
 Every resilience claim in a Kubernetes manifest is an assumption until it's tested. `replicas: 3` assumes the other two pods absorb load when one dies. A `PodDisruptionBudget` assumes voluntary evictions won't drop you below quorum. Liveness probes assume a hung process gets restarted before it silently serves errors. None of these are wrong on paper — but "on paper" is exactly the problem: nobody actually kills a pod and watches the clock until a real node reboots, a real OOM-killer fires, or a real `kubectl drain` runs during a datacenter maintenance window.
@@ -236,3 +238,7 @@ A: No — `pod-delete` verifies pod-level self-healing specifically. It doesn't 
 - **Concept:** Chaos engineering / resilience testing (pod-delete experiment)
 - **Domain:** Observability
 - **Repo:** [litmuschaos/litmus-go](https://github.com/litmuschaos/litmus-go) → [`chaoslib/litmus/pod-delete/lib/pod-delete.go`](https://github.com/litmuschaos/litmus-go/blob/master/chaoslib/litmus/pod-delete/lib/pod-delete.go) — the real, CNCF chaos engineering toolkit's pod-delete fault injection logic
+
+
+
+

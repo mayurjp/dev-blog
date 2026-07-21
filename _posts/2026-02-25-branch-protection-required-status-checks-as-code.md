@@ -6,6 +6,8 @@ categories: cicd
 order: 11
 tags: [cicd, github-actions, branch-protection, terraform]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: a CI result is just information unless something enforces it
 
@@ -129,3 +131,7 @@ Known-stale fact: "classic" branch protection (one settings object per branch-na
 - **Concept:** Branch protection & required status checks
 - **Domain:** cicd
 - **Repo:** [integrations/terraform-provider-github](https://github.com/integrations/terraform-provider-github) → [`docs/resources/repository_ruleset.md`](https://github.com/integrations/terraform-provider-github/blob/main/docs/resources/repository_ruleset.md) — the community-maintained, widely-used Terraform provider's own resource documentation for GitHub's current branch-protection mechanism.
+
+
+
+

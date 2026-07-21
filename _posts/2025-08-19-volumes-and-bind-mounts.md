@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** Where does a container's data go when the container dies? Docker gives you two distinct mount mechanisms — named volumes, which Docker manages and which outlive the container (surviving `docker rm`), and bind mounts, which map an exact host path into the container for live, two-way access to config or source — and picking the right one for the job is what makes persistence a declared, portable part of the service definition rather than a fragile host-path convention.
 
+> **In plain English (30 sec):** External hard drive for pods — survives restart.
+
 **Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: a container's filesystem is disposable by design
@@ -140,3 +142,7 @@ secrets:
 - **Concept:** Named volumes vs. bind mounts in Docker/Compose
 - **Domain:** docker
 - **Repo:** [docker/awesome-compose](https://github.com/docker/awesome-compose) → [`nginx-golang-mysql/compose.yaml`](https://github.com/docker/awesome-compose/blob/master/nginx-golang-mysql/compose.yaml) — Docker's official curated collection of real multi-service Compose stacks
+
+
+
+

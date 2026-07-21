@@ -10,6 +10,8 @@ tags: [cicd, glossary, github-actions, pipelines]
 
 **TL;DR:** This is the reference page for the CI/CD vocabulary used throughout this blog's pipeline and delivery posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 The posts in this domain assume you already know what a runner or a cache key is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Pipeline basics
@@ -112,3 +114,7 @@ A monorepo holds many packages or services in one repository with a shared pipel
 ---
 
 This page is a reference, not a lesson — each term above links to the post that takes it from definition to mechanism.
+
+
+
+

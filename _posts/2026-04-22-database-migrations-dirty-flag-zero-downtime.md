@@ -9,6 +9,8 @@ tags: [databases, migrations, schema-changes, go]
 
 **TL;DR:** A migration crashes halfway through — how does the tool know not to just retry it? `golang-migrate` marks the target version dirty in its tracking table before running the migration's SQL and only marks it clean after it succeeds; if the process dies mid-migration, the dirty flag stays set and every subsequent run refuses to proceed until a human explicitly forces that version clean.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`golang-migrate/migrate`](https://github.com/golang-migrate/migrate)
 
 ## 1. The Engineering Problem: a migration that crashes partway leaves the schema in an unknown, ambiguous state
@@ -130,3 +132,7 @@ Known-stale fact: migration tooling is sometimes assumed to be "safe" simply by 
 - **Concept:** Database migrations & zero-downtime schema changes
 - **Domain:** databases
 - **Repo:** [golang-migrate/migrate](https://github.com/golang-migrate/migrate) → [`migrate.go`](https://github.com/golang-migrate/migrate/blob/master/migrate.go), [`database/driver.go`](https://github.com/golang-migrate/migrate/blob/master/database/driver.go) — a real, widely used, language-agnostic schema-migration tool.
+
+
+
+

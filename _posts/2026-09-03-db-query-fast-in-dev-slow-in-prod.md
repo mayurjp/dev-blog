@@ -10,6 +10,8 @@ tags: [databases, troubleshooting, debugging, postgresql, explain-analyze, autov
 
 **TL;DR:** The production query is not slow because production has more data — it is slow because the planner's row estimate is 53,000x too high, so it correctly prices a sequential scan as cheaper than the index. The estimate is wrong because `autovacuum_analyze_scale_factor` is a *percentage* of table size, and on a 204-million-row table that percentage has not been crossed in six weeks.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The symptom
 
 > "Same query. Same schema. Same index — I checked `\d orders` on both. 8ms on my laptop against a restored dump, 4.1 seconds in production. And it's not a cold cache: I ran it ten times in a row and it's 4 seconds every time. `EXPLAIN` in prod shows a Seq Scan on a table that definitely has the index the query needs."
@@ -262,3 +264,7 @@ No — and that is the trap. Plain `EXPLAIN` prints only the estimate, so it sho
 - **Docs/Repo:** [PostgreSQL — `pg_stats`](https://www.postgresql.org/docs/current/view-pg-stats.html) — establishes `most_common_vals` / `most_common_freqs` as the selectivity source
 - **Docs/Repo:** [PostgreSQL — Planner Cost Constants](https://www.postgresql.org/docs/current/runtime-config-query.html) — establishes `seq_page_cost` 1.0, `random_page_cost` 4.0, `default_statistics_target` 100
 - **Docs/Repo:** [`postgres/postgres` → `src/backend/optimizer/path/costsize.c`](https://github.com/postgres/postgres/blob/master/src/backend/optimizer/path/costsize.c) — `cost_seqscan()`, the arithmetic behind the `cost=0.00..6014311.00` printed above
+
+
+
+

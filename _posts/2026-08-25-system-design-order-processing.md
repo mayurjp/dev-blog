@@ -7,6 +7,8 @@ categories: aspnet-webapi
 order: 3
 tags: [aspnet-webapi, system-design, architecture, event-driven, messaging]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The problem
 
@@ -233,3 +235,7 @@ Event store (Cosmos DB, same container, different partition key):
 
 - Azure Service Bus: [learn.microsoft.com/en-us/azure/service-bus-messaging](https://learn.microsoft.com/en-us/azure/service-bus-messaging/)
 - Saga pattern: [learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga/)
+
+
+
+

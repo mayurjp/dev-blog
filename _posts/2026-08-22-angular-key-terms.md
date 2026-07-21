@@ -10,6 +10,8 @@ tags: [angular, glossary, signals, frontend]
 
 **TL;DR:** This is the vocabulary reference for every Angular post on this blog. Each term below is written to stand alone — bookmark it and jump back whenever a later post uses a word you don't have pinned down.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Reactivity
 
 ### Component
@@ -107,3 +109,7 @@ Ivy is Angular's current rendering and compilation engine, introduced to replace
 Zoneless is the opt-in mode where Angular no longer relies on Zone.js to know when to run change detection; instead, signals, `markForCheck`, and explicit `ChangeDetectorRef` calls schedule updates. It removes the Zone.js patch overhead and the awkward `runOutsideAngular` dance, and makes reactivity explicit and traceable. Enabling it is a matter of providing `provideExperimentalZonelessChangeDetection()` (or its stable successor) at the root.
 
 That's the vocabulary. Keep this open in a tab — the framework-internals posts reference these terms constantly, and the 101 below is where they first get wired together.
+
+
+
+

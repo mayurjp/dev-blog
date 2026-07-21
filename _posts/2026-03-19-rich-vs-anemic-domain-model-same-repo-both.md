@@ -6,6 +6,8 @@ categories: ddd
 order: 11
 tags: [ddd, rich-domain-model, anemic-domain-model, csharp]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: having a behavior method doesn't guarantee it's the *only* way to reach that state
 
@@ -112,3 +114,7 @@ Known-stale fact: the Anemic Domain Model anti-pattern is often described as an 
 - **Concept:** Rich domain model vs anemic domain model
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Catalog.API/Model/CatalogItem.cs`](https://github.com/dotnet/eShop/blob/main/src/Catalog.API/Model/CatalogItem.cs), [`src/Catalog.API/Apis/CatalogApi.cs`](https://github.com/dotnet/eShop/blob/main/src/Catalog.API/Apis/CatalogApi.cs) — a real, actively maintained reference application.
+
+
+
+

@@ -9,6 +9,8 @@ tags: [databases, backups, point-in-time-recovery, postgresql, c]
 
 **TL;DR:** A backup ran at midnight, the accident happened at 2:47pm — how does recovery land exactly there? Postgres restores the base backup, then replays every WAL record since it in order, checking each one against the configured recovery target (a timestamp, transaction ID, or WAL location), and halts replay the instant a record satisfies the stop condition — landing the database precisely at that point, not at midnight and not at everything since.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: a backup captures one moment, but the moment you need to recover to is almost never that one
@@ -114,3 +116,7 @@ Known-stale fact: backup strategy is sometimes evaluated purely by *backup frequ
 - **Concept:** Backup strategies & point-in-time recovery
 - **Domain:** databases
 - **Repo:** [postgres/postgres](https://github.com/postgres/postgres) → [`src/backend/access/transam/xlogrecovery.c`](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xlogrecovery.c) — the actual PostgreSQL server source, its WAL-replay recovery-target logic.
+
+
+
+

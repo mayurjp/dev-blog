@@ -9,6 +9,8 @@ tags: [security, oauth2, pkce, authorization-code]
 
 **TL;DR:** How does a mobile app prove it's the same client that started login, without a secret? PKCE has the client generate a random `code_verifier` locally, send only its hash (`code_challenge`) up front, then reveal the verifier at token exchange so the server can confirm it matches — a stolen authorization code alone is useless without the verifier that was never transmitted until then.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 
 ## 1. The Engineering Problem: the authorization code flow assumes a secret the client can't actually keep
@@ -129,3 +131,7 @@ Known-stale fact: PKCE is often taught as "for public/mobile clients only" — t
 - **Concept:** OAuth 2.0 authorization code flow (with PKCE)
 - **Domain:** security
 - **Repo:** [ory/hydra](https://github.com/ory/hydra) → [`fosite/handler/pkce/handler.go`](https://github.com/ory/hydra/blob/master/fosite/handler/pkce/handler.go) — Ory's real, production OAuth2/OIDC server and its vendored `fosite` library.
+
+
+
+

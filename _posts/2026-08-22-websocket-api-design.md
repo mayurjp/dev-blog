@@ -10,6 +10,8 @@ tags: [api-design, websocket, heartbeat, scaling, connection-lifecycle]
 
 **TL;DR:** How do you keep a WebSocket API reliable at scale? Design around the upgrade handshake, send application-level heartbeats (ping/pong) to detect dead connections, and put connection state behind a shared pub/sub backplane so any node can serve any socket.
 
+> **In plain English (30 sec):** Vertical = bigger machine, Horizontal = more machines.
+
 **Real repo:** [Fastify/fastify](https://github.com/Fastify/fastify) — its schema-first validation/serialization model and WebSocket support illustrate how a request framework handles upgrade, routing, and per-connection lifecycle hooks.
 
 ## 1. The Engineering Problem
@@ -117,3 +119,7 @@ What this teaches: treat each socket as ephemeral and re-establishable. Clients 
 - **Concept:** WebSocket lifecycle / heartbeat / scaling
 - **Domain:** api-design
 - **Repo:** Fastify/fastify → [lib/validation.js](https://github.com/Fastify/fastify/blob/main/lib/validation.js) — schema-first validation/serialization model applied uniformly (mirror for WS message frames).
+
+
+
+

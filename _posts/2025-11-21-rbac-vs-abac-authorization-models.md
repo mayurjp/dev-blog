@@ -9,6 +9,8 @@ tags: [security, rbac, abac, authorization, casbin]
 
 **TL;DR:** Why does "can Alice edit this file" sometimes need more than a role check? RBAC checks whether a subject holds a role that's been granted a permission — a static, enumerable lookup — while ABAC evaluates an expression over live attributes of the subject and resource (like "is the requester the resource's owner"), covering every case without a new policy row per resource.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`casbin/casbin`](https://github.com/casbin/casbin)
 
 ## 1. The Engineering Problem: static roles don't scale to permission logic that depends on the specific resource
@@ -128,3 +130,7 @@ Known-stale fact: RBAC and ABAC are often presented as a binary either/or archit
 - **Concept:** RBAC vs ABAC (authorization models)
 - **Domain:** security
 - **Repo:** [casbin/casbin](https://github.com/casbin/casbin) → [`examples/rbac_model.conf`](https://github.com/casbin/casbin/blob/master/examples/rbac_model.conf), [`examples/rbac_policy.csv`](https://github.com/casbin/casbin/blob/master/examples/rbac_policy.csv), [`examples/abac_model.conf`](https://github.com/casbin/casbin/blob/master/examples/abac_model.conf) — the widely-used open-source authorization/access-control library.
+
+
+
+

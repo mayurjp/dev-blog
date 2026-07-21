@@ -10,6 +10,8 @@ tags: [multicloud, terraform, iac, grpc, provider-protocol]
 
 **TL;DR:** If Terraform "supports" AWS, GCP, Azure, and dozens of other providers, does that mean Terraform's own core codebase has grown a hardcoded, ever-expanding pile of provider-specific logic — one code path per cloud? No — Terraform core and every provider are separate operating-system processes talking over one fixed gRPC protocol, and a resource's actual field shape (exactly the AWS RDS-vs-GCP-Cloud-SQL divergence covered in this domain's first lesson) is never compiled into core at all. It travels as opaque bytes core doesn't parse, and core only learns what those bytes mean for a given resource type by calling one generic RPC — `GetProviderSchema` — at startup.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 The previous lesson in this domain showed that AWS RDS and GCP Cloud SQL model "highly available" and "backup retention" with genuinely different field shapes under the same HCL syntax. That raises an obvious follow-up question: if Terraform core has to understand `aws_db_instance`'s flat `multi_az` boolean *and* `google_sql_database_instance`'s nested `settings.availability_type` enum well enough to plan and apply changes to both, doesn't that mean Terraform's own source code has separate, provider-specific logic baked in for each one?
@@ -169,3 +171,7 @@ A: No — the "6" indicates this is the current major protocol version; earlier 
 - **Concept:** Terraform's provider RPC protocol as the mechanism behind schema-agnostic, multi-cloud infrastructure as code
 - **Domain:** multicloud
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`docs/plugin-protocol/tfplugin6.proto`](https://github.com/hashicorp/terraform/blob/main/docs/plugin-protocol/tfplugin6.proto) — the real gRPC contract every Terraform provider, for every cloud, implements
+
+
+
+

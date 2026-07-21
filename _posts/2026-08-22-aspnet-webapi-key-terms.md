@@ -10,6 +10,8 @@ tags: [aspnet-webapi, glossary, api, dotnet]
 
 **TL;DR:** This is the vocabulary reference for every ASP.NET WebAPI post on this blog — read it once, then skip back here whenever a term like *RouteEndpoint*, *FluentValidation*, or *OpenAPI* shows up.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Endpoint Pipeline
 
 ### RouteEndpoint
@@ -68,3 +70,7 @@ OpenAPI (formerly Swagger) is a specification for describing HTTP APIs in a mach
 - `dotnet/aspnetcore` — the actual ASP.NET Core framework source: [github.com/dotnet/aspnetcore](https://github.com/dotnet/aspnetcore)
 - `domaindrivendev/Swashbuckle.AspNetCore` — Swagger/SwaggerUI integration: [github.com/domaindrivendev/Swashbuckle.AspNetCore](https://github.com/domaindrivendev/Swashbuckle.AspNetCore)
 - `dotnet/aspnet-api-versioning` — API versioning library: [github.com/dotnet/aspnet-api-versioning](https://github.com/dotnet/aspnet-api-versioning)
+
+
+
+

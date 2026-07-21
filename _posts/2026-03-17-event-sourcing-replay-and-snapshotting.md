@@ -6,6 +6,8 @@ categories: ddd
 order: 10
 tags: [ddd, event-sourcing, csharp]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: keeping only "current state" throws away the history a lot of real questions need
 
@@ -147,3 +149,7 @@ Known-stale fact: event sourcing is sometimes assumed to require CQRS as a packa
 - **Concept:** Event sourcing (aggregate state as an event log)
 - **Domain:** ddd
 - **Repo:** [eventflow/EventFlow](https://github.com/eventflow/EventFlow) → [`Source/EventFlow/Aggregates/AggregateRoot.cs`](https://github.com/eventflow/EventFlow/blob/develop-v1/Source/EventFlow/Aggregates/AggregateRoot.cs), [`Source/EventFlow/Snapshots/SnapshotAggregateRoot.cs`](https://github.com/eventflow/EventFlow/blob/develop-v1/Source/EventFlow/Snapshots/SnapshotAggregateRoot.cs) — a real, dedicated .NET CQRS+ES framework.
+
+
+
+

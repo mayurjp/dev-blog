@@ -9,6 +9,8 @@ tags: [microservices, rate-limiting, bulkhead, resilience]
 
 **TL;DR:** What's the difference between limiting how often you're called and how many calls run at once? Rate limiting (a token bucket) caps throughput over time — how often requests are allowed — while a bulkhead caps concurrent occupancy — how many requests can be in flight against a dependency at once — and production systems need both because they defend against different failure modes.
 
+> **In plain English (30 sec):** Like Express rateLimit — allow 100 req/sec, 101st gets 429.
+
 **Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore), [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: two different failure modes need two different defenses
@@ -159,3 +161,7 @@ Known-stale fact: before .NET 7, ASP.NET Core had no built-in rate-limiting midd
 - **Concept:** Rate limiting & bulkheads
 - **Domain:** microservices
 - **Repo:** [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) → [`src/Middleware/RateLimiting/samples/RateLimitingSample/Program.cs`](https://github.com/dotnet/aspnetcore/blob/main/src/Middleware/RateLimiting/samples/RateLimitingSample/Program.cs) — the official ASP.NET Core rate-limiting sample; [App-vNext/Polly](https://github.com/App-vNext/Polly) → [`src/Polly/Bulkhead/BulkheadEngine.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly/Bulkhead/BulkheadEngine.cs) — the .NET resilience library's real bulkhead implementation.
+
+
+
+

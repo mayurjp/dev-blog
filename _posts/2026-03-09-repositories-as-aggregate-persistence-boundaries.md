@@ -9,6 +9,8 @@ tags: [ddd, repository-pattern, csharp, entity-framework]
 
 **TL;DR:** Why can't a repository fetch just the `OrderItems`, without their `Order`? Because `IOrderRepository` only ever speaks in terms of `Order` — there is no `OrderItemRepository` and no method returns an item on its own — so the persistence layer mirrors the same consistency boundary the domain model already enforces, loading and saving the whole aggregate as one unit.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "always load and save the whole aggregate together" needs an enforcement point, not just a convention
@@ -122,3 +124,7 @@ Known-stale fact: repositories are sometimes designed generically — one reposi
 - **Concept:** Repositories as aggregate persistence boundaries
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Infrastructure/Repositories/OrderRepository.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Infrastructure/Repositories/OrderRepository.cs), [`src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

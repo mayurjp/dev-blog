@@ -9,6 +9,8 @@ tags: [kubernetes, rbac, security, serviceaccount]
 
 **TL;DR:** How does Kubernetes decide which ServiceAccount can do what? Through two independent axes — a `Role` or `ClusterRole` defines what's allowed, and a `RoleBinding` or `ClusterRoleBinding` grants that to a specific subject, with built-in roles like `view`/`edit`/`admin` continuously extended by a ClusterRole aggregation controller that merges in any ClusterRole carrying the right label.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kubernetes-sigs/metrics-server`](https://github.com/kubernetes-sigs/metrics-server)
 
 ## 1. The Engineering Problem: every ServiceAccount starts with almost nothing, and "just grant everything" is how clusters get compromised
@@ -164,3 +166,7 @@ Known-stale fact: RBAC (`rbac.authorization.k8s.io/v1`) has been the only in-tre
 - **Concept:** RBAC (Role, ClusterRole, RoleBinding, ClusterRoleBinding, aggregation)
 - **Domain:** kubernetes
 - **Repo:** [kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server) → [`manifests/base/rbac.yaml`](https://github.com/kubernetes-sigs/metrics-server/blob/master/manifests/base/rbac.yaml) — production add-on and real API aggregation extension.
+
+
+
+

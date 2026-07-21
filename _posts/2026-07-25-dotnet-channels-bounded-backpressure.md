@@ -10,6 +10,8 @@ tags: [dotnet, channels, concurrency, backpressure, producer-consumer]
 
 **TL;DR:** Does your channel slow down the producer when the consumer falls behind? A bounded channel blocks the writer's `WriteAsync` the instant the internal deque hits capacity — that's backpressure. An unbounded channel never blocks because its `ConcurrentQueue` has no capacity check — a fast producer with a slow consumer will allocate items until the process runs out of memory. The runtime gives you both choices; the production consequences are entirely your problem.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Building a producer-consumer pipeline in .NET used to mean choosing between a `BlockingCollection<T>` (heavy, `SemaphoreSlim` + `Monitor` per operation) or rolling your own `ConcurrentQueue<T>` with manual signaling via `ManualResetEventSlim`. Both paths had the same blind spot: there was no built-in way to tell a producer "slow down, the consumer can't keep up."
@@ -242,3 +244,7 @@ A: Essentially yes. With capacity 0, there's no buffer — the producer's `Write
 - **Concept:** Backpressure via bounded channels — `System.Threading.Channels` in .NET
 - **Domain:** dotnet
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/System.Threading.Channels/src/System/Threading/Channels/BoundedChannel.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Threading.Channels/src/System/Threading/Channels/BoundedChannel.cs), [`UnboundedChannel.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Threading.Channels/src/System/Threading/Channels/UnboundedChannel.cs), [`Channel.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Threading.Channels/src/System/Threading/Channels/Channel.cs), and [`BoundedChannelFullMode.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Threading.Channels/src/System/Threading/Channels/BoundedChannelFullMode.cs) — the runtime's own channel implementations.
+
+
+
+

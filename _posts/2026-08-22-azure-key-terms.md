@@ -10,6 +10,8 @@ tags: [azure, glossary, cloud, fundamentals]
 
 **TL;DR:** This is the vocabulary reference for every Azure post on this blog — read it once, then skip back here whenever a term like *ARM*, *NSG*, or *Availability Zone* shows up.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Organization
 
 ### Region
@@ -73,3 +75,7 @@ Application Gateway is a layer-7 (HTTP/HTTPS) load balancer that terminates TLS,
 
 - Azure documentation: [learn.microsoft.com/en-us/azure](https://learn.microsoft.com/en-us/azure/)
 - Azure architecture center: [learn.microsoft.com/en-us/azure/architecture](https://learn.microsoft.com/en-us/azure/architecture/)
+
+
+
+

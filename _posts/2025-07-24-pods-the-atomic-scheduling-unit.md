@@ -10,6 +10,8 @@ tags: [kubernetes, pods, kubelet, containers]
 
 **TL;DR:** Why does Kubernetes never schedule a single bare container? Because sidecars need the same node, the same IP, and the same lifecycle as the container they sit next to — so Kubernetes schedules a **Pod**, not a container, and lets the kubelet manage the whole group as one unit.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: containers that need to live together
@@ -206,3 +208,7 @@ No. A Pod is bound to the node it was scheduled on for its whole life; if that n
 ---
 
 **Next in the Kubernetes series:** [Who actually recreates a crashed Pod, and how do you update one without downtime? →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})
+
+
+
+

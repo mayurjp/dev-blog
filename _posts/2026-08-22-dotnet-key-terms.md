@@ -10,6 +10,8 @@ tags: [dotnet, glossary, clr, aspnetcore]
 
 **TL;DR:** This is the vocabulary reference for every .NET post on this blog — read it once, then skip back here whenever a term like *JIT*, *Scoped*, or *Generic Host* shows up. The terms are grouped by theme and each stands alone, so you can land on any post in the series without first reading the others.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Runtime
 
 ### CLR (Common Language Runtime)
@@ -106,3 +108,7 @@ Logging is the framework's `ILogger<T>` abstraction fed by the host's configured
 Health checks are endpoints (usually `/health`) backed by `IHealthCheck` implementations that report the app's dependency status — database reachable, downstream API responding, disk space OK. Registered via `AddHealthChecks()` and exposed with `MapHealthChecks`, they are what an orchestrator (Kubernetes, a load balancer) polls to decide whether to route traffic or restart the pod. A failing check is how a broken dependency takes a service out of rotation before it serves errors.
 
 Keep this page bookmarked — every other .NET post links a term back to one of the definitions above, and the 101 post walks through how these pieces actually fit together at request time.
+
+
+
+

@@ -9,6 +9,8 @@ tags: [microservices, jwt, oauth, token-relay]
 
 **TL;DR:** How does a downstream API trust a request without asking the user to log in again? Token relay forwards the same OAuth2/OIDC access token the frontend obtained at login as a Bearer header on every downstream call, and each service validates that token independently against the shared identity provider, with no re-authentication and no synchronous callback per request.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: the user only logs in once, but three services need to know who they are
@@ -146,3 +148,7 @@ Known-stale fact: blindly relaying one raw user token to every downstream servic
 - **Concept:** Cross-service auth (JWT/OAuth propagation)
 - **Domain:** microservices
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.ServiceDefaults/HttpClientExtensions.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.ServiceDefaults/HttpClientExtensions.cs), [`src/eShop.ServiceDefaults/AuthenticationExtensions.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.ServiceDefaults/AuthenticationExtensions.cs), [`src/WebApp/Extensions/Extensions.cs`](https://github.com/dotnet/eShop/blob/main/src/WebApp/Extensions/Extensions.cs) — .NET Aspire-orchestrated e-commerce reference architecture.
+
+
+
+

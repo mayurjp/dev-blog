@@ -9,6 +9,8 @@ tags: [design-patterns, decorator, polly, resilience]
 
 **TL;DR:** How does Polly wrap retry, circuit breaker, and timeout around one call without changing it? Each policy implements the same interface as the call it wraps and calls the wrapped delegate internally, so composing policies is just nesting their execution — and the nesting order itself changes the resulting behavior.
 
+> **In plain English (30 sec):** Like a fuse — if service fails 5 times, stop calling for 30s.
+
 **Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: cross-cutting behaviors baked into a method don't compose or reorder cleanly
@@ -106,3 +108,7 @@ Known-stale fact: Decorator is usually taught as a pure OOP class-wrapping patte
 - **Concept:** Decorator pattern (composable behavior wrapping)
 - **Domain:** design-patterns
 - **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly) → [`src/Polly/Wrap/AsyncPolicyWrapEngine.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly/Wrap/AsyncPolicyWrapEngine.cs), [`src/Polly/Wrap/IAsyncPolicyPolicyWrapExtensions.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly/Wrap/IAsyncPolicyPolicyWrapExtensions.cs) — the real, production .NET resilience library.
+
+
+
+

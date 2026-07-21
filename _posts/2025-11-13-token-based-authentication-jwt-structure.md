@@ -9,6 +9,8 @@ tags: [security, jwt, tokens, hmac]
 
 **TL;DR:** What actually stops someone from editing their own JWT to become admin? The signature is computed over the entire header-plus-payload using a secret or private key only the issuer holds, so changing even one character makes the recomputed signature fail to match and the token gets rejected.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`jwt-dotnet/jwt`](https://github.com/jwt-dotnet/jwt)
 
 ## 1. The Engineering Problem: a self-contained token is only safe if forging it is infeasible
@@ -136,3 +138,7 @@ Known-stale fact: **algorithm-confusion attacks are a real, historical CVE class
 - **Concept:** Token-based authentication (JWT structure, signing, verification)
 - **Domain:** security
 - **Repo:** [jwt-dotnet/jwt](https://github.com/jwt-dotnet/jwt) → [`src/JWT/JwtEncoder.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/JwtEncoder.cs), [`src/JWT/Algorithms/HMACSHA256Algorithm.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/Algorithms/HMACSHA256Algorithm.cs), [`src/JWT/JwtValidator.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/JwtValidator.cs) — a widely-used, real .NET JWT library.
+
+
+
+

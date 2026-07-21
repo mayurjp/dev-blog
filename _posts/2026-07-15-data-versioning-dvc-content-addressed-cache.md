@@ -10,6 +10,8 @@ tags: [mlops, dvc, data-versioning, content-addressing, reproducibility]
 
 **TL;DR:** Does DVC, "Git for datasets," teach git to actually store large binary data files? No — it does the opposite: it keeps git doing exactly what git is already good at (tracking small text files efficiently) and never gives it the real data at all. A `.dvc` file — a few lines of plain YAML holding a content hash, a size, and a path — is what git actually commits. The real data lives in a completely separate, content-addressed cache, keyed by that same hash, using the identical two-level sharded-directory scheme git's own internal object store has always used.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`iterative/dvc`](https://github.com/iterative/dvc), [`iterative/dvc-data`](https://github.com/iterative/dvc-data)
 
 ## 1. The Engineering Problem
@@ -145,3 +147,7 @@ A: It can be — the `.dvc` file's path is relative to where DVC expects that da
 - **Concept:** Content-addressed data versioning, separate from git's own object store
 - **Domain:** mlops
 - **Repo:** [iterative/dvc](https://github.com/iterative/dvc) → [`dvc/output.py`](https://github.com/iterative/dvc/blob/main/dvc/output.py); [iterative/dvc-data](https://github.com/iterative/dvc-data) → [`src/dvc_data/hashfile/db/local.py`](https://github.com/iterative/dvc-data/blob/main/src/dvc_data/hashfile/db/local.py) — the real, canonical open-source "Git for datasets" tool
+
+
+
+

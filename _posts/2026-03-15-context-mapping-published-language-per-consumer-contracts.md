@@ -6,6 +6,8 @@ categories: ddd
 order: 9
 tags: [ddd, context-mapping, strategic-ddd, integration-events]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: once two bounded contexts need to talk, *whose* model governs the shape of what crosses the boundary?
 
@@ -102,3 +104,7 @@ Known-stale fact: context mapping is sometimes taught as choosing exactly one la
 - **Concept:** Context mapping (strategic DDD relationships)
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.API/Application/IntegrationEvents/Events/OrderStatusChangedToPaidIntegrationEvent.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/IntegrationEvents/Events/OrderStatusChangedToPaidIntegrationEvent.cs), [`src/Catalog.API/IntegrationEvents/Events/OrderStatusChangedToPaidIntegrationEvent.cs`](https://github.com/dotnet/eShop/blob/main/src/Catalog.API/IntegrationEvents/Events/OrderStatusChangedToPaidIntegrationEvent.cs), [`OrderStatusChangedToPaidIntegrationEventHandler.cs`](https://github.com/dotnet/eShop/blob/main/src/Catalog.API/IntegrationEvents/EventHandling/OrderStatusChangedToPaidIntegrationEventHandler.cs) — a real, actively maintained multi-service reference application.
+
+
+
+

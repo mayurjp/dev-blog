@@ -7,6 +7,8 @@ categories: azure
 order: 90
 tags: [azure, troubleshooting, debugging, app-service, performance, dotnet]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -153,3 +155,7 @@ public class OrderService : IOrderService
 
 - Microsoft docs: `IHttpClientFactory` guidance: [learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests)
 - Azure App Service diagnostics: [learn.microsoft.com/en-us/azure/app-service/overview-diagnostics](https://learn.microsoft.com/en-us/azure/app-service/overview-diagnostics)
+
+
+
+

@@ -12,6 +12,8 @@ source_url: "https://github.com/argoproj/argo-cd"
 
 **TL;DR:** Does the cluster generator actually *read* cluster Secrets at runtime, or does it just use a static list you paste in? It reads them live — every time the ApplicationSet controller reconciles, `ClusterGenerator.GenerateParams` queries the Kubernetes API for Secrets labeled `argocd.argoproj.io/secret-type: cluster`, extracts `name`, `server`, `project`, and metadata from each, and emits one parameter map per matching cluster. Register a new cluster in Argo CD and the next reconciliation cycle automatically creates the corresponding `Application` — zero manifest edits required.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Multi-cluster deployments create an N×M management burden: every application needs a separate `Application` manifest for every cluster it targets. The problem compounds when clusters come and go dynamically.
@@ -334,3 +336,7 @@ A: Each `flatList` cluster generator produces its own single Application — the
 - **Repository:** [`argoproj/argo-cd`](https://github.com/argoproj/argo-cd)
 - **Generator:** [`applicationset/generators/cluster.go`](https://github.com/argoproj/argo-cd/blob/master/applicationset/generators/cluster.go) — `ClusterGenerator.GenerateParams`, `getClusterParameters`, `getSecretsByClusterName`
 - **Docs:** [`docs/operator-manual/applicationset/Generators-Cluster.md`](https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset/Generators-Cluster.md) — label selectors, `flatList` mode, `values` interpolation
+
+
+
+

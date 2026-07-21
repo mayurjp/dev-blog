@@ -10,6 +10,8 @@ tags: [gitops, glossary, argocd, flux, kubernetes]
 
 **TL;DR:** This is the shared vocabulary for every GitOps post on this blog — read it once, then treat it as a lookup table. Each term is written to stand alone, so you can jump straight to the one you hit in another post.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Core model
 
 ### GitOps
@@ -102,3 +104,7 @@ Helm is the Kubernetes package manager: charts are parameterized templates, and 
 Sealed Secrets (`bitnami-labs/sealed-secrets`) encrypt a `Secret` into a `SealedSecret` resource that is safe to commit to Git; only the in-cluster controller holds the private key to decrypt it back into a real `Secret`. This solves the GitOps contradiction of "everything in Git" versus "secrets must not be in Git" without an external vault in the simplest cases.
 
 Keep this page open in a tab — the 101 and the deeper GitOps posts all assume these definitions.
+
+
+
+

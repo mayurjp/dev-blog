@@ -10,6 +10,8 @@ tags: [platform-engineering, platform-as-a-product, operating-model, inner-sourc
 
 **TL;DR:** *How should a platform team be organized so it accelerates developers instead of becoming the new bottleneck?* Run the platform as a product — with users, a roadmap, and inner-source contribution — not as an ops ticket queue.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [humanitec-architecture/reference-architecture-aws](https://github.com/humanitec-architecture/reference-architecture-aws)
 
 ## 1. The Engineering Problem
@@ -144,3 +146,7 @@ resource "humanitec_resource_definition_criteria" "backstage_postgres" {
 - **Domain:** platform-engineering
 - **Repo:** [humanitec-architecture/reference-architecture-aws](https://github.com/humanitec-architecture/reference-architecture-aws) → [modules/portal-backstage/main.tf](https://github.com/humanitec-architecture/reference-architecture-aws/blob/main/modules/portal-backstage/main.tf) — portal plane built from versioned shared modules + resource definitions
 - **Repo:** [humanitec-architecture/reference-architecture-aws](https://github.com/humanitec-architecture/reference-architecture-aws) → [README.md](https://github.com/humanitec-architecture/reference-architecture-aws/blob/main/README.md) — the five planes and Platform-as-a-Product definition
+
+
+
+

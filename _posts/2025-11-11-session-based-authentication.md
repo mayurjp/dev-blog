@@ -9,6 +9,8 @@ tags: [security, sessions, cookies, django]
 
 **TL;DR:** Where does "you're logged in" actually live — in the cookie, or on the server? The cookie carries only an opaque, randomly generated session key; the real identity and permissions live server-side, indexed by that key, so revoking a session is just deleting one row.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`django/django`](https://github.com/django/django)
 
 ## 1. The Engineering Problem: HTTP forgets who you are between requests, and the client can't be trusted to remind it
@@ -122,3 +124,7 @@ Known-stale fact: "session-based auth doesn't scale, use stateless JWTs instead"
 - **Concept:** Session-based authentication (cookies + server-side session store)
 - **Domain:** security
 - **Repo:** [django/django](https://github.com/django/django) → [`django/contrib/sessions/backends/base.py`](https://github.com/django/django/blob/main/django/contrib/sessions/backends/base.py), [`django/contrib/sessions/backends/db.py`](https://github.com/django/django/blob/main/django/contrib/sessions/backends/db.py) — the reference session-auth implementation for one of the most widely deployed web frameworks.
+
+
+
+

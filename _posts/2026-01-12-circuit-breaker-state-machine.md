@@ -9,6 +9,8 @@ tags: [design-patterns, circuit-breaker, polly, resilience]
 
 **TL;DR:** Why does a circuit breaker have a 4th state that has nothing to do with failures? Because alongside the automatic Closed/Open/HalfOpen failure-detection states, Polly adds a manually-triggered Isolated state so an operator can deliberately force a dependency offline, and it throws a distinct `IsolatedCircuitException` so monitoring can tell a deliberate action apart from a real incident.
 
+> **In plain English (30 sec):** Like a fuse — if service fails 5 times, stop calling for 30s.
+
 **Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: repeatedly calling a failing dependency wastes resources and can make things worse
@@ -149,3 +151,7 @@ Known-stale fact: textbook circuit breaker explanations typically describe exact
 - **Concept:** Circuit Breaker (code-level pattern)
 - **Domain:** design-patterns
 - **Repo:** [App-vNext/Polly](https://github.com/App-vNext/Polly) → [`src/Polly.Core/CircuitBreaker/Controller/CircuitStateController.cs`](https://github.com/App-vNext/Polly/blob/main/src/Polly.Core/CircuitBreaker/Controller/CircuitStateController.cs) — the real, production .NET resilience library's circuit breaker state machine.
+
+
+
+

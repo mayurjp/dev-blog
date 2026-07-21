@@ -10,6 +10,8 @@ tags: [kubernetes, pod-security-standards, admission-controllers, security-profi
 
 **TL;DR:** RBAC controls who can create a Pod; it says nothing about what that Pod is allowed to run as once created — a user with `create pods` permission can still request `privileged: true` or a hostPath mount, and RBAC won't stop them. Pod Security Admission, a built-in admission controller since Kubernetes 1.23 (and PodSecurityPolicy's replacement after PSP's removal in 1.25), closes that gap by evaluating every Pod against one of three fixed **Pod Security Standards** levels — driven entirely by `pod-security.kubernetes.io/*` labels on the Pod's namespace, no separate policy object to create or bind. From Kubernetes' own `pod-security-admission` source and `kubernetes-sigs/security-profiles-operator`'s real `MutatingWebhookConfiguration`.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 ## 1. The Engineering Problem
 
 RBAC answers "can this identity create a Pod in this namespace" — it has no concept of what fields that Pod's spec is allowed to contain. A `Role` granting `create` on `pods` says nothing about `securityContext.privileged`, `hostNetwork`, or mounting `/var/run/docker.sock` as a `hostPath` volume. In practice this means any user or CI pipeline with ordinary "deploy an app" permissions can, intentionally or by copy-pasting an example manifest, request a container that shares the host's PID/network namespace or runs as root with all Linux capabilities — a full container-breakout surface, with RBAC never even evaluating the question.
@@ -230,3 +232,7 @@ A: In practice no — `restricted` requires `runAsNonRoot: true`, `allowPrivileg
 ---
 
 **Next in the Kubernetes series:** [Advanced Scheduling: Why Topology Spread and Anti-Affinity Aren't the Same Guarantee]({{ '/kubernetes/advanced-scheduling-topology-spread-affinity-anti-affinity/' | relative_url }})
+
+
+
+

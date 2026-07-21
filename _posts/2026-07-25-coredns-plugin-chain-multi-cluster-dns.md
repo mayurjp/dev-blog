@@ -6,6 +6,8 @@ date: 2026-07-25 09:00:00 +0530
 categories: multicloud
 order: 8
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -329,3 +331,7 @@ A: CoreDNS will fail to initialize the multi-cluster controller during `InitKube
 - [coredns/coredns — `plugin/kubernetes/handler.go`](https://github.com/coredns/coredns/blob/master/plugin/kubernetes/handler.go)
 - [coredns/coredns — `plugin/kubernetes/setup.go`](https://github.com/coredns/coredns/blob/master/plugin/kubernetes/setup.go)
 - [Kubernetes Multi-Cluster Services API (MCS)](https://github.com/kubernetes-sigs/mcs-api)
+
+
+
+

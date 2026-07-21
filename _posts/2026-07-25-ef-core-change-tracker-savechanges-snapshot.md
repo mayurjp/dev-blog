@@ -7,6 +7,8 @@ categories: dotnet
 order: 7
 tags: [dotnet, ef-core, change-tracking, orm]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 How does EF Core know which SQL to generate when you call SaveChanges — an INSERT, an UPDATE, or a DELETE — without you ever writing a WHERE clause or a state flag? It snapshots every property value when an entity is first tracked, diffs the snapshot against the live object at save time, and routes each entity to the right command based on the gap between the two.
 
@@ -204,3 +206,7 @@ When a principal entity transitions to `Deleted`, the change tracker evaluates `
 - **Concept:** Snapshot-based change detection and the EntityState machine in EF Core
 - **Domain:** dotnet
 - **Repo:** [dotnet/efcore](https://github.com/dotnet/efcore) → [`src/EFCore/ChangeTracking/ChangeTracker.cs`](https://github.com/dotnet/efcore/blob/main/src/EFCore/ChangeTracking/ChangeTracker.cs), [`src/EFCore/ChangeTracking/Internal/StateManager.cs`](https://github.com/dotnet/efcore/blob/main/src/EFCore/ChangeTracking/Internal/StateManager.cs) — the EF Core change tracker and state manager that drive INSERT/UPDATE/DELETE generation.
+
+
+
+

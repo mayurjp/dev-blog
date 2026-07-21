@@ -6,6 +6,8 @@ categories: observability
 order: 7
 tags: [observability, slo, sli, error-budget, prometheus, go]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: an error budget is only useful if you know how fast it's being spent, not just whether it's gone
 
@@ -113,3 +115,7 @@ Known-stale fact: SLOs and error budgets are sometimes treated as simple, single
 - **Concept:** SLIs, SLOs & error budgets
 - **Domain:** observability
 - **Repo:** [slok/sloth](https://github.com/slok/sloth) → [`internal/alert/window.go`](https://github.com/slok/sloth/blob/main/internal/alert/window.go) — a real, widely used open-source Prometheus SLO generator implementing Google's multi-window multi-burn-rate SRE methodology.
+
+
+
+

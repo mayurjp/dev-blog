@@ -9,6 +9,8 @@ tags: [microservices, saga, outbox, data-consistency]
 
 **TL;DR:** How do you update your database AND notify other services without ever losing one? The transactional outbox pattern writes the event to an outbox table in the same local database transaction as the business data, then a separate relay reads unpublished rows and publishes them afterward, so the write and the notification are never split across two uncoordinated systems.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers)
 
 ## 1. The Engineering Problem: a DB write and a message publish can't be made atomic the naive way
@@ -167,3 +169,7 @@ Known-stale fact: two-phase commit (XA transactions) spanning a relational datab
 - **Concept:** Data consistency patterns (Saga/outbox)
 - **Domain:** microservices
 - **Repo:** [dotnet-architecture/eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers) → [`TransactionBehaviour.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/Services/Ordering/Ordering.API/Application/Behaviors/TransactionBehaviour.cs), [`OrderingIntegrationEventService.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/Services/Ordering/Ordering.API/Application/IntegrationEvents/OrderingIntegrationEventService.cs), [`IntegrationEventLogService.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/BuildingBlocks/EventBus/IntegrationEventLogEF/Services/IntegrationEventLogService.cs) — the reference implementation's real outbox + relay.
+
+
+
+

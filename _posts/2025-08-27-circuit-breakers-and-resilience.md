@@ -9,6 +9,8 @@ tags: [microservices, circuit-breaker, istio, service-mesh, resilience]
 
 **TL;DR:** If a dependency is dying, should your own code have to notice? No — a service mesh sidecar (Envoy, via Istio) can apply circuit breaking as infrastructure config, limiting connections proactively and ejecting unhealthy endpoints reactively, without any application code involved.
 
+> **In plain English (30 sec):** Like a fuse — if service fails 5 times, stop calling for 30s.
+
 **Real repo:** [`istio/istio`](https://github.com/istio/istio)
 
 ## 1. The Engineering Problem
@@ -234,3 +236,7 @@ What this teaches that a hello-world can't:
 - **Concept:** Circuit breakers & resilience
 - **Domain:** microservices
 - **Repo:** [istio/istio](https://github.com/istio/istio) → [`samples/bookinfo/networking/destination-rule-all.yaml`](https://github.com/istio/istio/blob/master/samples/bookinfo/networking/destination-rule-all.yaml) (mesh, `bookinfo` sample), plus [istio/istio.io](https://github.com/istio/istio.io) → [`content/en/docs/tasks/traffic-management/circuit-breaking/index.md`](https://github.com/istio/istio.io/blob/master/content/en/docs/tasks/traffic-management/circuit-breaking/index.md) (CI-tested docs task, `httpbin` sample) — Istio service mesh, mesh-layer traffic management
+
+
+
+

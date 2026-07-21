@@ -7,6 +7,8 @@ categories: angular
 order: 5
 tags: [angular, rxjs, async-pipe, observables, subscription, memory-leak]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -265,3 +267,7 @@ All operator code in this post is verbatim from the `ReactiveX/rxjs` repository 
 - [`packages/rxjs/src/internal/operators/switchMap.ts`](https://github.com/ReactiveX/rxjs/blob/master/packages/rxjs/src/internal/operators/switchMap.ts) — inner subscription cancellation on source emission
 - [`packages/rxjs/src/internal/operators/finalize.ts`](https://github.com/ReactiveX/rxjs/blob/master/packages/rxjs/src/internal/operators/finalize.ts) — teardown callback registration via `subscriber.add()`
 - [`packages/rxjs/src/internal/operators/mergeMap.ts`](https://github.com/ReactiveX/rxjs/blob/master/packages/rxjs/src/internal/operators/mergeMap.ts) — contrast: mergeMap does NOT cancel previous inner subscriptions
+
+
+
+

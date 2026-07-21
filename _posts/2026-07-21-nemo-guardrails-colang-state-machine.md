@@ -10,6 +10,8 @@ tags: [genai, guardrails, prompt-injection, llm-safety, colang]
 
 **TL;DR:** Can a single regex stop a prompt injection attack? No — the attacker simply rephrases across multiple turns, or injects mid-conversation after trust has been established. Input/output filtering treats each message independently, with no memory of prior turns or flow state. NVIDIA's NeMo Guardrails solves this by modeling safety rails as a **state machine**: Colang flows track execution position, fork into parallel branches, and carry context across turns — turning "did this message match a bad pattern?" into "is this conversation in a valid state for the bot to respond?"
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`NVIDIA-NeMo/Guardrails`](https://github.com/NVIDIA-NeMo/Guardrails)
 
 ---
@@ -250,3 +252,7 @@ The runtime processes one event at a time through its main loop, but flows can b
   - [`nemoguardrails/rails/llm/llm_flows.co`](https://github.com/NVIDIA-NeMo/Guardrails/blob/develop/nemoguardrails/rails/llm/llm_flows.co) — the built-in system flows defining input/dialog/output rail orchestration.
   - [`nemoguardrails/colang/v2_x/runtime/flows.py`](https://github.com/NVIDIA-NeMo/Guardrails/blob/develop/nemoguardrails/colang/v2_x/runtime/flows.py) — the `FlowState`, `FlowHead`, and `Action` state-machine dataclasses.
   - [`nemoguardrails/rails/llm/llmrails.py`](https://github.com/NVIDIA-NeMo/Guardrails/blob/develop/nemoguardrails/rails/llm/llmrails.py) — the `LLMRails` entry point wiring config, runtime, and LLM engines together.
+
+
+
+

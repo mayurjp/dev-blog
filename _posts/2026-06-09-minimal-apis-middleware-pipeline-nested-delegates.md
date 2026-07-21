@@ -10,6 +10,8 @@ tags: [dotnet, aspnetcore, minimal-apis, middleware, request-pipeline]
 
 **TL;DR:** `app.Use(...)`/`app.MapGet(...)` calls in a Minimal API look like they're building a list the framework walks through per-request, checking "does this middleware apply?" one by one — but ASP.NET Core composes them once, at startup, into a single nested chain of function calls (`RequestDelegate`s wrapping `RequestDelegate`s), registered last-to-first so the *first* `app.Use(...)` call ends up as the *outermost* wrapper. There's no list being iterated at request time — just one function calling the next.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 A request-handling pipeline needs to run several independent concerns — logging, authentication, exception handling, routing, and finally the actual endpoint — in a fixed order, with each stage able to run code *both* before and after everything downstream of it (log the request, call onward, then log the response; catch an exception thrown by anything downstream). Two naive designs both fall short:
@@ -201,3 +203,7 @@ A: No — `MapGet`/`MapMethods`/`Map` add to `DataSources` (a separate `ICollect
 - **Concept:** Minimal APIs and the ASP.NET Core middleware pipeline
 - **Domain:** dotnet
 - **Repo:** [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) → [`src/Http/Http/src/Builder/ApplicationBuilder.cs`](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/Builder/ApplicationBuilder.cs), [`src/DefaultBuilder/src/WebApplication.cs`](https://github.com/dotnet/aspnetcore/blob/main/src/DefaultBuilder/src/WebApplication.cs), [`src/Http/Routing/src/Builder/EndpointRouteBuilderExtensions.cs`](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Routing/src/Builder/EndpointRouteBuilderExtensions.cs) — the real ASP.NET Core framework source
+
+
+
+

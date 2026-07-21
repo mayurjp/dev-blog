@@ -6,6 +6,8 @@ categories: observability
 order: 6
 tags: [observability, log-aggregation, loki, full-text-search, go]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: indexing every word of every log line is expensive, for queries that usually don't need it
 
@@ -104,3 +106,7 @@ Known-stale fact: log aggregation is sometimes assumed to universally mean "inde
 - **Concept:** Log aggregation architecture
 - **Domain:** observability
 - **Repo:** [grafana/loki](https://github.com/grafana/loki) → [`pkg/logql/log/filter.go`](https://github.com/grafana/loki/blob/main/pkg/logql/log/filter.go) — a real, widely deployed production log aggregation system, "like Prometheus, but for logs."
+
+
+
+

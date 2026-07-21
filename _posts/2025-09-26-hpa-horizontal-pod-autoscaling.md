@@ -9,6 +9,8 @@ tags: [kubernetes, hpa, autoscaling, metrics-server]
 
 **TL;DR:** How does Kubernetes decide when to add more Pods on its own? An HPA is a control loop that polls a metrics API (such as metrics-server) every sync period, computes `desiredReplicas = ceil(currentReplicas * (currentMetricValue / desiredMetricValue))`, and patches the target's `replicas` field accordingly.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`GoogleCloudPlatform/bank-of-anthos`](https://github.com/GoogleCloudPlatform/bank-of-anthos)
 
 ## 1. The Engineering Problem: a fixed `replicas` count is always wrong somewhere
@@ -183,3 +185,7 @@ Known-stale fact: `autoscaling/v2beta1` and `v2beta2` are gone, not just depreca
 - **Concept:** HorizontalPodAutoscaler
 - **Domain:** kubernetes
 - **Repo:** [GoogleCloudPlatform/bank-of-anthos](https://github.com/GoogleCloudPlatform/bank-of-anthos) → [`extras/postgres-hpa/kubernetes-manifests/contacts.yaml`](https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/main/extras/postgres-hpa/kubernetes-manifests/contacts.yaml) — Google's reference microservices banking demo.
+
+
+
+

@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: "GitHub Actions Artifacts: Sharing Files Between Jobs vs Job Outputs"
 date: 2026-02-15 09:00:00 +0530
@@ -11,11 +11,13 @@ excerpt: ""
 
 **TL;DR:** Why can't you just use a job output to pass a compiled binary to the next job? Job outputs only carry small string values, not real files; `actions/upload-artifact` uploads actual files to GitHub's artifact storage under an explicit name, and `actions/download-artifact` in a later job retrieves them by matching that name, since each job runs on its own separate runner with no shared filesystem.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: job outputs can't carry real files
 
-Job outputs pass small string values between jobs — a version number, a computed flag. They can't carry an actual compiled binary, a built package, or a test-coverage report — real files, potentially megabytes in size. Yet a real pipeline routinely needs exactly this: build a binary in one job on one platform's runner, then test that exact binary in a later, separate job, or package it, or publish it — and each of those later jobs runs on its *own* separate runner with no access to the first job's filesystem at all, which may already be destroyed by the time the next job starts.
+Job outputs pass small string values between jobs  a version number, a computed flag. They can't carry an actual compiled binary, a built package, or a test-coverage report  real files, potentially megabytes in size. Yet a real pipeline routinely needs exactly this: build a binary in one job on one platform's runner, then test that exact binary in a later, separate job, or package it, or publish it  and each of those later jobs runs on its *own* separate runner with no access to the first job's filesystem at all, which may already be destroyed by the time the next job starts.
 
 ---
 
@@ -42,7 +44,7 @@ flowchart TD
     class A1,A2 dyn;
 ```
 
-Core truths: **the artifact name is often dynamically computed** (from matrix values, from a runtime-determined filename) specifically so multiple parallel matrix legs don't collide uploading *different* files under the *same* name; and **an empty or missing upload can be made a hard failure, not a silent no-op** — `if-no-files-found: error` catches a real, easy-to-miss bug class where a build step silently produces nothing (a wrong path, a failed compile that didn't actually fail the step), which would otherwise only surface much later when a downstream job can't find the artifact it expected.
+Core truths: **the artifact name is often dynamically computed** (from matrix values, from a runtime-determined filename) specifically so multiple parallel matrix legs don't collide uploading *different* files under the *same* name; and **an empty or missing upload can be made a hard failure, not a silent no-op**  `if-no-files-found: error` catches a real, easy-to-miss bug class where a build step silently produces nothing (a wrong path, a failed compile that didn't actually fail the step), which would otherwise only surface much later when a downstream job can't find the artifact it expected.
 
 ---
 
@@ -101,11 +103,11 @@ jobs:
 
 What this teaches that a hello-world can't:
 
-- **`RPM_PACKAGE=$(basename out/*.rpm)` computes the artifact name from a glob at runtime, not a hardcoded string.** The RPM package's exact filename includes version and architecture details baked in by the packaging tool itself — rather than duplicating that naming logic in the workflow YAML (and risking it drifting out of sync with what the tool actually produces), the workflow just asks the filesystem what got created and uses that directly.
-- **The download step references `${{ env.os }}` and `${{ env.arch }}`, values that must have been set earlier in that SAME job** — matching a dynamically-named artifact across jobs requires the downloading job to independently reconstruct the exact name string the uploading job used, which means both jobs need access to the same underlying matrix/version values (via job outputs, env vars, or matrix inputs) — the artifact system itself does no fuzzy matching; the name must match exactly, byte for byte.
-- **`if-no-files-found: error` is set explicitly on every upload step shown here, not left at its default.** The default behavior (a warning, not a failure) would let a build that silently produced zero files pass its own job successfully, only to fail confusingly several jobs later when nothing can be downloaded — setting `error` moves that failure to the moment it actually happened, with a much clearer error message pointing at the real cause.
+- **`RPM_PACKAGE=$(basename out/*.rpm)` computes the artifact name from a glob at runtime, not a hardcoded string.** The RPM package's exact filename includes version and architecture details baked in by the packaging tool itself  rather than duplicating that naming logic in the workflow YAML (and risking it drifting out of sync with what the tool actually produces), the workflow just asks the filesystem what got created and uses that directly.
+- **The download step references `${{ env.os }}` and `${{ env.arch }}`, values that must have been set earlier in that SAME job**  matching a dynamically-named artifact across jobs requires the downloading job to independently reconstruct the exact name string the uploading job used, which means both jobs need access to the same underlying matrix/version values (via job outputs, env vars, or matrix inputs)  the artifact system itself does no fuzzy matching; the name must match exactly, byte for byte.
+- **`if-no-files-found: error` is set explicitly on every upload step shown here, not left at its default.** The default behavior (a warning, not a failure) would let a build that silently produced zero files pass its own job successfully, only to fail confusingly several jobs later when nothing can be downloaded  setting `error` moves that failure to the moment it actually happened, with a much clearer error message pointing at the real cause.
 
-Known-stale fact: job outputs and artifacts are sometimes treated as interchangeable "pass data between jobs" mechanisms — they're not. Job outputs are for small, string-shaped values referenced directly in expressions elsewhere in the workflow YAML (`if:`, `with:`, other steps' inputs); artifacts are for actual file content a later job's steps need to read, execute, or test. Using one where the other fits — stuffing file content into a job output string, or uploading an artifact just to carry a single boolean flag — is a real, avoidable inefficiency once a pipeline grows past its simplest form.
+Known-stale fact: job outputs and artifacts are sometimes treated as interchangeable "pass data between jobs" mechanisms  they're not. Job outputs are for small, string-shaped values referenced directly in expressions elsewhere in the workflow YAML (`if:`, `with:`, other steps' inputs); artifacts are for actual file content a later job's steps need to read, execute, or test. Using one where the other fits  stuffing file content into a job output string, or uploading an artifact just to carry a single boolean flag  is a real, avoidable inefficiency once a pipeline grows past its simplest form.
 
 ---
 
@@ -113,5 +115,9 @@ Known-stale fact: job outputs and artifacts are sometimes treated as interchange
 
 - **Concept:** Artifacts & build outputs (sharing between jobs)
 - **Domain:** cicd
-- **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/build-terraform-cli.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build-terraform-cli.yml), [`.github/workflows/build.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build.yml) — a large, real project's multi-platform release pipeline.
+- **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) ? [`.github/workflows/build-terraform-cli.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build-terraform-cli.yml), [`.github/workflows/build.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/build.yml)  a large, real project's multi-platform release pipeline.
 {% endraw %}
+
+
+
+

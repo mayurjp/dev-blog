@@ -10,6 +10,8 @@ tags: [mlops, prometheus, histogram, model-monitoring, observability, latency]
 
 **TL;DR:** Prometheus default histogram buckets (.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10) are tuned for HTTP request durations, not ML inference latency. A transformer model serving requests at 15ms p50 and 200ms p99 will see 99% of observations land in the last bucket (10s), making percentile queries like `histogram_quantile(0.99, ...)` wildly inaccurate. Custom buckets solve this -- and Prometheus native histograms (introduced in v2.53) go further by encoding the bucket layout directly in the metric, not in the metric name.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`prometheus/prometheus`](https://github.com/prometheus/prometheus)
 
 ---
@@ -271,3 +273,7 @@ A: No. The delta-encoded span/bucket structure stores exact integer counts per b
 - **Concept:** Histogram bucket design, native histogram encoding, and the Schema/CustomValues system for user-defined boundaries
 - **Domain:** mlops
 - **Repo:** [prometheus/prometheus](https://github.com/prometheus/prometheus) → [`model/histogram/histogram.go`](https://github.com/prometheus/prometheus/blob/main/model/histogram/histogram.go) — the core histogram data structure that implements sparse exponential and custom-bucket encoding for Prometheus native histograms.
+
+
+
+

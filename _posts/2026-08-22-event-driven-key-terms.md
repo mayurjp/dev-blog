@@ -10,6 +10,8 @@ tags: [event-driven, glossary, cqrs, event-sourcing]
 
 **TL;DR:** This is a reference glossary for the event-driven-architecture series — every term below is defined standalone so you can jump in from any post and know what "projection," "outbox," or "choreography" concretely means at the mechanism level.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Core concepts
 
 ### Event
@@ -103,3 +105,7 @@ Orchestration is centralized coordination where one process (a saga orchestrator
 A saga is a sequence of local transactions across services where each step publishes an event, and if a later step fails, earlier steps are undone by compensating actions — charge the card, reserve inventory, and if shipping fails, refund the card. It replaces a distributed two-phase commit, which doesn't work across autonomous services, with a series of reversible local commits. Sagas come in choreography and orchestration flavors, trading coupling for visibility.
 
 This glossary is the shared vocabulary for the event-driven series; the [Event-Driven Architecture 101]({{ '/event-driven/event-driven-101/' | relative_url }}) post applies these terms to a concrete order-and-fulfillment example.
+
+
+
+

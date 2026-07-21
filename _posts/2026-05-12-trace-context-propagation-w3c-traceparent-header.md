@@ -9,6 +9,8 @@ tags: [observability, distributed-tracing, w3c-trace-context, dotnet, csharp]
 
 **TL;DR:** Two services using two different tracing vendors need to agree on one trace ID — how do they do that without configuring anything? The W3C Trace Context standard defines an exact `traceparent` header format (version-traceid-parentid-flags) that any compliant implementation can parse regardless of vendor, so the wire format itself — not a shared SDK — is the agreement.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 
 ## 1. The Engineering Problem: linking spans across a network boundary requires both sides to agree on a shared trace identity, in a header
@@ -136,3 +138,7 @@ Known-stale fact: trace propagation across services is sometimes assumed to just
 - **Concept:** Trace context propagation (W3C Trace Context header)
 - **Domain:** observability
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/W3CPropagator.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/W3CPropagator.cs) — the actual .NET runtime source implementing the W3C Trace Context standard.
+
+
+
+

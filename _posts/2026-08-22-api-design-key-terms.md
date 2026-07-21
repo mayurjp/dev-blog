@@ -10,6 +10,8 @@ tags: [api-design, glossary, rest, grpc, openapi]
 
 **TL;DR:** This is the shared vocabulary for every API-design post on this blog — read it once, then skip back here whenever a term like *idempotency*, *cursor pagination*, or *contract testing* shows up. Each entry is a standalone, mechanism-level definition you can read in any order.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## REST fundamentals
 
 ### REST
@@ -110,3 +112,7 @@ A unary RPC is the classic request-then-response call (`rpc GetOrder(OrderId) re
 ## Closing reference
 
 Keep this glossary open alongside the API-design series: the terms here — idempotency, cursor pagination, OpenAPI schemas, gRPC streaming, contract testing — recur in every post, and the [API Design 101]({{ '/api-design/api-design-101/' | relative_url }}) foundations post puts them to work on a concrete orders API.
+
+
+
+

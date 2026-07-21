@@ -6,6 +6,8 @@ categories: ddd
 order: 12
 tags: [ddd, validation, invariants, csharp, mediatr]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: "is this input well-formed" and "does this preserve the domain's rules" are different questions, checked at different moments
 
@@ -121,3 +123,7 @@ Known-stale fact: validation is sometimes treated as a single concern — one pa
 - **Concept:** Domain model validation & invariant enforcement
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.API/Application/Behaviors/ValidatorBehavior.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/Behaviors/ValidatorBehavior.cs), [`src/Ordering.Domain/AggregatesModel/OrderAggregate/OrderItem.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/OrderItem.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

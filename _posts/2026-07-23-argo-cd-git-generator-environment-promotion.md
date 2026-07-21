@@ -9,6 +9,8 @@ order: 10
 source: argoproj/argo-cd
 source_url: https://github.com/argoproj/argo-cd
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -308,3 +310,7 @@ A: Yes. ApplicationSet supports multiple generators. When multiple are specified
 - **Repository:** [argoproj/argo-cd](https://github.com/argoproj/argo-cd)
 - **File:** [`applicationset/generators/git.go`](https://github.com/argoproj/argo-cd/blob/master/applicationset/generators/git.go)
 - **File:** [`applicationset/generators/list.go`](https://github.com/argoproj/argo-cd/blob/master/applicationset/generators/list.go)
+
+
+
+

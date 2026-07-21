@@ -9,6 +9,8 @@ tags: [system-design, failover, orleans, distributed-systems]
 
 **TL;DR:** How does a cluster tell the difference between a dead node and one it just can't reach? By never letting a single observer's suspicion declare a node dead — Orleans' SWIM-style membership protocol requires multiple independent votes from different observers, each based on missed liveness probes, before gossiping a node as dead, so one observer's own network problem can't unilaterally evict a healthy node.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/orleans`](https://github.com/dotnet/orleans)
 
 ## 1. The Engineering Problem: "ping it, no response, it's dead" is a real, common source of false failures
@@ -120,3 +122,7 @@ Known-stale fact: "heartbeat timeout equals dead" is a common, oversimplified me
 - **Concept:** Designing for failure (redundancy, failover, disaster recovery)
 - **Domain:** system-design
 - **Repo:** [dotnet/orleans](https://github.com/dotnet/orleans) → [`src/Orleans.Core/Configuration/Options/ClusterMembershipOptions.cs`](https://github.com/dotnet/orleans/blob/main/src/Orleans.Core/Configuration/Options/ClusterMembershipOptions.cs) — the real distributed actor framework's cluster membership/failure-detection protocol.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [microservices, resilience, load-shedding, adaptive-concurrency, retry-sto
 
 **TL;DR:** Why does a fixed concurrency limit or a fixed retry count eventually make an outage worse, not better? Because a static limit is either too low most of the time or too high exactly when the backend is already struggling, and a static retry count multiplies load on a system that's failing *because* it's overloaded — the fix is a limit that adapts to measured latency in real time, plus a retry budget that caps total in-flight retries across the whole client population, not per-request.
 
+> **In plain English (30 sec):** Like a fuse — if service fails 5 times, stop calling for 30s.
+
 **Real repo:** [`envoyproxy/envoy`](https://github.com/envoyproxy/envoy)
 
 ## 1. The Engineering Problem: static limits and unconditional retries both assume a backend that never degrades
@@ -225,3 +227,7 @@ A: It's `sqrt(limit)`, added on top of the gradient-scaled limit specifically to
 - **Concept:** Advanced resilience patterns (load shedding, adaptive concurrency, retry storms)
 - **Domain:** microservices
 - **Repo:** [envoyproxy/envoy](https://github.com/envoyproxy/envoy) → [`source/extensions/filters/http/adaptive_concurrency/adaptive_concurrency_filter.cc`](https://github.com/envoyproxy/envoy/blob/main/source/extensions/filters/http/adaptive_concurrency/adaptive_concurrency_filter.cc), [`source/extensions/filters/http/adaptive_concurrency/controller/gradient_controller.cc`](https://github.com/envoyproxy/envoy/blob/main/source/extensions/filters/http/adaptive_concurrency/controller/gradient_controller.cc), [`source/common/router/retry_state_impl.cc`](https://github.com/envoyproxy/envoy/blob/main/source/common/router/retry_state_impl.cc) — the CNCF-graduated edge and service proxy.
+
+
+
+

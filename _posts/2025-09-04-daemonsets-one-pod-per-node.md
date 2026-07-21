@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** How do you guarantee a Pod runs on every node, not just somewhere in the cluster? A DaemonSet replaces the `replicas` count with a node-matching criterion, ensuring exactly one matching Pod exists on every eligible node — automatically adding one when a node joins and removing it when a node leaves — something a Deployment's fixed replica count can't guarantee.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
 ## 1. The Engineering Problem: some workloads are per-node, not per-application
@@ -174,3 +176,7 @@ spec:
 - **Concept:** Kubernetes `DaemonSet` — guaranteed one-Pod-per-node scheduling
 - **Domain:** kubernetes
 - **Repo:** [prometheus-operator/kube-prometheus](https://github.com/prometheus-operator/kube-prometheus) → [`manifests/nodeExporter-daemonset.yaml`](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/nodeExporter-daemonset.yaml) — the production Prometheus + Alertmanager + Grafana monitoring stack (falling back from `kubernetes/ingress-nginx`, which defines no DaemonSet anywhere in its manifests)
+
+
+
+

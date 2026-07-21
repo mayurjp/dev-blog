@@ -10,6 +10,8 @@ tags: [gitops, flux, pull-based, reconciliation, kustomize, server-side-apply]
 
 **TL;DR:** In a push-based CI/CD pipeline, your CI runner needs cluster credentials and runs `kubectl apply` from outside. In Flux's pull-based model, an in-cluster controller polls Git on a fixed interval, fetches the artifact, builds the Kustomize overlay, applies with server-side apply, prunes orphans, and runs health checks — all without any external system holding a kubeconfig. Git is the only source of truth, and the controller is the only thing touching the cluster.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The Engineering Problem
 
 Push-based CI/CD requires your pipeline to reach into the cluster. The moment a GitHub Action or Jenkins job runs `kubectl apply -f manifests/`, several things become true:
@@ -433,3 +435,7 @@ This post is based on the following files from the [`fluxcd/flux2`](https://gith
 
 - [`kustomization_controller.go`](https://github.com/fluxcd/kustomize-controller/blob/main/internal/controller/kustomization_controller.go) — The main reconciliation loop with `Reconcile`, `reconcile`, `apply`, `prune`, `checkHealth`, and `checkDependencies`
 - [`kustomization.go`](https://github.com/fluxcd/flux2/blob/main/pkg/manifestgen/kustomization/kustomization.go) — The manifest generator with `Generate` and `BuildWithRoot` for Kustomize overlay construction
+
+
+
+

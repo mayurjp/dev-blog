@@ -9,6 +9,8 @@ tags: [design-patterns, command, redis]
 
 **TL;DR:** How does Redis run 200+ different commands through the exact same dispatch code? Each command is represented as a `redisCommand` struct holding a function pointer plus metadata, so the generic execution path looks up the struct once and dispatches through a single, uniform `c->cmd->proc(c)` call regardless of which command is running.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
 ## 1. The Engineering Problem: hard-coded dispatch couples infrastructure to every individual request handler
@@ -114,3 +116,7 @@ Known-stale fact: Command pattern is often introduced primarily through its undo
 - **Concept:** Command pattern (requests as objects, undo/redo, task queues)
 - **Domain:** design-patterns
 - **Repo:** [redis/redis](https://github.com/redis/redis) → [`src/server.h`](https://github.com/redis/redis/blob/unstable/src/server.h) (`struct redisCommand`), [`src/server.c`](https://github.com/redis/redis/blob/unstable/src/server.c) (the real dispatch call site) — the real, production in-memory data store.
+
+
+
+

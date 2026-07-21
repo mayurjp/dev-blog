@@ -7,6 +7,8 @@ categories: azure
 order: 91
 tags: [azure, troubleshooting, debugging, sql, performance, dtu]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -138,3 +140,7 @@ If the data volume justifies it, scaling from S2 (50 DTU) to S3 (100 DTU) or S4 
 - Azure SQL DTU model: [learn.microsoft.com/en-us/azure/azure-sql/database/service-tiers-dtu](https://learn.microsoft.com/en-us/azure/azure-sql/database/service-tiers-dtu)
 - `sys.dm_db_resource_stats`: [learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-resource-stats-azure-sql-database](https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-resource-stats-azure-sql-database)
 - Indexed views: [learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views](https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views)
+
+
+
+

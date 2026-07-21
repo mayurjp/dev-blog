@@ -10,6 +10,8 @@ tags: [databases, glossary, sql]
 
 **TL;DR:** This is the reference page for the database vocabulary used throughout this blog's storage, transactions, and scaling posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it from definition to mechanism.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 The posts in this domain assume you already know what a B-tree is, what isolation level you're running at, or why a shard key is not a search filter. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Transactions & consistency
@@ -131,3 +133,7 @@ In a stream, "now" is the event's own timestamp, not its arrival time, and out-o
 ---
 
 This page is a reference, not a lesson — each term above links to the post that takes it from definition to mechanism. If you read a post and hit an unfamiliar word, it should now resolve here.
+
+
+
+

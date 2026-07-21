@@ -9,6 +9,8 @@ tags: [microservices, saga, choreography, orchestration, masstransit]
 
 **TL;DR:** Who decides what happens next in a multi-step process — everyone, or one coordinator? Choreography has each service react to the previous event and publish its own next one, with no central coordinator; orchestration has one saga/state machine explicitly track state and issue each step as a command — a real architectural tradeoff between decentralized flexibility and centralized visibility.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers), [`MassTransit/MassTransit`](https://github.com/MassTransit/MassTransit)
 
 ## 1. The Engineering Problem: a multi-step process needs SOMETHING deciding "what happens next," and where that logic lives is a real architectural choice
@@ -148,3 +150,7 @@ Known-stale fact: a common assumption is that choosing orchestration means givin
 - **Concept:** Choreography vs Orchestration (saga coordination styles)
 - **Domain:** microservices
 - **Repo:** [dotnet-architecture/eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers) → [`ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/Services/Ordering/Ordering.API/Application/DomainEventHandlers/OrderStartedEvent/ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs) — real choreography; [MassTransit/MassTransit](https://github.com/MassTransit/MassTransit) → [`Telephone_Sample.cs`](https://github.com/MassTransit/MassTransit/blob/master/tests/MassTransit.Tests/SagaStateMachineTests/Automatonymous/Telephone_Sample.cs) — the framework's own canonical saga state-machine mechanism.
+
+
+
+

@@ -9,6 +9,8 @@ tags: [cicd, github-actions, ci, dotnet, automation]
 
 **TL;DR:** What actually happens between `git push` and "All checks have passed"? GitHub Actions matches the push/PR event against a workflow's trigger, provisions a fresh ephemeral runner, executes the defined steps (checkout, install toolchain, build, test) in that clean environment, and reports the pass/fail result back onto the commit or PR as a status check.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "works on my machine" isn't a gate, it's a hope
@@ -128,3 +130,7 @@ What this teaches that the minimal example above can't:
 - **Concept:** CI fundamentals (from manual builds to automated pipelines)
 - **Domain:** cicd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`.github/workflows/pr-validation.yml`](https://github.com/dotnet/eShop/blob/main/.github/workflows/pr-validation.yml) — Microsoft's own .NET microservices reference app
+
+
+
+

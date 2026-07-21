@@ -10,6 +10,8 @@ published: false
 
 **TL;DR:** What do you do when your replicas can't be interchangeable? Use a StatefulSet — it gives each replica a fixed ordinal identity (`-0`, `-1`, `-2`...) with stable DNS and, optionally, its own persistent volume, both of which are re-issued to the same ordinal across every reschedule instead of the random names a Deployment's Pods get.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`argoproj/argo-cd`](https://github.com/argoproj/argo-cd)
 
 ## 1. The Engineering Problem: Deployment replicas are anonymous, on purpose
@@ -173,3 +175,7 @@ spec:
 - **Concept:** Kubernetes `StatefulSet` — stable, ordinal Pod identity (with or without persistent storage)
 - **Domain:** kubernetes
 - **Repo:** [argoproj/argo-cd](https://github.com/argoproj/argo-cd) → [`manifests/base/application-controller/argocd-application-controller-statefulset.yaml`](https://github.com/argoproj/argo-cd/blob/master/manifests/base/application-controller/argocd-application-controller-statefulset.yaml) — Argo CD's application controller, sharded across replicas by StatefulSet ordinal (falling back from `prometheus-operator/kube-prometheus`, whose StatefulSets are generated at runtime by the operator rather than checked in as manifests)
+
+
+
+

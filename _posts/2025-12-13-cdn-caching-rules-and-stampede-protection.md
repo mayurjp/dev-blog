@@ -9,6 +9,8 @@ tags: [system-design, cdn, varnish, caching]
 
 **TL;DR:** Why does adding one cookie header silently turn off your CDN's caching? Because Varnish's default rules bypass the cache entirely for any request carrying a Cookie or Authorization header (and mark a response uncacheable if the origin's reply sets a cookie or is `no-store`/`private`) — a deliberate safety default against leaking one user's response to another, not a bug — while "hit-for-miss" caches that uncacheable state briefly to prevent a stampede of repeated origin fetches.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [`varnishcache/varnish-cache`](https://github.com/varnishcache/varnish-cache)
 
 ## 1. The Engineering Problem: caching isn't safe by default, and that's a feature, not a bug
@@ -142,3 +144,7 @@ Known-stale fact: a very common real-world "why isn't my CDN caching anything" i
 - **Concept:** Content Delivery Networks (CDN)
 - **Domain:** system-design
 - **Repo:** [varnishcache/varnish-cache](https://github.com/varnishcache/varnish-cache) → [`bin/varnishd/builtin.vcl`](https://github.com/varnishcache/varnish-cache/blob/master/bin/varnishd/builtin.vcl) — the real default caching logic shipped with Varnish, used by many production CDN/reverse-proxy deployments.
+
+
+
+

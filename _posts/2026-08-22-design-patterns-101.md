@@ -10,6 +10,8 @@ tags: [design-patterns, fundamentals, oop]
 
 **TL;DR:** A design pattern is a *named, reusable solution to a recurring design problem* — not a piece of code you copy, and not a badge to earn. The proof is in a real codebase: dotnet/eShop puts `IOrderRepository` in the domain layer and keeps EF Core in the infrastructure layer, so business code never touches the database library. The skill is knowing when the problem is real — and when a single function is enough.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. What is a design pattern (and what it isn't)
 
 A **design pattern** is a named, reusable solution to a recurring problem in software design. "Recurring" is the operative word: a pattern earns its name because the same shape of problem shows up across projects — loading an aggregate correctly, swapping one algorithm for another, supplying a class's dependencies from outside. A pattern is *described*, not inherited; you implement the idea in your own language and your own types.
@@ -143,3 +145,7 @@ Example code and architecture from Microsoft's real [dotnet/eShop](https://githu
 ## Next in the series
 
 → [Strategy Pattern: Swapping Retry, Circuit Breaker, and Timeout Behind One Execute() Call]({{ '/design-patterns/strategy-pattern-pluggable-behavior/' | relative_url }})
+
+
+
+

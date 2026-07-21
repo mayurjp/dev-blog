@@ -9,6 +9,8 @@ tags: [kubernetes, ingress, nginx, routing]
 
 **TL;DR:** How do you route HTTP traffic to 20 Services without 20 cloud load balancers? An Ingress object declares host/path routing rules, and an Ingress Controller (like ingress-nginx) watches those rules and turns them into real proxy behavior — templating and reloading `nginx.conf` — behind one shared external entry point with TLS terminated centrally.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kubernetes/ingress-nginx`](https://github.com/kubernetes/ingress-nginx)
 
 ## 1. The Engineering Problem: `type: LoadBalancer` doesn't scale per-service
@@ -170,3 +172,7 @@ Known-stale fact: `extensions/v1beta1` and `networking.k8s.io/v1beta1` Ingress a
 - **Concept:** Ingress / Ingress Controller
 - **Domain:** kubernetes
 - **Repo:** [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx) → [`docs/examples/tls-termination/ingress.yaml`](https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/tls-termination/ingress.yaml), [`docs/examples/auth/external-auth/ingress.yaml`](https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/auth/external-auth/ingress.yaml) — the reference Ingress controller implementation.
+
+
+
+

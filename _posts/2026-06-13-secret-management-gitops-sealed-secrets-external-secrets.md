@@ -10,6 +10,8 @@ tags: [kubernetes, secrets, gitops, sealed-secrets, external-secrets-operator]
 
 **TL;DR:** A Kubernetes `Secret`'s `data` field is base64, not encryption — committing one to a GitOps repo commits the plaintext value in a thin disguise. `bitnami/sealed-secrets` and `external-secrets/external-secrets` solve this with two genuinely different trust models: SealedSecrets encrypts the value client-side into ciphertext that's cryptographically bound to the exact namespace/name it was sealed for, so it's safe to commit; External Secrets Operator skips storing the value in git (or even in etcd at rest) entirely, syncing it live from an external secret store on a refresh interval instead.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 **Real repo:** [`bitnami/sealed-secrets`](https://github.com/bitnami/sealed-secrets), [`external-secrets/external-secrets`](https://github.com/external-secrets/external-secrets)
 
 ## 1. The Engineering Problem
@@ -202,3 +204,7 @@ A: Yes, and it's a reasonable split — External Secrets Operator for values tha
 - **Concept:** Keeping real secret values out of a GitOps-committed manifest
 - **Domain:** kubernetes
 - **Repo:** [bitnami/sealed-secrets](https://github.com/bitnami/sealed-secrets) → [`pkg/crypto/crypto.go`](https://github.com/bitnami/sealed-secrets/blob/main/pkg/crypto/crypto.go), [`pkg/apis/sealedsecrets/v1alpha1/sealedsecret_expansion.go`](https://github.com/bitnami/sealed-secrets/blob/main/pkg/apis/sealedsecrets/v1alpha1/sealedsecret_expansion.go) (moved from `bitnami-labs/sealed-secrets`, which now redirects here); [external-secrets/external-secrets](https://github.com/external-secrets/external-secrets) → [`pkg/controllers/externalsecret/externalsecret_controller.go`](https://github.com/external-secrets/external-secrets/blob/main/pkg/controllers/externalsecret/externalsecret_controller.go)
+
+
+
+

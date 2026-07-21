@@ -9,6 +9,8 @@ tags: [security, mtls, spiffe, x509]
 
 **TL;DR:** How does a service prove its identity to another service without a shared secret? Mutual TLS has both sides present X.509 certificates carrying a SPIFFE ID in a URI SAN, verified against a trusted CA and checked against an explicit authorization rule — identity is proven cryptographically, with no hostname/IP lookup and no shared secret involved.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 **Real repo:** [`spiffe/spire`](https://github.com/spiffe/spire), [`spiffe/go-spiffe`](https://github.com/spiffe/go-spiffe)
 
 ## 1. The Engineering Problem: shared secrets don't scale as a service-identity mechanism
@@ -115,3 +117,7 @@ Known-stale fact: the traditional TLS mental model — "verification means check
 - **Concept:** mTLS (certificate-based service auth)
 - **Domain:** security
 - **Repo:** [spiffe/spire](https://github.com/spiffe/spire) → [`pkg/common/x509svid/csr.go`](https://github.com/spiffe/spire/blob/main/pkg/common/x509svid/csr.go) — the production workload-identity issuance system; [spiffe/go-spiffe](https://github.com/spiffe/go-spiffe) → [`spiffetls/tlsconfig/authorizer.go`](https://github.com/spiffe/go-spiffe/blob/main/spiffetls/tlsconfig/authorizer.go) — the reference SPIFFE-aware mTLS verification library.
+
+
+
+

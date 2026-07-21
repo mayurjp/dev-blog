@@ -9,6 +9,8 @@ tags: [databases, full-text-search, inverted-index, lucene, java]
 
 **TL;DR:** Why does searching "The Quick FOX" match a document containing "quick fox jumps"? Both the indexed document and the query text pass through the identical analyzer pipeline — tokenize, then lowercase, then strip stopwords — before anything is compared, so casing, word order, and common words like "the" never affect whether they match.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`apache/lucene`](https://github.com/apache/lucene)
 
 ## 1. The Engineering Problem: neither the query text nor the document text can be compared as literal raw strings
@@ -89,3 +91,7 @@ Known-stale fact: full-text matching is sometimes assumed to be a case-insensiti
 - **Concept:** Full-text search & search indexes
 - **Domain:** databases
 - **Repo:** [apache/lucene](https://github.com/apache/lucene) → [`lucene/core/src/java/org/apache/lucene/analysis/standard/StandardAnalyzer.java`](https://github.com/apache/lucene/blob/main/lucene/core/src/java/org/apache/lucene/analysis/standard/StandardAnalyzer.java) — the real, foundational full-text search library underlying Elasticsearch and many other production search engines.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [architecture, glossary, design]
 
 **TL;DR:** This is the reference page for the architecture vocabulary used throughout this blog's styles, quality-attribute, and boundary posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 The posts in this domain assume you already know what a port is, what "inward-pointing dependencies" means, or why a producer's schema change can break a consumer. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Architectural styles
@@ -109,3 +111,7 @@ Deep dive: [Event-Driven Architecture]({{ '/architecture/event-driven-architectu
 ---
 
 This page is a reference, not a lesson — each term above links to the post that takes it from definition to mechanism. If you read a post and hit an unfamiliar word, it should now resolve here.
+
+
+
+

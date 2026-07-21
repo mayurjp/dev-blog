@@ -9,6 +9,8 @@ tags: [ddd, factory-pattern, csharp]
 
 **TL;DR:** Why does `Order` have both a constructor and a separate `NewDraft()` method? Because a fully-committed order (buyer, address, payment, plus a raised domain event) and a checkout-preview draft (no buyer, no event, minimal state) are two genuinely different valid starting states, so each gets its own construction path — a normal constructor for the real order, a static factory method for the draft — while both still reuse the same `AddOrderItem` logic.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: constructing a valid aggregate can require more than one path, and both need to stay valid
@@ -136,3 +138,7 @@ Known-stale fact: "Factory" in DDD is sometimes assumed to require a dedicated, 
 - **Concept:** Factories (complex aggregate construction)
 - **Domain:** ddd
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Domain/AggregatesModel/OrderAggregate/Order.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/Order.cs), [`src/Ordering.API/Application/Commands/CreateOrderDraftCommandHandler.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/Commands/CreateOrderDraftCommandHandler.cs) — a real, actively maintained DDD reference implementation.
+
+
+
+

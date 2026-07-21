@@ -10,6 +10,8 @@ tags: [cicd, troubleshooting, debugging, github-actions, secrets, supply-chain]
 
 **TL;DR:** GitHub deliberately does not pass secrets to a `pull_request` run that came from a fork, because that run checks out and executes the fork author's code — an unresolved secret expression evaluates to the empty string rather than erroring, which is why it fails silently. The fix is *not* to switch the trigger to `pull_request_target`.
 
+> **In plain English (30 sec):** Env file outside code — same image, different config.
+
 ## The symptom
 
 > "Our SonarCloud step needs `SONAR_TOKEN`. It works perfectly on pull requests opened from branches inside our repo. On pull requests from external contributors' forks, the exact same job runs, the exact same step executes, and the scanner exits with `You're not authorized to analyze this project`. The secret is defined at the repository level. There is no `Secret not found` warning anywhere in the log. The workflow file is byte-identical in both cases because it comes from our base branch either way."
@@ -270,3 +272,7 @@ No, and log masking is a red herring here. The fork's code runs *in the same job
 - **Docs/Repo:** [Events that trigger workflows — GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows) — establishes "With the exception of `GITHUB_TOKEN`, secrets are not passed to the runner when a workflow is triggered from a forked repository", that `GITHUB_TOKEN` is read-only in fork PRs, that `pull_request_target` runs in the base repository's default-branch context, and the caution that running untrusted code on `pull_request_target` can lead to cache poisoning and unintended access to write privileges or secrets
 - **Docs/Repo:** [Keeping your GitHub Actions and workflows secure: Preventing pwn requests — GitHub Security Lab](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/) — establishes that `pull_request_target` grants write permission and target-repository secrets, names the pwn-request pattern as `pull_request_target` combined with an explicit checkout of an untrusted PR, and describes the unprivileged-build plus `workflow_run`-privileged-consumer split
 - **Docs/Repo:** [Troubleshooting Dependabot on GitHub Actions — GitHub Docs](https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions) — establishes that Dependabot-triggered runs receive only Dependabot secrets, not Actions secrets, and a read-only `GITHUB_TOKEN` by default
+
+
+
+

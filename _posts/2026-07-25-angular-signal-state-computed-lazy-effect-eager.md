@@ -10,6 +10,8 @@ tags: [angular, signals, computed, effect, state-management, reactivity]
 
 **TL;DR:** Why does `computed()` wait to calculate until something reads it, while `effect()` fires the instant it's created? Because computed values derive state — they produce nothing until someone asks for the result, and computing eagerly would waste cycles on values nobody reads. Effects produce side effects — their entire purpose is to *do* something, so deferring them would mean missing the initial trigger they were registered to observe. Angular implements both on the same reactive graph node, but the scheduling hook differs: `producerMustRecompute` returns `true` on a `computed` whose value is `UNSET`, while an `effect`'s `consumerMarkedDirty` immediately schedules itself with the `ChangeDetectionScheduler`.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Every reactive system faces a fundamental scheduling question: when a piece of state changes, how do you decide which dependents get to run, and *when*?
@@ -325,3 +327,7 @@ A: Not through the signal API directly, but `effect()` can serve as an eager pro
 - **Concept:** Lazy vs. eager scheduling of `computed()` and `effect()` on Angular's reactive graph
 - **Domain:** angular
 - **Repo:** [angular/angular](https://github.com/angular/angular) → [`packages/core/primitives/signals/src/computed.ts`](https://github.com/angular/angular/blob/main/packages/core/primitives/signals/src/computed.ts), [`packages/core/primitives/signals/src/graph.ts`](https://github.com/angular/angular/blob/main/packages/core/primitives/signals/src/graph.ts), [`packages/core/src/render3/reactivity/effect.ts`](https://github.com/angular/angular/blob/main/packages/core/src/render3/reactivity/effect.ts) — the Angular framework's own signals implementation
+
+
+
+

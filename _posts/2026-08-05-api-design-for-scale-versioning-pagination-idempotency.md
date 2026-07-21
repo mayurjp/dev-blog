@@ -10,6 +10,8 @@ tags: [system-design, api-design, versioning, pagination, idempotency, stripe]
 
 **TL;DR:** Why do production APIs version by date instead of `v1`/`v2`, paginate by cursor instead of page number, and require clients to generate their own idempotency key instead of just deduplicating on the server? Because each of those choices is a contract that has to survive the server changing its internals without warning every caller: dated versioning lets the server evolve field-by-field instead of forcing every client onto a big-bang cutover, cursor pagination lets the underlying data shift between requests (or shard across nodes) without skipping or repeating rows, and a client-generated idempotency key is the only signal that survives a response actually getting lost on the way back — a server can't invent that signal after the fact. Stripe's real Go client (`stripe-go`) implements all three as actual request-building code, not just documented conventions.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`stripe/stripe-go`](https://github.com/stripe/stripe-go)
 
 ## 1. The Engineering Problem: an API's internals will change, but its callers can't all upgrade at once
@@ -271,3 +273,7 @@ They solve related but distinct layers of the same problem. The RPC failure sema
 ---
 
 **Next in the System Design series:** [Real-World System Design Case Studies: How a Chat Homeserver Composes Rate Limiting, Cursor Pagination, and Sharded Delivery]({{ '/system-design/real-world-system-design-case-studies-chat-homeserver/' | relative_url }})
+
+
+
+

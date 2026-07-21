@@ -10,6 +10,8 @@ tags: [dotnet, jit, tiered-compilation, ryujit, performance, runtime]
 
 **TL;DR:** Why does .NET re-compile a method it already has machine code for? Because the first JIT pass (Tier0) trades code quality for startup speed — it generates unoptimized code with no inlining, no loop optimizations, and minimal analysis. Once call counting confirms a method is actually hot (called 30+ times after startup), the runtime kicks off a background thread to re-JIT it with full Tier1 optimizations (inlining, vectorization, dead code elimination). The slow code runs for milliseconds; the optimized code runs for the lifetime of the process.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime) — the RyuJIT JIT compiler and `TieredCompilationManager`
 
 ## 1. The Engineering Problem: optimizing every method at startup wastes time nobody will ever get back
@@ -248,3 +250,7 @@ A: Via the `DOTNET_TieredCompilation_CallCountThreshold` environment variable or
 - **Concept:** Tiered JIT compilation, call counting, background optimization
 - **Domain:** dotnet
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/coreclr/vm/tieredcompilation.cpp`](https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/tieredcompilation.cpp), [`src/coreclr/vm/tieredcompilation.h`](https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/tieredcompilation.h), [`src/coreclr/vm/callcounting.cpp`](https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/callcounting.cpp) — the TieredCompilationManager and CallCountingManager that implement two-tier JIT in the .NET runtime. Design doc: [`docs/design/features/tiered-compilation.md`](https://github.com/dotnet/runtime/blob/main/docs/design/features/tiered-compilation.md).
+
+
+
+

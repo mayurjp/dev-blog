@@ -10,6 +10,8 @@ tags: [multicloud, consul, service-mesh, networking, multi-cloud, wan-federation
 
 **TL;DR:** Can a service in an AWS VPC talk to a service in a GCP VPC without opening a single port on either firewall? In HashiCorp Consul it can — but the path from "service registered in dc-us-east-1" to "service reachable from dc-europe-west1" doesn't happen through direct VPC peering or VPN tunnels; it passes through three distinct mechanisms (WAN federation for control-plane gossip, mesh gateways for data-plane traffic, and exported-services config entries for which services are visible across boundaries), each configured through a different layer of Consul's config entry system — and confusing the layers is how multi-cloud meshes break silently in production.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Multi-cloud networking has a firewall problem that gets worse as you add clouds: every VPC, every subnet, every security group is a hard boundary that blocks unsolicited inbound traffic. Inside a single cloud, you can use VPC peering or private endpoints; across clouds, you're looking at VPN tunnels or dedicated interconnects — both of which give you network-layer reachability but not service-layer discoverability. A service in AWS doesn't know how to find a service in GCP by DNS name, and even if you bolt on a global DNS, you still have mTLS certificate trust boundaries: the SPIFFE identity issued by Consul in dc-us-east-1 is not trusted by the Consul cluster in dc-europe-west1.
@@ -349,3 +351,7 @@ A: Yes — a `SamenessGroupMember` with a `Peer` field references a peered clust
 - **Concept:** Consul's multi-cloud service mesh networking — WAN federation, mesh gateways, peering tokens, and exported-services config entries for cross-VPC service discovery and traffic routing
 - **Domain:** multicloud
 - **Repo:** [hashicorp/consul](https://github.com/hashicorp/consul) — Consul's core repository; key files: [`agent/structs/config_entry.go`](https://github.com/hashicorp/consul/blob/main/agent/structs/config_entry.go) (config entry registry and `MakeConfigEntry` factory), [`agent/structs/config_entry_mesh.go`](https://github.com/hashicorp/consul/blob/main/agent/structs/config_entry_mesh.go) (`MeshConfigEntry` with `PeerThroughMeshGateways`), [`agent/structs/peering.go`](https://github.com/hashicorp/consul/blob/main/agent/structs/peering.go) (`PeeringToken` and `ExportedServiceList`), [`agent/structs/config_entry_sameness_group.go`](https://github.com/hashicorp/consul/blob/main/agent/structs/config_entry_sameness_group.go) (`SamenessGroupConfigEntry` for cross-cluster failover)
+
+
+
+

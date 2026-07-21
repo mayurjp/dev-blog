@@ -7,6 +7,8 @@ categories: mlops
 order: 6
 tags: [mlops, model-serving, kserve, inference, batch-processing, online-inference]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -262,3 +264,7 @@ A: It's tracked by `PRE_HIST_TIME` (a Prometheus histogram) and adds directly to
 - **Repo:** [kserve/kserve](https://github.com/kserve/kserve) → [`python/kserve/kserve/model.py`](https://github.com/kserve/kserve/blob/master/python/kserve/kserve/model.py) — the `Model` class implementing the preprocess-predict-postprocess serving pipeline
 - **Repo:** [kserve/kserve](https://github.com/kserve/kserve) → [`python/kserve/kserve/predictor_config.py`](https://github.com/kserve/kserve/blob/master/python/kserve/kserve/predictor_config.py) — protocol, timeout, and retry configuration for predictor communication
 - **Repo:** [kserve/kserve](https://github.com/kserve/kserve) → [`python/kserve/kserve/constants/constants.py`](https://github.com/kserve/kserve/blob/master/python/kserve/kserve/constants/constants.py) — `PredictorProtocol` enum and `EXPLAINER_BASE_URL_FORMAT`
+
+
+
+

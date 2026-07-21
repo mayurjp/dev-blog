@@ -9,6 +9,8 @@ tags: [security, authentication, aspnetcore, identity, password-hashing, pbkdf2]
 
 **TL;DR:** When a database breach exposes the Users table, does the attacker walk away with usable passwords or garbage? A production password hasher salts each password uniquely and runs it through a deliberately slow, versioned hash (like PBKDF2) so every guess costs real time, and old and new hashes can both still be verified.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore)
 
 ## 1. The Engineering Problem: a database breach shouldn't be a password breach
@@ -215,3 +217,7 @@ migrate to a new algorithm later without a forced password reset.
 - **Concept:** Password hashing & credential storage
 - **Domain:** security
 - **Repo:** [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) → [`src/Identity/Extensions.Core/src/PasswordHasher.cs`](https://github.com/dotnet/aspnetcore/blob/main/src/Identity/Extensions.Core/src/PasswordHasher.cs) — the real password hasher used by ASP.NET Core Identity
+
+
+
+

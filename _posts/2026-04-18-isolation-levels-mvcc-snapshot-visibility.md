@@ -9,6 +9,8 @@ tags: [databases, isolation-levels, mvcc, postgresql, c]
 
 **TL;DR:** How does Postgres decide whether your transaction can see a row someone else just committed? It checks the row version's creating transaction ID against a frozen snapshot taken at some earlier moment — if that transaction was still in-progress as of the snapshot, the row is invisible regardless of whether it has actually committed since; isolation levels differ only in how often a new snapshot gets taken.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: concurrent transactions need a consistent view of data, but "consistent" has real degrees
@@ -110,3 +112,7 @@ Known-stale fact: preventing read anomalies (non-repeatable reads especially) is
 - **Concept:** Isolation levels & concurrency anomalies (dirty/non-repeatable/phantom reads)
 - **Domain:** databases
 - **Repo:** [postgres/postgres](https://github.com/postgres/postgres) → [`src/backend/access/heap/heapam_visibility.c`](https://github.com/postgres/postgres/blob/master/src/backend/access/heap/heapam_visibility.c) — the actual PostgreSQL server source, `HeapTupleSatisfiesMVCC()`.
+
+
+
+

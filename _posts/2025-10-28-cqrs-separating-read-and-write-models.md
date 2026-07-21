@@ -9,6 +9,8 @@ tags: [microservices, cqrs, mediatr, domain-model]
 
 **TL;DR:** Why shouldn't your read query go through the same model as your write? Because writes need a rich domain model that enforces invariants through methods, while reads need flat, purpose-shaped data with no business logic — CQRS splits the two into separate models against the same database, so neither compromises the other.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: one model can't be both strict and fast at the same time
@@ -134,3 +136,7 @@ Known-stale fact: "CQRS" is frequently taught as inseparable from event sourcing
 - **Concept:** CQRS (Command Query Responsibility Segregation)
 - **Domain:** microservices
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.API/Application/Commands/CreateOrderCommandHandler.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/Commands/CreateOrderCommandHandler.cs), [`src/Ordering.API/Application/Queries/OrderQueries.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.API/Application/Queries/OrderQueries.cs) — the modern .NET microservices reference architecture.
+
+
+
+

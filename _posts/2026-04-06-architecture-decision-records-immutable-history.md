@@ -6,6 +6,8 @@ categories: architecture
 order: 9
 tags: [architecture, adr, documentation]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: current code shows *what* was decided, never *why*, and design docs drift or get silently rewritten
 
@@ -121,3 +123,7 @@ Known-stale fact: ADRs are sometimes treated as a bureaucratic formality — a c
 - **Concept:** Architecture Decision Records (ADRs)
 - **Domain:** architecture
 - **Repo:** [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller) → [`docs/adrs/yyyy-mm-dd-TEMPLATE.md`](https://github.com/actions/actions-runner-controller/blob/master/docs/adrs/yyyy-mm-dd-TEMPLATE.md), [`docs/adrs/2023-11-02-min-runners-semantics.md`](https://github.com/actions/actions-runner-controller/blob/master/docs/adrs/2023-11-02-min-runners-semantics.md) — a real, actively maintained Kubernetes controller project with a real, dated ADR log.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [observability, tracing, sampling, opentelemetry, tail-sampling]
 
 **TL;DR:** Can a trace-sampling decision always be made the instant a trace starts? Only for one of the two real approaches — head-based sampling decides immediately, from nothing but a hash of the trace ID, with zero knowledge of how the trace turns out; tail-based sampling can only guarantee "always keep errors and slow traces" by buffering every span belonging to a trace ID and waiting until the trace looks complete before evaluating anything. That buffering isn't an implementation detail — it's the entire reason tail-based sampling can do something head-based structurally cannot.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Uniform sampling — "keep 1% of all traces" — is cheap and easy to reason about, but it throws away exactly the traces an on-call engineer needs most. If errors and slow outliers are rare (they usually are), a flat 1% keep-rate drops roughly 99% of the error traces right along with 99% of the boring, healthy ones. The sample a team is left with doesn't correlate with the incidents that actually happened — a system could be having a real, isolated failure and the sampled trace set would show almost nothing wrong, purely because the interesting trace didn't win its 1% coin flip.
@@ -192,3 +194,7 @@ A: It's deterministic by design, not truly random — the same trace ID with the
 - **Concept:** Head-based vs. tail-based trace sampling
 - **Domain:** observability
 - **Repo:** [open-telemetry/opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib) → [`processor/probabilisticsamplerprocessor/tracesprocessor.go`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/probabilisticsamplerprocessor/tracesprocessor.go), [`processor/tailsamplingprocessor/processor.go`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/processor.go) — the real, official OpenTelemetry Collector sampling processors
+
+
+
+

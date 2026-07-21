@@ -10,6 +10,8 @@ tags: [design-patterns, concurrency, producer-consumer, reader-writer-lock, thre
 
 **TL;DR:** Why does a single shared lock around a work queue, or around a read-mostly cache, fall over under real concurrent load — and what do production runtimes actually do instead of "just add a lock"? They keep almost all synchronization local to one thread (a private queue, a packed counter) and only reach for a shared, contended resource when local state runs out — that's the same idea behind producer-consumer queues, reader-writer locks, and thread pools, and .NET's runtime implements all three with it.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Three concurrency mistakes keep showing up in code review, and they all have the same root cause: treating "thread-safe" as "wrap it in one lock."
@@ -380,3 +382,7 @@ A: Conceptually, yes — a single shared `BlockingCollection`-style queue with a
 ---
 
 **Next in the Design Patterns series:** [Microservices Patterns as Code: What Sidecar, Ambassador, BFF, and Event-Driven Actually Compile To]({{ '/design-patterns/microservices-patterns-as-code-sidecar-ambassador-bff-event-driven/' | relative_url }})
+
+
+
+

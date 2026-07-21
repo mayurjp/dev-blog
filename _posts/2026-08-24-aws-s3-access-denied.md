@@ -7,6 +7,8 @@ categories: aws
 order: 90
 tags: [aws, troubleshooting, debugging, iam, s3, security]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -206,3 +208,7 @@ Using `aws:PrincipalArn` in a `Condition` is more precise — it grants access o
 
 - AWS IAM policy evaluation logic: [docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html)
 - S3 Access Analyzer: [docs.aws.amazon.com/AmazonS3/latest/userguide/access-analyzer.html](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-analyzer.html)
+
+
+
+

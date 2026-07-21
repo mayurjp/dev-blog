@@ -9,6 +9,8 @@ tags: [design-patterns, adapter, django, orm]
 
 **TL;DR:** How does Django run the same ORM query against Postgres, MySQL, and SQLite unchanged? Because `BaseDatabaseOperations` defines one common interface for dialect-specific details like quoting and date truncation, and each backend implements that same interface to translate calls into its own database's actual syntax.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`django/django`](https://github.com/django/django)
 
 ## 1. The Engineering Problem: every database speaks a genuinely different SQL dialect
@@ -120,3 +122,7 @@ Known-stale fact: Adapter is sometimes conflated with Facade — both "provide a
 - **Concept:** Adapter pattern (interface translation between incompatible APIs)
 - **Domain:** design-patterns
 - **Repo:** [django/django](https://github.com/django/django) → [`django/db/backends/base/operations.py`](https://github.com/django/django/blob/main/django/db/backends/base/operations.py), [`django/db/backends/mysql/operations.py`](https://github.com/django/django/blob/main/django/db/backends/mysql/operations.py), [`django/db/backends/postgresql/operations.py`](https://github.com/django/django/blob/main/django/db/backends/postgresql/operations.py), [`django/db/backends/oracle/operations.py`](https://github.com/django/django/blob/main/django/db/backends/oracle/operations.py) — the reference implementation for one of the most widely deployed web frameworks.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [security, api-security, owasp-api-top-10, input-validation, bola]
 
 **TL;DR:** Why does the OWASP API Security Top 10 rank Broken Object Level Authorization (BOLA) above every injection or input-validation issue? Because an API's URL and request bodies are built entirely around client-supplied object IDs by design — every `GET /posts/{id}` is an implicit trust decision about whether the caller may see *that specific* object, and unlike a web app's server-rendered pages, an API has no UI layer quietly hiding IDs the caller was never shown in the first place.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`OWASP/crAPI`](https://github.com/OWASP/crAPI)
 
 ## 1. The Engineering Problem: an API's entire interface is client-supplied identifiers
@@ -195,3 +197,7 @@ A: `bson.M` (an untyped BSON map, from the MongoDB Go driver) is a legitimate ty
 - **Concept:** API security hardening — OWASP API Top 10 (Broken Object Level Authorization, unrestricted input), rate limiting at the gateway
 - **Domain:** security
 - **Repo:** [OWASP/crAPI](https://github.com/OWASP/crAPI) → [`services/community/api/controllers/post_controller.go`](https://github.com/OWASP/crAPI/blob/main/services/community/api/controllers/post_controller.go), [`services/community/api/controllers/coupon_controller.go`](https://github.com/OWASP/crAPI/blob/main/services/community/api/controllers/coupon_controller.go) — OWASP's own official, deliberately vulnerable API, built specifically to demonstrate the OWASP API Security Top 10 in real running service code.
+
+
+
+

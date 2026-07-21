@@ -9,6 +9,8 @@ tags: [design-patterns, repository, efcore, ddd]
 
 **TL;DR:** Why does eShop wrap EF Core's DbSet in another layer of abstraction? Because a narrow, domain-shaped repository interface like `IOrderRepository` centralizes the correct way to load a specific aggregate (eager-loading its related collections) in exactly one place, instead of relying on every caller to remember to do it right.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: a generic query API doesn't encode "how to correctly load this specific aggregate"
@@ -123,3 +125,7 @@ Known-stale fact: Repository is sometimes dismissed as "redundant with an ORM's 
 - **Concept:** Repository pattern (data access abstraction)
 - **Domain:** design-patterns
 - **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Domain/AggregatesModel/OrderAggregate/IOrderRepository.cs), [`src/Ordering.Infrastructure/Repositories/OrderRepository.cs`](https://github.com/dotnet/eShop/blob/main/src/Ordering.Infrastructure/Repositories/OrderRepository.cs) — the modern .NET microservices reference architecture.
+
+
+
+

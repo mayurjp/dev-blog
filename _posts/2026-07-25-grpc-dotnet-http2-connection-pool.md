@@ -10,6 +10,8 @@ tags: [dotnet, grpc, http2, networking]
 
 **TL;DR:** Does a single `GrpcChannel` really open just one HTTP/2 connection to a server, and if so, what happens when your concurrent streams exceed that connection's limit?
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 When you call `GrpcChannel.ForAddress("https://my-server")` and start firing concurrent unary RPCs or opening bidirectional streams, the channel feels like it handles unlimited parallelism. Under the hood, every `GrpcChannel` creates a single `SocketsHttpHandler` (when no handler is supplied), and that handler maintains **one HTTP/2 connection per server** by default.
@@ -239,3 +241,7 @@ A: No. `MaxConnectionsPerServer` controls TCP connections for HTTP/1.1. For HTTP
 - **Concept:** HTTP/2 connection pooling via `SocketsHttpHandler`
 - **Domain:** dotnet
 - **Repo:** [grpc/grpc-dotnet](https://github.com/grpc/grpc-dotnet) → [`src/Grpc.Net.Client/GrpcChannel.cs`](https://github.com/grpc/grpc-dotnet/blob/master/src/Grpc.Net.Client/GrpcChannel.cs) — the .NET gRPC client implementation that wraps `HttpClient` and `SocketsHttpHandler`
+
+
+
+

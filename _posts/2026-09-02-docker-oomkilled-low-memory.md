@@ -10,6 +10,8 @@ tags: [docker, troubleshooting, debugging, cgroups, memory, jvm]
 
 **TL;DR:** Three different numbers are being compared as if they were the same number. The app reports *heap*, `docker stats` reports `memory.current` *minus* `inactive_file`, and the kernel enforces `memory.max` against `memory.current` in full — including page cache, slab and kernel stacks. The container is over the limit even though every dashboard says it isn't.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The symptom
 
 > "Our ingest service gets killed roughly every forty minutes. `--memory=1g`, and the JVM's own `/actuator/metrics/jvm.memory.used` gauge peaks around 420 MB against a 512 MB max heap. `docker stats` never showed it above 680 MiB either — I watched it. But `docker inspect` says `OOMKilled: true` and the exit code is 137. The host has 60 GB free. There is no leak: the heap flattens out, the GC logs are boring, and a heap dump shows nothing retained."
@@ -212,3 +214,7 @@ Not through `docker stats` on cgroup v2 — moby's stats conversion marks `MaxUs
 - **Docs/Repo:** [moby/moby — `daemon/stats_unix.go`](https://github.com/moby/moby/blob/master/daemon/stats_unix.go) — the cgroup v2 mapping of `Usage` to `memory.current`, `Failcnt` to `memory.events`' `oom` field, and the `MaxUsage is not supported` comment
 - **Docs/Repo:** [OpenJDK — `src/hotspot/share/gc/shared/gc_globals.hpp`](https://github.com/openjdk/jdk/blob/master/src/hotspot/share/gc/shared/gc_globals.hpp) — `MaxRAMPercentage` default `25.0`, `MinRAMPercentage` default `50.0`
 - **Docs/Repo:** [JDK-8230305 Cgroups v2: Container awareness](https://bugs.openjdk.org/browse/JDK-8230305) — the change that added cgroup v2 detection, backported to 11.0.16 and 8u372
+
+
+
+

@@ -6,6 +6,8 @@ categories: cicd
 order: 9
 tags: [cicd, github-actions, self-hosted-runners, kubernetes]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## 1. The Engineering Problem: "self-hosted" says nothing about whether state carries between jobs
 
@@ -114,3 +116,7 @@ Known-stale fact: Actions Runner Controller's original design — `RunnerDeploym
 - **Concept:** Self-hosted vs GitHub-hosted runners
 - **Domain:** cicd
 - **Repo:** [actions/runner](https://github.com/actions/runner) → [`src/Runner.Listener/Runner.cs`](https://github.com/actions/runner/blob/main/src/Runner.Listener/Runner.cs); [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller) → [`charts/gha-runner-scale-set/values.yaml`](https://github.com/actions/actions-runner-controller/blob/master/charts/gha-runner-scale-set/values.yaml), [`docs/gha-runner-scale-set-controller/README.md`](https://github.com/actions/actions-runner-controller/blob/master/docs/gha-runner-scale-set-controller/README.md) — the actual open-source runner binary and its Kubernetes autoscaling controller.
+
+
+
+

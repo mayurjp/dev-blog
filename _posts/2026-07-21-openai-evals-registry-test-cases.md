@@ -10,6 +10,8 @@ tags: [genai, llm-evals, evaluation, openai, testing]
 
 **TL;DR:** Does a single accuracy score tell you whether your LLM is safe, factually grounded, and stylistically appropriate? No — it tells you the average across a batch, hiding exactly which categories fail and why. OpenAI's `openai/evals` framework replaces the "one number" approach with a **registry of named evals**, each backed by a JSONL dataset, a scoring template, and a version identifier — so you can run `oaieval gpt-4 my-eval.dev.v0`, see accuracy per eval, compare across model versions, and use a separate model to grade open-ended responses when a simple string match won't do.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 Evaluating an LLM is not like evaluating a classifier. A classifier's output is a discrete label, and a confusion matrix tells you exactly which class is leaking. An LLM produces free-form text — sometimes correct but phrased differently, sometimes partially right, sometimes confidently wrong in a way that superficially resembles correctness. A single accuracy score collapses all of these failure modes into one number, making it impossible to answer the question that actually matters: **which capability broke when I changed the prompt, fine-tuned the model, or switched from GPT-3.5 to GPT-4?**
@@ -307,3 +309,7 @@ A: Any choice string not in `choice_strings` is mapped to `"__invalid__"` and sc
 - **Concept:** LLM evaluation — registry-based test cases, parallel harness, and model-graded scoring
 - **Domain:** genai
 - **Repo:** [openai/evals](https://github.com/openai/evals) → [`evals/eval.py`](https://github.com/openai/evals/blob/main/evals/eval.py) (the `Eval` base class and `eval_all_samples` harness), [`evals/registry.py`](https://github.com/openai/evals/blob/main/evals/registry.py) (the `Registry` that loads YAML eval definitions and resolves names to specs), [`evals/registry/modelgraded/fact.yaml`](https://github.com/openai/evals/blob/main/evals/registry/modelgraded/fact.yaml) (the model-graded factual-consistency rubric) — OpenAI's official framework for evaluating LLMs, with a public registry of evals and templates for basic and model-graded scoring.
+
+
+
+

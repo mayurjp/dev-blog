@@ -10,6 +10,8 @@ tags: [dotnet, xunit, testing, tdd]
 
 **TL;DR:** When you slap `[Fact]` on a method, xUnit's `FactDiscoverer` emits exactly one test case and the runner executes it once. When you slap `[Theory]` with `[MemberData]` on the same method, `TheoryDiscoverer` calls `dataAttribute.GetData()` at discovery time, gets back an `IEnumerable<object[]>`, loops over every row, and emits one `XunitTestCase` per row — so the runner sees N independent test cases and runs the method N times. The attribute itself doesn't loop anything; the discoverer does.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`xunit/xunit`](https://github.com/xunit/xunit)
 
 ---
@@ -217,3 +219,7 @@ A: Setting `DisableDiscoveryEnumeration = true` on `[Theory]` forces the single 
 - **Concept:** Theory data-driven testing (MemberData, InlineData, TheoryDiscoverer)
 - **Domain:** dotnet
 - **Repo:** [xunit/xunit](https://github.com/xunit/xunit) → [`src/xunit.v3.core/Framework/TheoryDiscoverer.cs`](https://github.com/xunit/xunit/blob/main/src/xunit.v3.core/Framework/TheoryDiscoverer.cs), [`src/xunit.v3.core/Framework/FactDiscoverer.cs`](https://github.com/xunit/xunit/blob/main/src/xunit.v3.core/Framework/FactDiscoverer.cs), [`src/xunit.v3.core/TheoryAttribute.cs`](https://github.com/xunit/xunit/blob/main/src/xunit.v3.core/TheoryAttribute.cs), [`src/xunit.v3.core/MemberDataAttribute.cs`](https://github.com/xunit/xunit/blob/main/src/xunit.v3.core/MemberDataAttribute.cs) — the xUnit testing framework itself.
+
+
+
+

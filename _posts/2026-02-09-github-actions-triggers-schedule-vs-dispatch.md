@@ -1,4 +1,4 @@
-﻿---
+---
 layout: post
 title: "GitHub Actions Triggers: Schedule vs workflow_dispatch"
 date: 2026-02-09 09:00:00 +0530
@@ -11,11 +11,13 @@ excerpt: ""
 
 **TL;DR:** Why does a scheduled workflow have nothing to react to, but a manually-triggered one gets a form? `schedule` is pure time-based with essentially no event payload, so the workflow has to independently determine what needs doing on every run; `workflow_dispatch` provides zero automatic event data either, but instead exposes structured, typed, author-defined input fields that become a literal form a human fills in before the run starts.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: different automation needs fundamentally different triggering shapes
 
-Some automation should react to a specific event — a push, a PR opened — with no human involved and no configuration beyond the event itself. Some should run on a schedule, independent of any code change — a nightly cleanup, a stale-issue sweep — but a schedule trigger has no git event to react to at all; the workflow has to figure out what needs doing from scratch each run, since cron provides zero context. And some things should only happen when a human deliberately decides to run them, often needing specific parameters supplied for that one run — a fundamentally different, parameterized trigger shape from the other two.
+Some automation should react to a specific event  a push, a PR opened  with no human involved and no configuration beyond the event itself. Some should run on a schedule, independent of any code change  a nightly cleanup, a stale-issue sweep  but a schedule trigger has no git event to react to at all; the workflow has to figure out what needs doing from scratch each run, since cron provides zero context. And some things should only happen when a human deliberately decides to run them, often needing specific parameters supplied for that one run  a fundamentally different, parameterized trigger shape from the other two.
 
 ---
 
@@ -41,9 +43,9 @@ flowchart TD
     class S1,D1 empty;
 ```
 
-`schedule: - cron: '...'` is pure time-based — it runs unconditionally on the clock, with essentially no useful event payload (unlike `push`/`pull_request`'s rich event object). `workflow_dispatch: inputs: {...}` is manually triggered from the UI or API, with structured, typed, potentially required input fields that become a literal form a human fills in before the run starts, consumed inside the workflow as `${{ inputs.<name> }}`.
+`schedule: - cron: '...'` is pure time-based  it runs unconditionally on the clock, with essentially no useful event payload (unlike `push`/`pull_request`'s rich event object). `workflow_dispatch: inputs: {...}` is manually triggered from the UI or API, with structured, typed, potentially required input fields that become a literal form a human fills in before the run starts, consumed inside the workflow as `${{ inputs.<name> }}`.
 
-Core truths: **`workflow_dispatch` inputs are the *only* trigger-provided data of their kind — explicitly author-defined, not automatically derived from any event** — push and pull_request triggers hand you metadata about what already happened; `workflow_dispatch` hands you exactly, and only, whatever fields the workflow author chose to expose as a form. And **a schedule-triggered run's `github.event` context carries essentially nothing actionable** — a common, real surprise for anyone assuming every trigger type provides comparably rich context to react to.
+Core truths: **`workflow_dispatch` inputs are the *only* trigger-provided data of their kind  explicitly author-defined, not automatically derived from any event**  push and pull_request triggers hand you metadata about what already happened; `workflow_dispatch` hands you exactly, and only, whatever fields the workflow author chose to expose as a form. And **a schedule-triggered run's `github.event` context carries essentially nothing actionable**  a common, real surprise for anyone assuming every trigger type provides comparably rich context to react to.
 
 ---
 
@@ -127,11 +129,11 @@ jobs:
 
 What this teaches that a hello-world can't:
 
-- **`lock.yml` never references `github.event` anywhere in its logic** — the entire workflow just runs, unconditionally, at `50 1 * * *` (1:50 AM UTC daily), and the third-party action itself is responsible for figuring out which issues/PRs qualify (inactive 30+ days). There's genuinely nothing for the workflow to "react to" beyond the clock; all the decision logic about *what* to act on lives downstream of the trigger, not in it.
-- **`equivalence-test-manual-update.yml`'s inputs have real, distinct field semantics**: `target-branch` and `new-branch` are `required: true` with no default (the run genuinely cannot start without a human supplying them), while `equivalence-test-version` has both `required: true` *and* a `default: "0.5.0"` — required just means "this field will always have SOME value," and a default is what supplies that value when the human running it doesn't override it. Required and defaulted aren't contradictory; a required field with a sensible default just means most runs won't need to think about it.
-- **`ref: ${{ inputs.target-branch }}` feeds a human-supplied string directly into which branch gets checked out** — this is real, meaningful power a push/pull_request-triggered workflow doesn't have: the human deciding to run this workflow is choosing, at trigger time, *which* branch the entire rest of the job operates against, not just confirming an already-determined target the way merging a PR would.
+- **`lock.yml` never references `github.event` anywhere in its logic**  the entire workflow just runs, unconditionally, at `50 1 * * *` (1:50 AM UTC daily), and the third-party action itself is responsible for figuring out which issues/PRs qualify (inactive 30+ days). There's genuinely nothing for the workflow to "react to" beyond the clock; all the decision logic about *what* to act on lives downstream of the trigger, not in it.
+- **`equivalence-test-manual-update.yml`'s inputs have real, distinct field semantics**: `target-branch` and `new-branch` are `required: true` with no default (the run genuinely cannot start without a human supplying them), while `equivalence-test-version` has both `required: true` *and* a `default: "0.5.0"`  required just means "this field will always have SOME value," and a default is what supplies that value when the human running it doesn't override it. Required and defaulted aren't contradictory; a required field with a sensible default just means most runs won't need to think about it.
+- **`ref: ${{ inputs.target-branch }}` feeds a human-supplied string directly into which branch gets checked out**  this is real, meaningful power a push/pull_request-triggered workflow doesn't have: the human deciding to run this workflow is choosing, at trigger time, *which* branch the entire rest of the job operates against, not just confirming an already-determined target the way merging a PR would.
 
-Known-stale fact: it's easy to assume every GitHub Actions trigger type hands the workflow a comparable "here's what happened" payload to work with, the way `push` and `pull_request` do — `schedule` is the clear counterexample, providing essentially no actionable event data at all. Any scheduled workflow that needs to know "what's changed" or "what needs attention" has to determine that itself, from scratch, on every run — the trigger only tells it *when*, never *what*.
+Known-stale fact: it's easy to assume every GitHub Actions trigger type hands the workflow a comparable "here's what happened" payload to work with, the way `push` and `pull_request` do  `schedule` is the clear counterexample, providing essentially no actionable event data at all. Any scheduled workflow that needs to know "what's changed" or "what needs attention" has to determine that itself, from scratch, on every run  the trigger only tells it *when*, never *what*.
 
 ---
 
@@ -139,5 +141,9 @@ Known-stale fact: it's easy to assume every GitHub Actions trigger type hands th
 
 - **Concept:** Triggers & events (push, pull_request, workflow_dispatch, schedule)
 - **Domain:** cicd
-- **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`.github/workflows/lock.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/lock.yml), [`.github/workflows/equivalence-test-manual-update.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/equivalence-test-manual-update.yml) — a large, real project's production automation workflows.
+- **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) ? [`.github/workflows/lock.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/lock.yml), [`.github/workflows/equivalence-test-manual-update.yml`](https://github.com/hashicorp/terraform/blob/main/.github/workflows/equivalence-test-manual-update.yml)  a large, real project's production automation workflows.
 {% endraw %}
+
+
+
+

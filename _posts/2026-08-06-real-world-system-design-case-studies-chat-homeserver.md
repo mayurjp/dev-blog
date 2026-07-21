@@ -10,6 +10,8 @@ tags: [system-design, case-study, chat-systems, rate-limiting, pagination, synap
 
 **TL;DR:** What actually changes between a "design a chat system" and "design a URL shortener" interview question, if both ultimately need caching, sharding, and rate limiting? Mostly the read/write ratio and the ordering guarantee each system's core operation needs — a URL shortener is almost pure point-lookup-by-key (a job for consistent hashing and aggressive caching), a notification system is fan-out-on-write to many recipients (a job for message queues and idempotent delivery), and a chat system is an append-only, strictly-ordered-per-room log that many readers page through concurrently (a job for cursor pagination plus per-key rate limiting). The primitives are the same across all three; the case study is in which primitive carries the weight. Matrix's production Synapse homeserver shows the chat shape concretely: a leaky-bucket `Ratelimiter` gates writes per-user, and a topological-ordering pagination cursor keeps `/messages` correct even while history is still being backfilled from other servers.
 
+> **In plain English (30 sec):** Like Express rateLimit — allow 100 req/sec, 101st gets 429.
+
 **Real repo:** [`element-hq/synapse`](https://github.com/element-hq/synapse)
 
 ## 1. The Engineering Problem: "design a chat system" is really four problems wearing one trenchcoat
@@ -230,3 +232,7 @@ A URL shortener's hot path is Topic 3 (cache-aside on the short key) plus Topic 
 - **Concept:** Real-world system design case studies — putting rate limiting, pagination, and ordered append-only logs together for a chat system
 - **Domain:** system-design
 - **Repo:** [element-hq/synapse](https://github.com/element-hq/synapse) → [`synapse/api/ratelimiting.py`](https://github.com/element-hq/synapse/blob/develop/synapse/api/ratelimiting.py), [`synapse/handlers/pagination.py`](https://github.com/element-hq/synapse/blob/develop/synapse/handlers/pagination.py) — the production Matrix homeserver's real per-user rate limiter and cursor-based room history pagination. (Note: the project moved from the archived `matrix-org/synapse` to `element-hq/synapse` after Element's fork of the Matrix.org Foundation's homeserver maintenance.)
+
+
+
+

@@ -9,6 +9,8 @@ tags: [gcp, cloud-logging, cloud-monitoring, observability]
 
 **TL;DR:** How does Cloud Logging know which trace a specific log line belongs to? Google's client library builds every `LogEntry` with the currently-active trace and span ID stamped on automatically via `SetTraceAndSpanIfAny`, alongside an auto-detected `MonitoredResource` and a structured, queryable `JsonPayload` — a concrete field written at log-creation time, not a UI correlation guessed from timestamps.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`googleapis/google-cloud-dotnet`](https://github.com/googleapis/google-cloud-dotnet)
 
 ## 1. The Engineering Problem: logs and traces are usually two disconnected systems
@@ -99,3 +101,7 @@ Known-stale fact: Cloud Logging and Cloud Trace (both part of Google Cloud's Ope
 - **Concept:** Cloud Monitoring & Logging (Ops Suite: metrics, traces, logs)
 - **Domain:** gcp
 - **Repo:** [googleapis/google-cloud-dotnet](https://github.com/googleapis/google-cloud-dotnet) → [`apis/Google.Cloud.Diagnostics.Common/Google.Cloud.Diagnostics.Common/Logging/GoogleLogger.cs`](https://github.com/googleapis/google-cloud-dotnet/blob/main/apis/Google.Cloud.Diagnostics.Common/Google.Cloud.Diagnostics.Common/Logging/GoogleLogger.cs) — the official Google Cloud diagnostics/logging client library for .NET.
+
+
+
+

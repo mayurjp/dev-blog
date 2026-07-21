@@ -9,6 +9,8 @@ tags: [design-patterns, factory-method, efcore, dotnet]
 
 **TL;DR:** Why does calling a factory method hide something a constructor call never could? Because callers depend only on a factory interface like `IDbContextFactory<T>`, never on `new T()` directly — so the concrete factory can swap between allocating fresh instances and pooling/recycling them without any caller code changing.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/efcore`](https://github.com/dotnet/efcore)
 
 ## 1. The Engineering Problem: `new T()` couples every call site to one specific way of creating T
@@ -122,3 +124,7 @@ Known-stale fact: classic GoF Factory Method and Abstract Factory were designed 
 - **Concept:** Factory Method & Abstract Factory
 - **Domain:** design-patterns
 - **Repo:** [dotnet/efcore](https://github.com/dotnet/efcore) → [`src/EFCore/IDbContextFactory.cs`](https://github.com/dotnet/efcore/blob/main/src/EFCore/IDbContextFactory.cs), [`src/EFCore/Internal/DbContextFactory.cs`](https://github.com/dotnet/efcore/blob/main/src/EFCore/Internal/DbContextFactory.cs), [`src/EFCore/Infrastructure/PooledDbContextFactory.cs`](https://github.com/dotnet/efcore/blob/main/src/EFCore/Infrastructure/PooledDbContextFactory.cs) — the real, production .NET ORM.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [observability, troubleshooting, debugging, opentelemetry, distributed-tra
 
 **TL;DR:** The trace stops at the message broker because OpenTelemetry's *active* `Context` lives in an execution-unit-local slot (`AsyncLocal` in .NET, `contextvars` in Python, a `ContextStorage` `ThreadLocal` in Java) and there is no instrumentation on the AMQP publish path to serialise it into a `traceparent` header — so the consumer, running on a completely unrelated execution unit in a different process, starts a fresh root span. Fix it by explicitly `Inject`-ing the context into the message headers on publish and `Extract`-ing it into the consumer span's parent.
 
+> **In plain English (30 sec):** Logs with traceId that follows request across services.
+
 ## The symptom
 
 > "Checkout p99 on the dashboard is 84 milliseconds and it has been 84 milliseconds all week. Support has three tickets saying the confirmation screen takes forty seconds. I pulled a trace ID off a slow request and Jaeger shows me a beautiful, complete, 84ms trace that ends at `order.placed publish`. Nothing is broken in it. There's no error, no gap, no orphan span — the trace just *finishes*, correctly, and the customer is still waiting."
@@ -282,3 +284,7 @@ Check the getter's return type first — the `byte[]`-vs-`string` mismatch is th
 - **Docs/Repo:** [OpenTelemetry Context specification](https://opentelemetry.io/docs/specs/otel/context/) — `Context` as execution-scoped, and the implicit-mode Attach/Detach/Token operations
 - **Docs/Repo:** [open-telemetry/opentelemetry-dotnet](https://github.com/open-telemetry/opentelemetry-dotnet) — `TextMapPropagator.Inject`/`Extract` signatures, `PropagationContext`, and `Propagators.DefaultTextMapPropagator` defaulting to `Noop`
 - **Docs/Repo:** [OpenTelemetry messaging semantic conventions](https://opentelemetry.io/docs/specs/semconv/messaging/messaging-spans/) — producer/consumer span kinds and why span links are the default correlation mechanism
+
+
+
+

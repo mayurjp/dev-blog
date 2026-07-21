@@ -10,6 +10,8 @@ tags: [platform-engineering, golden-paths, paved-roads, backstage, scaffolder]
 
 **TL;DR:** *How do you make the right way to build a service also the easiest way, without forbidding the exceptions?* A golden path: opinionated defaults baked into a template, with an escape hatch for when the default genuinely doesn't fit.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [backstage/backstage](https://github.com/backstage/backstage)
 
 ## 1. The Engineering Problem
@@ -165,3 +167,7 @@ spec:
 - **Concept:** Golden paths / paved roads — opinionated defaults with escape hatches, not lock-in
 - **Domain:** platform-engineering
 - **Repo:** [backstage/software-templates](https://github.com/backstage/software-templates) → [scaffolder-templates/react-ssr-template/template.yaml](https://github.com/backstage/software-templates/blob/main/scaffolder-templates/react-ssr-template/template.yaml) — paved road with `copyWithoutRender` escape hatch and mandatory ownership
+
+
+
+

@@ -10,6 +10,8 @@ tags: [networking, glossary, tcp-ip, dns, tls]
 
 **TL;DR:** This is the reference page for the networking vocabulary used throughout this blog's protocol, infrastructure, and performance posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 The posts in this domain assume you already know what a TCP handshake or a DNS resolver is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Transport & addressing
@@ -108,3 +110,7 @@ A high-performance RPC framework built on HTTP/2 and Protocol Buffers. It provid
 ## Source
 
 Terms verified against the TCP specification (RFC 793), TLS 1.3 (RFC 8446), DNS (RFC 1035/1034), HTTP/2 (RFC 7540), HTTP/3 (RFC 9114), and real infrastructure patterns from nginx, HAProxy, Cloudflare, and Let's Encrypt documentation.
+
+
+
+

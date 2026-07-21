@@ -10,6 +10,8 @@ tags: [mlops, tensorflow-datasets, tfds, feature-engineering, tfrecord, data-val
 
 **TL;DR:** Does `tfds.load('mnist')` re-download and re-transform the data every time you run it? No — the first call runs `download_and_prepare()`, which downloads raw data, applies the dataset builder's `_download_and_prepare` transform exactly once, and writes the result as sharded TFRecord files to a versioned directory on disk. Every subsequent call finds that directory already exists, short-circuits the entire download-and-transform pipeline, and returns a `tf.data.Dataset` reading directly from the cached TFRecords. A `DatasetInfo` JSON sidecar records the feature schema, split boundaries, and checksum so the system knows whether the cache is still valid.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [`tensorflow/datasets`](https://github.com/tensorflow/datasets)
 
 ---
@@ -212,3 +214,7 @@ A: Yes — `ReadOnlyBuilder` (`read_only_builder.py`) reconstructs a `DatasetBui
 - **Concept:** Transform-once-and-cache pattern with TFRecord serialization and metadata sidecar validation
 - **Domain:** mlops
 - **Repo:** [tensorflow/datasets](https://github.com/tensorflow/datasets) → [`tensorflow_datasets/core/dataset_builder.py`](https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/core/dataset_builder.py) (cache detection and `download_and_prepare` short-circuit); [`tensorflow_datasets/core/dataset_info.py`](https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/core/dataset_info.py) (proto serialization and version validation); [`tensorflow_datasets/core/file_adapters.py`](https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/core/file_adapters.py) (pluggable format abstraction); [`tensorflow_datasets/core/reader.py`](https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/core/reader.py) (interleaved `tf.data.Dataset` from sharded TFRecords)
+
+
+
+

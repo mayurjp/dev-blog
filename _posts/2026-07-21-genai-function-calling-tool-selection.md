@@ -10,6 +10,8 @@ tags: [genai, function-calling, tool-use, openai, structured-outputs]
 
 **TL;DR:** Does "function calling" mean the model executes your code when it decides a tool is needed? No — the model emits a structured JSON payload that *names* a function and *supplies* its arguments, and your application code receives that payload, decides whether to actually run the function, executes it separately, and sends the result back as a new message. The model never runs code; it only *requests* that code be run, and the `tool_choice` parameter on the API call controls how aggressively it does so — `"auto"` lets the model decide, `"required"` forces it to pick a tool even when it might prefer to answer directly, and a named choice forces a specific function regardless of the input.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 An LLM's generation loop is stateless and side-effect-free by design: it receives a prompt, produces tokens, and stops. It has no runtime, no file system access, no network sockets, and no ability to call an API. This is a deliberate safety boundary — the model's output is text, not action — but it creates a concrete engineering gap when a real task requires the model to *do* something: look up a flight, query a database, send an email, or fetch live weather data.
@@ -302,3 +304,7 @@ A: The model sees the tool definitions (they remain in its context) but is prohi
 - **Concept:** Function calling / tool use — how an LLM emits structured tool-call requests and how `tool_choice` controls model autonomy
 - **Domain:** genai
 - **Repo:** [openai/openai-python](https://github.com/openai/openai-python) → [`src/openai/types/chat/chat_completion_message_tool_call.py`](https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion_message_tool_call.py), [`src/openai/types/shared_params/function_definition.py`](https://github.com/openai/openai-python/blob/main/src/openai/types/shared_params/function_definition.py), [`src/openai/types/chat/chat_completion_tool_choice_option_param.py`](https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion_tool_choice_option_param.py), and [`src/openai/types/chat/chat_completion_tool_message_param.py`](https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion_tool_message_param.py) — the official OpenAI Python SDK, auto-generated from their OpenAPI spec by Stainless.
+
+
+
+

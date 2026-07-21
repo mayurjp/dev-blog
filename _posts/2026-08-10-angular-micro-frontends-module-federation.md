@@ -7,6 +7,8 @@ categories: angular
 order: 15
 tags: [angular, micro-frontends, module-federation]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -200,3 +202,7 @@ A: Once. `ModuleFederation.moduleCache` and the share scope cache the remote ent
 - **Repo:** [module-federation/core](https://github.com/module-federation/core) → [packages/runtime-core/src/shared/index.ts](https://github.com/module-federation/core/blob/main/packages/runtime-core/src/shared/index.ts) — `SharedHandler.loadShare` dedup and factory caching.
 - **Repo:** [module-federation/core](https://github.com/module-federation/core) → [packages/runtime-core/src/core.ts](https://github.com/module-federation/core/blob/main/packages/runtime-core/src/core.ts) — `ModuleFederation` class, `loadRemote` entry point.
 - **Repo:** [angular/angular](https://github.com/angular/angular) — Angular framework packages consumed as `singleton` shared deps by the federation plugin.
+
+
+
+

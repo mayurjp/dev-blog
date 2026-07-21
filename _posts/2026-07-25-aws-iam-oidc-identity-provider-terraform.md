@@ -6,6 +6,8 @@ domain: multicloud
 source_repo: hashicorp/terraform-provider-aws
 tags: [aws, terraform, oidc, github-actions, identity-federation, iam, no-secrets]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -332,3 +334,7 @@ For GitHub, GitLab, Google, Auth0, and S3-hosted JWKS endpoints, yes. AWS valida
 - **Terraform Registry** — [`aws_iam_role`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)
 - **AWS Docs** — [Using IAM Identity Providers and Creating Tokens](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html)
 - **GitHub Docs** — [Security hardening: Using OpenID Connect](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
+
+
+
+

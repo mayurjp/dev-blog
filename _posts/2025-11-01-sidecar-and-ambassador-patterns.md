@@ -9,6 +9,8 @@ tags: [microservices, sidecar, ambassador, kubernetes]
 
 **TL;DR:** How does a proxy container end up in every Pod without any Deployment mentioning it? A sidecar shares a Pod's network namespace and lifecycle with the app container, and mesh sidecars like Istio's are auto-injected by a Kubernetes mutating webhook so no team has to hand-add the container; an ambassador is the same pattern scoped to one external dependency, translating its protocol and auth so the app never has to.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`istio/istio`](https://github.com/istio/istio), [`GoogleCloudPlatform/cloud-sql-proxy`](https://github.com/GoogleCloudPlatform/cloud-sql-proxy)
 
 ## 1. The Engineering Problem: cross-cutting connection logic doesn't belong hand-written into every app, but someone has to attach the helper
@@ -137,3 +139,7 @@ Known-stale fact: before Kubernetes' native sidecar support (the `restartPolicy:
 - **Concept:** Sidecar & Ambassador patterns
 - **Domain:** microservices
 - **Repo:** [istio/istio](https://github.com/istio/istio) → [`manifests/charts/istio-control/istio-discovery/templates/mutatingwebhook.yaml`](https://github.com/istio/istio/blob/master/manifests/charts/istio-control/istio-discovery/templates/mutatingwebhook.yaml) — real sidecar auto-injection mechanism; [GoogleCloudPlatform/cloud-sql-proxy](https://github.com/GoogleCloudPlatform/cloud-sql-proxy) → [`examples/k8s-sidecar/proxy_with_workload_identity.yaml`](https://github.com/GoogleCloudPlatform/cloud-sql-proxy/blob/main/examples/k8s-sidecar/proxy_with_workload_identity.yaml) — the canonical production Ambassador pattern.
+
+
+
+

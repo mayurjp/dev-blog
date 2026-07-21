@@ -10,6 +10,8 @@ tags: [databases, troubleshooting, debugging, postgresql, deadlock, transactions
 
 **TL;DR:** Two code paths update the same two rows in opposite order. Each holds the row lock the other is waiting on, and because a row lock in Postgres is released only at commit, neither can ever yield — so the deadlock detector kills one of them. Adding a retry makes the error go away without making the collision go away.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## The symptom
 
 > "We get 30 to 40 `deadlock detected` errors an hour, but only between 11:00 and 14:00 when traffic peaks. It's always the same two statements in the log. Both transactions are tiny — two `UPDATE`s each, no long-running queries, no reports. Staging has never produced one, and I can't reproduce it locally no matter how fast I click. Our retry wrapper catches them so users mostly don't notice, but the error rate is climbing week over week."
@@ -266,3 +268,7 @@ By reviewing the ordering rule rather than the statements. "Source account first
 - **Docs/Repo:** [PostgreSQL — Lock Management](https://www.postgresql.org/docs/current/runtime-config-locks.html) — establishes `deadlock_timeout` default `1s` and why the check is deferred
 - **Docs/Repo:** [PostgreSQL — `pg_stat_database`](https://www.postgresql.org/docs/current/monitoring-stats.html) — establishes the `deadlocks` counter
 - **Docs/Repo:** [`postgres/postgres` → `src/backend/utils/errcodes.txt`](https://github.com/postgres/postgres/blob/master/src/backend/utils/errcodes.txt) — establishes `40P01 deadlock_detected` versus `40001 serialization_failure`
+
+
+
+

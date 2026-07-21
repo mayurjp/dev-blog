@@ -10,6 +10,8 @@ tags: [mlops, ml-infrastructure, gpu-scheduling, distributed-serving, ray, place
 
 **TL;DR:** When you're serving dozens of GPU-hungry model replicas across a heterogeneous cluster, how does the scheduler decide which physical node each replica lands on, and how does a multi-GPU model replica get all the GPUs it needs atomically instead of half-starting and deadlocking? By treating GPU (and CPU and memory) allocation as a bin-packing problem solved with a best-fit-node search that prioritizes GPU above every other resource type, and by reserving multi-bundle "gang" placement groups atomically before any replica actor is created -- so a replica that needs 4 GPUs either gets all 4 in one uninterruptible reservation, or the scheduler cleanly fails and retries later, never leaving it holding 2.
 
+> **In plain English (30 sec):** Declare 'I want 3 copies' — K8s keeps 3 running.
+
 **Real repo:** [`ray-project/ray`](https://github.com/ray-project/ray)
 
 ## 1. The Engineering Problem: GPUs fragment, and partial allocations deadlock
@@ -281,3 +283,7 @@ A: It can, which is why `SPREAD`/`STRICT_SPREAD` exist as the opposite strategy 
 - **Concept:** GPU-aware bin-packing and atomic gang scheduling for distributed model serving
 - **Domain:** mlops
 - **Repo:** [ray-project/ray](https://github.com/ray-project/ray) → [`python/ray/util/placement_group.py`](https://github.com/ray-project/ray/blob/master/python/ray/util/placement_group.py) — the `placement_group()` API for atomic multi-bundle resource reservation with `PACK`/`SPREAD`/`STRICT_PACK`/`STRICT_SPREAD` strategies; [`python/ray/serve/_private/deployment_scheduler.py`](https://github.com/ray-project/ray/blob/master/python/ray/serve/_private/deployment_scheduler.py) — `Resources`/`DefaultDeploymentScheduler`, the best-fit bin-packing scheduler and gang placement group reservation logic behind Ray Serve's GPU-aware replica placement.
+
+
+
+

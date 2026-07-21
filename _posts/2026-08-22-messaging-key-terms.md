@@ -10,6 +10,8 @@ tags: [messaging, glossary, kafka, rabbitmq, grpc]
 
 **TL;DR:** This is the shared vocabulary for every messaging post on this blog — brokers, topics, partitions, consumer groups, delivery semantics, and the RabbitMQ/Kafka/gRPC pieces — each term defined in isolation so you can jump in from any later article.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## Brokers & models
 
 ### Message broker
@@ -113,3 +115,7 @@ WebSocket is a full-duplex, long-lived TCP connection (upgraded from HTTP) that 
 ---
 
 Reference: terms here map directly to components in [apache/kafka](https://github.com/apache/kafka), [rabbitmq/rabbitmq-server](https://github.com/rabbitmq/rabbitmq-server), [grpc/grpc](https://github.com/grpc/grpc), and [dotnet/aspnetcore](https://github.com/dotnet/aspnetcore) (SignalR).
+
+
+
+

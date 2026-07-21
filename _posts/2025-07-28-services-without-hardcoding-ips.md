@@ -27,6 +27,8 @@ system_design:
 
 **TL;DR:** How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtual IP and DNS name — in front of the volatile pods, tracking which pods are currently alive and Ready via a label selector so clients never need a pod's real IP.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: the volatile IP address
@@ -521,3 +523,7 @@ For a **headless Service**, DNS returns the **individual pod IPs** instead of on
 - **Concept:** Kubernetes `Service`, service discovery, and the networking control plane
 - **Domain:** kubernetes
 - **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`kubernetes-manifests/frontend.yaml`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/frontend.yaml) — Google's "Online Boutique," an 11-microservice reference app
+
+
+
+

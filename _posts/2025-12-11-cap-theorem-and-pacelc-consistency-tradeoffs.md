@@ -9,6 +9,8 @@ tags: [system-design, cap-theorem, pacelc, cockroachdb, consistency]
 
 **TL;DR:** Why does "consistent" sometimes mean "wait a little longer," even when nothing is broken? Because PACELC extends CAP theorem to the non-partition case: CockroachDB's closed timestamps let a follower serve a read locally once it holds a promise that no more writes will land below a given timestamp, trading a computed lead time of staleness for lower latency and availability, while reads that need the absolute latest write still go to the leaseholder.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`cockroachdb/cockroach`](https://github.com/cockroachdb/cockroach)
 
 ## 1. The Engineering Problem: CAP only describes the bad day, not the other 99.9% of the time
@@ -116,3 +118,7 @@ Known-stale fact: CAP theorem is frequently oversimplified as "you get to pick 2
 - **Concept:** CAP theorem & consistency models (strong vs eventual)
 - **Domain:** system-design
 - **Repo:** [cockroachdb/cockroach](https://github.com/cockroachdb/cockroach) → [`pkg/kv/kvserver/closedts/policy.go`](https://github.com/cockroachdb/cockroach/blob/master/pkg/kv/kvserver/closedts/policy.go) — the real distributed SQL database's closed-timestamp/follower-reads mechanism.
+
+
+
+

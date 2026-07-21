@@ -6,6 +6,8 @@ domain: mlops
 order: 12
 source_repo: great-expectations/great_expectations
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -427,3 +429,7 @@ A: In production, you run expectations on each batch of scoring data. The `unexp
 - [`expect_column_values_to_not_be_null.py`](https://github.com/great-expectations/great_expectations/blob/main/great_expectations/expectations/core/expect_column_values_to_not_be_null.py) — Nullity expectation with `mostly` threshold logic
 - [`expect_column_values_to_be_in_set.py`](https://github.com/great_expectations/great_expectations/blob/main/great_expectations/expectations/core/expect_column_values_to_be_in_set.py) — Categorical membership validation with profiler support
 - [`validation_graph.py`](https://github.com/great-expectations/great_expectations/blob/main/great_expectations/validator/validation_graph.py) — Metric dependency graph and deduplication engine
+
+
+
+

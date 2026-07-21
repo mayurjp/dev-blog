@@ -10,6 +10,8 @@ tags: [networking, load-balancer, l4, l7, health-check, draining]
 
 **TL;DR:** How does a load balancer spread load without breaking sessions? L4 routes on IP/port (fast, opaque), L7 routes on HTTP semantics; both use health checks to evict bad backends and **connection draining** to retire live ones without dropping in-flight requests.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [envoyproxy/envoy](https://github.com/envoyproxy/envoy) — its `HealthCheckerFactory` supports HTTP, TCP, and gRPC health checks, and [nginx/nginx](https://github.com/nginx/nginx) shows weighted round-robin peer selection with `max_conns` caps.
 
 ## 1. The Engineering Problem
@@ -128,3 +130,7 @@ This is the L4 (TCP) health-check primitive: send a known byte pattern, require 
 - **Concept:** L4 vs L7 load balancing, connection draining, active health checks
 - **Domain:** networking
 - **Repo:** envoyproxy/envoy → [source/common/upstream/health_checker_impl.cc](https://github.com/envoyproxy/envoy/blob/main/source/common/upstream/health_checker_impl.cc) — `HealthCheckerFactory::create`, `PayloadMatcher::match`; nginx/nginx → [src/http/ngx_http_upstream_round_robin.c](https://github.com/nginx/nginx/blob/master/src/http/ngx_http_upstream_round_robin.c) — weighted peer selection, `max_conns`
+
+
+
+

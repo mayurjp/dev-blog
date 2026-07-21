@@ -10,6 +10,8 @@ tags: [observability, fundamentals, monitoring, opentelemetry]
 
 **TL;DR:** Observability is the ability to answer "what is happening inside my system, and why" from the outside, using three signals — **metrics, logs, and traces**. A real request through three OpenTelemetry-instrumented services, scraped by Prometheus and traced in Jaeger, shows how the pieces connect; the traps are high cardinality, missing trace context, and over-aggressive sampling.
 
+> **In plain English (30 sec):** Logs with traceId that follows request across services.
+
 ## 1. What observability is (and what it isn't)
 
 A system is **observable** when you can explain any internal state — including one you didn't predict — from its external outputs. The outputs are telemetry: numbers, records, and request paths your code emits while running.
@@ -129,3 +131,7 @@ Worked example and component names from real repositories: [open-telemetry/opent
 ## Next in the series
 
 → [OpenTelemetry Collector: Pipelines, Processors, and Exporters]({{ '/observability/otel-collector-pipelines/' | relative_url }})
+
+
+
+

@@ -10,6 +10,8 @@ tags: [networking, cdn, edge-caching, cache-invalidation, origin-shield]
 
 **TL;DR:** How do CDNs make the world feel local? They terminate user requests at edge PoPs that cache responses, invalidate by TTL/purge, and funnel cache misses through an **origin shield** so the origin sees far fewer requests.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [nginx/nginx](https://github.com/nginx/nginx) — the canonical edge/proxy cache; its upstream + connection-cap model mirrors how an edge node fronts and shields an origin.
 
 ## 1. The Engineering Problem
@@ -116,3 +118,7 @@ Combined with `proxy_cache_use_stale`, this is the origin-shield guarantee: miss
 - **Concept:** edge caching, TTL/purge invalidation, origin shield tiering
 - **Domain:** networking
 - **Repo:** nginx/nginx → [src/http/ngx_http_upstream_round_robin.c](https://github.com/nginx/nginx/blob/master/src/http/ngx_http_upstream_round_robin.c) — `max_conns` cap modeling shield/edge backpressure
+
+
+
+

@@ -9,6 +9,8 @@ tags: [observability, structured-logging, dotnet, csharp]
 
 **TL;DR:** `logger.LogInformation($"User {userId}")` and `logger.LogInformation("User {UserId}", userId)` look the same — why is only one structured? Because .NET's structured logging parses the template string for `{Name}` placeholders at log-call time and passes each name/value pair (plus the original template) as separate, individually queryable fields, while string interpolation collapses everything into one opaque message before the logging API ever sees it.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 
 ## 1. The Engineering Problem: two nearly identical-looking log calls produce fundamentally different queryability later
@@ -104,3 +106,7 @@ Known-stale fact: structured logging is sometimes assumed to simply mean "logs f
 - **Concept:** Structured logging
 - **Domain:** observability
 - **Repo:** [dotnet/runtime](https://github.com/dotnet/runtime) → [`src/libraries/Microsoft.Extensions.Logging.Abstractions/src/LogValuesFormatter.cs`](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Logging.Abstractions/src/LogValuesFormatter.cs) — the actual .NET runtime source, the real primitive OpenTelemetry's .NET logging instrumentation is built on.
+
+
+
+

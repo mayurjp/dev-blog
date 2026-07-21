@@ -9,6 +9,8 @@ tags: [kubernetes, deployments, replicasets, rollouts]
 
 **TL;DR:** Who actually recreates a crashed Pod, and how do you update one without downtime? Kubernetes splits the job into two stacked controllers — a **ReplicaSet** notices a missing Pod and recreates it, while a **Deployment** orchestrates the transition between old and new ReplicaSets, bounded by `maxUnavailable`/`maxSurge` so capacity never drops to zero.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: Pods can't heal themselves, and can't be upgraded in place
@@ -173,3 +175,7 @@ spec:
 - **Concept:** Kubernetes `Deployment` and `ReplicaSet` — declarative scaling and rolling updates
 - **Domain:** kubernetes
 - **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`kubernetes-manifests/checkoutservice.yaml`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/checkoutservice.yaml) — Google's "Online Boutique," an 11-microservice reference app
+
+
+
+

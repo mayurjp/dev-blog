@@ -9,6 +9,8 @@ tags: [system-design, replication, redis, leader-follower]
 
 **TL;DR:** How does a replica catch up after a network blip without re-copying the whole database? The leader keeps a bounded replication backlog tagged with an offset, and on reconnect checks that the replica's replication lineage still matches and that the needed offset is still within the backlog before streaming only the missing slice; if either check fails, it falls back to a full resync.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
 ## 1. The Engineering Problem: reconnection shouldn't cost as much as the initial copy
@@ -113,3 +115,7 @@ Known-stale fact: "replication is just copying data to another server" undersell
 - **Concept:** Database replication (leader-follower, read replicas)
 - **Domain:** system-design
 - **Repo:** [redis/redis](https://github.com/redis/redis) → [`src/replication.c`](https://github.com/redis/redis/blob/unstable/src/replication.c) — the real, production in-memory data store's replication implementation.
+
+
+
+

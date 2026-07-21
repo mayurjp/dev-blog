@@ -10,6 +10,8 @@ tags: [networking, dns, recursive, ttl, cname, split-horizon]
 
 **TL;DR:** How does `www.example.com` become `93.184.216.34`? A stub resolver asks a recursive resolver, which walks the hierarchy iteratively (root → TLD → authoritative), honoring TTLs, following CNAME chains, while split-horizon serves different answers to different clients.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [miekg/dns](https://github.com/miekg/dns) — a Go DNS library whose `Client`, wire `Msg` format, and `RR_Header.Ttl` field model exactly what travels on the wire.
 
 ## 1. The Engineering Problem
@@ -142,3 +144,7 @@ func (c *Client) ExchangeWithConnContext(ctx context.Context, m *Msg, co *Conn) 
 - **Concept:** recursive/iterative resolution, TTL caching, CNAME chains, split-horizon views
 - **Domain:** networking
 - **Repo:** miekg/dns → [dns.go](https://github.com/miekg/dns/blob/master/dns.go) — `RR_Header.Ttl`; [client.go](https://github.com/miekg/dns/blob/master/client.go) — `ExchangeWithConnContext` ID-matching
+
+
+
+

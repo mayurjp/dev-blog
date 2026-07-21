@@ -9,6 +9,8 @@ tags: [gcp, cloud-functions, cloudevents, serverless]
 
 **TL;DR:** Is an event-driven Cloud Function actually invoked differently from an HTTP-triggered one? No — every Cloud Function is invoked over plain HTTP regardless of trigger type; for event-driven functions, Eventarc wraps the real event as a CNCF CloudEvents-formatted HTTP POST, and the Functions Framework's `CloudEventAdapter` parses it back into a structured `CloudEvent` before handing it to the user's code.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`GoogleCloudPlatform/functions-framework-dotnet`](https://github.com/GoogleCloudPlatform/functions-framework-dotnet)
 
 ## 1. The Engineering Problem: "event-driven" sounds like it might mean a different invocation transport entirely
@@ -115,3 +117,7 @@ Known-stale fact: a natural assumption is that event-driven and HTTP-driven serv
 - **Concept:** Cloud Functions (event-driven serverless)
 - **Domain:** gcp
 - **Repo:** [GoogleCloudPlatform/functions-framework-dotnet](https://github.com/GoogleCloudPlatform/functions-framework-dotnet) → [`src/Google.Cloud.Functions.Framework/CloudEventAdapter.cs`](https://github.com/GoogleCloudPlatform/functions-framework-dotnet/blob/main/src/Google.Cloud.Functions.Framework/CloudEventAdapter.cs), [`ICloudEventFunction.cs`](https://github.com/GoogleCloudPlatform/functions-framework-dotnet/blob/main/src/Google.Cloud.Functions.Framework/ICloudEventFunction.cs) — the real, official Cloud Functions runtime framework for .NET.
+
+
+
+

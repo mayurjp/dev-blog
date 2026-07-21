@@ -9,6 +9,8 @@ tags: [architecture, serverless, faas, aws-lambda, csharp]
 
 **TL;DR:** Eliminating cold starts by cloning an already-initialized function creates a new bug class — what breaks? Anything meant to be unique per environment (a random identifier, a fresh network handle) — every environment restored from the same snapshot would otherwise share the exact same value, unless application code registers an explicit "after restore" hook to regenerate it.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`aws/aws-lambda-dotnet`](https://github.com/aws/aws-lambda-dotnet)
 
 ## 1. The Engineering Problem: expensive one-time init helps warm reuse but hurts every cold start — until you snapshot it, which creates a new problem
@@ -130,3 +132,7 @@ Known-stale fact: serverless/FaaS is sometimes pitched as architecture-agnostic 
 - **Concept:** Serverless architecture (FaaS-centric system design)
 - **Domain:** architecture
 - **Repo:** [aws/aws-lambda-dotnet](https://github.com/aws/aws-lambda-dotnet) → [`Libraries/src/SnapshotRestore.Registry/RestoreHooksRegistry.cs`](https://github.com/aws/aws-lambda-dotnet/blob/master/Libraries/src/SnapshotRestore.Registry/RestoreHooksRegistry.cs), [`README.md`](https://github.com/aws/aws-lambda-dotnet/blob/master/Libraries/src/SnapshotRestore.Registry/README.md) — AWS's own official .NET Lambda tooling.
+
+
+
+

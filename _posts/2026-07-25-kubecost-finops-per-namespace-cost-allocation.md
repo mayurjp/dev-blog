@@ -9,6 +9,8 @@ tags: [multicloud, finops, kubernetes, prometheus, kubecost, opencost]
 
 **TL;DR:** AWS Cost Explorer tells you how much you spent on EC2 last month, but it cannot tell you which Kubernetes namespace in that cluster consumed 400 CPU-core-hours of that spend. Kubecost's allocation engine solves this by querying real-time Prometheus metrics -- pod CPU requests, node pricing, PVC attachment -- and computing per-namespace, per-pod, per-container cost breakdowns that no cloud-billing API can provide alone.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repos:** [`opencost/opencost`](https://github.com/opencost/opencost) (OpenCost -- the open-source core of Kubecost) and [`kubecost/kubecost`](https://github.com/kubecost/kubecost) (the Kubecost Helm chart)
 
 ## 1. The Engineering Problem: cloud billing APIs know what you paid, not who used it
@@ -296,3 +298,7 @@ A: Yes. The allocation set carries pod labels, namespace labels, and annotations
 - **Concept:** Kubernetes cost allocation via real-time Prometheus metrics
 - **Domain:** multicloud
 - **Repos:** [opencost/opencost](https://github.com/opencost/opencost) (the open-source core of Kubecost) -- [`pkg/metrics/nodemetrics.go`](https://github.com/opencost/opencost/blob/develop/pkg/metrics/nodemetrics.go), [`pkg/metrics/namespacemetrics.go`](https://github.com/opencost/opencost/blob/develop/pkg/metrics/namespacemetrics.go), [`pkg/metrics/kubemetrics.go`](https://github.com/opencost/opencost/blob/develop/pkg/metrics/kubemetrics.go), [`pkg/metrics/podmetrics.go`](https://github.com/opencost/opencost/blob/develop/pkg/metrics/podmetrics.go), [`pkg/costmodel/allocation.go`](https://github.com/opencost/opencost/blob/develop/pkg/costmodel/allocation.go); [kubecost/kubecost](https://github.com/kubecost/kubecost) (the Helm chart and enterprise layer)
+
+
+
+

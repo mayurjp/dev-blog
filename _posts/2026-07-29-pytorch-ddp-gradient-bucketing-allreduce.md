@@ -10,6 +10,8 @@ tags: [mlops, distributed-training, pytorch, ddp, allreduce, gradient-bucketing]
 
 **TL;DR:** Without bucketing, every parameter's gradient must finish computing before any cross-GPU communication starts — the backward pass is fully serialised against AllReduce. DDP partitions parameters into buckets (default 25 MiB each), and the moment the last parameter gradient in a bucket finishes computing, the AllReduce for that bucket fires immediately while the backward pass continues computing gradients for parameters in earlier buckets. This overlap hides AllReduce latency behind gradient computation, and the key code that makes it happen lives in PyTorch's C++ Reducer and `_BucketCapacityConfig`.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`pytorch/pytorch`](https://github.com/pytorch/pytorch)
 
 ---
@@ -375,3 +377,7 @@ A: Because backward computes gradients in reverse order of the forward pass. If 
 - **Topic:** Distributed training with gradient bucketing and AllReduce overlap
 - **Domain:** mlops
 - **Repo:** [pytorch/pytorch](https://github.com/pytorch/pytorch) — [`torch/nn/parallel/distributed.py`](https://github.com/pytorch/pytorch/blob/main/torch/nn/parallel/distributed.py) (`DistributedDataParallel`, `_BucketCapacityConfig`, `_ddp_init_helper` — bucket assignment, Reducer creation, and first-bucket latency optimisation), [`torch/distributed/algorithms/ddp_comm_hooks/default_hooks.py`](https://github.com/pytorch/pytorch/blob/main/torch/distributed/algorithms/ddp_comm_hooks/default_hooks.py) (`allreduce_hook` — the per-bucket AllReduce entry point called by the C++ Reducer), [`torch/distributed/algorithms/ddp_comm_hooks/optimizer_overlap_hooks.py`](https://github.com/pytorch/pytorch/blob/main/torch/distributed/algorithms/ddp_comm_hooks/optimizer_overlap_hooks.py) (`_hook_then_optimizer` — fused optimiser-in-backward that runs `step_param` immediately after each bucket's AllReduce completes) — the PyTorch distributed training framework.
+
+
+
+

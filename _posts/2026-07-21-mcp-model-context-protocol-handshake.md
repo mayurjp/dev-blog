@@ -7,6 +7,8 @@ categories: genai
 order: 18
 tags: [genai, mcp, ai-tools, llm, protocol]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 **Why can't an LLM just call a function on a remote server and get an answer back?**
 
@@ -275,3 +277,7 @@ A: Not unless you want to customize the server info or capabilities response. Th
 - **Repository:** [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk)
 - **Key files:** `src/mcp/server/lowlevel/server.py`, `src/mcp/client/session.py`
 - **MCP specification:** [spec.modelcontextprotocol.io](https://modelcontextprotocol.io/specification/latest)
+
+
+
+

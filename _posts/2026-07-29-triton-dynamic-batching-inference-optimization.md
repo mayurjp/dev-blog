@@ -10,6 +10,8 @@ tags: [mlops, triton, dynamic-batching, model-serving, gpu-optimization]
 
 **TL;DR:** Can a model server truly serve ten concurrent clients faster than serving them one at a time? Yes — if it waits a few milliseconds in a queue to accumulate a batch, then runs all ten through the GPU in a single kernel launch, amortizing the fixed overhead of GPU thread block scheduling, memory transfer setup, and model weight loading across every request in the group.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 ## 1. The Engineering Problem
 
 When you deploy a trained model behind an HTTP endpoint, the naive approach is straightforward: a client sends one request, the server loads the input tensor onto the GPU, executes the model forward pass, copies the output tensor back, and returns the response. For a single client this works fine. But at production scale, dozens or hundreds of clients are sending requests concurrently, and each one pays the full fixed cost of a GPU inference cycle.
@@ -274,3 +276,7 @@ A: No. TensorRT batching refers to the engine's ability to accept batched input 
 ---
 
 **Source:** [triton-inference-server/server](https://github.com/triton-inference-server/server) and [triton-inference-server/core](https://github.com/triton-inference-server/core) — specifically `common/protobuf/model_config.proto` (`ModelDynamicBatching`, `ModelQueuePolicy` messages), `triton-inference-server/server/src/main.cc` (server startup and endpoint wiring), and the [Triton dynamic batching documentation](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/model_configuration.html#dynamic-batching).
+
+
+
+

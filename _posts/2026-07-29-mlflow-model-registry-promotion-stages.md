@@ -7,6 +7,8 @@ categories: mlops
 order: 5
 tags: [mlops, model-registry, mlflow, versioning, model-lifecycle]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -281,3 +283,7 @@ All code in this post is from the [mlflow/mlflow](https://github.com/mlflow/mlfl
 - `mlflow/entities/model_registry/model_version_stages.py` — Stage constants and canonical mapping
 - `mlflow/store/model_registry/sqlalchemy_store.py:1192` — `transition_model_version_stage()` implementation
 - `mlflow/tracking/client.py:4896` — `MlflowClient.transition_model_version_stage()` public API
+
+
+
+

@@ -7,6 +7,8 @@ categories: aspnet-webapi
 order: 91
 tags: [aspnet-webapi, troubleshooting, debugging, authentication, jwt, middleware]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## The symptom
 
@@ -178,3 +180,7 @@ options.Events = new JwtBearerEvents
 
 - `dotnet/aspnetcore` — middleware pipeline and endpoint routing: [github.com/dotnet/aspnetcore](https://github.com/dotnet/aspnetcore)
 - Auth middleware source: `dotnet/aspnetcore/src/Security/Authentication`
+
+
+
+

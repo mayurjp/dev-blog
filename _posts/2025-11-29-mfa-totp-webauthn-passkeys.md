@@ -9,6 +9,8 @@ tags: [security, mfa, totp, webauthn, passkeys]
 
 **TL;DR:** How does a security key prove it wasn't cloned, without ever sharing its private key? Every WebAuthn authenticator increments a signature counter with each use and embeds it in the signed assertion, so the server rejects any new assertion whose counter isn't strictly greater than the last one it saw — exactly what happens once a cloned device starts signing from its own duplicate sequence.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`authelia/authelia`](https://github.com/authelia/authelia)
 
 ## 1. The Engineering Problem: two different second-factor models, two different ways to get compromised
@@ -125,3 +127,7 @@ Known-stale fact: many TOTP explainers stop at "compare the time-based code to w
 - **Concept:** Multi-factor authentication (TOTP/WebAuthn/passkeys)
 - **Domain:** security
 - **Repo:** [authelia/authelia](https://github.com/authelia/authelia) → [`internal/handlers/handler_sign_totp.go`](https://github.com/authelia/authelia/blob/master/internal/handlers/handler_sign_totp.go), [`internal/handlers/handler_sign_webauthn.go`](https://github.com/authelia/authelia/blob/master/internal/handlers/handler_sign_webauthn.go) — a real forward-auth SSO + MFA proxy.
+
+
+
+

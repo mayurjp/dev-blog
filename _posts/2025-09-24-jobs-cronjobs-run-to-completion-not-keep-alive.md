@@ -9,6 +9,8 @@ tags: [kubernetes, jobs, cronjobs, batch, controllers]
 
 **TL;DR:** How do you run a workload to completion instead of keeping it alive forever? A Job tracks Pod *completions* instead of liveness (`restartPolicy: Never`/`OnFailure`, retries up to `backoffLimit`), and a CronJob is just a scheduler that creates a new Job from its `jobTemplate` on every cron tick — everything a Job does still applies underneath it.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`kubernetes-sigs/descheduler`](https://github.com/kubernetes-sigs/descheduler)
 
 ## 1. The Engineering Problem: not every workload wants to stay running
@@ -204,3 +206,7 @@ What this teaches that a hello-world can't:
 - **Concept:** Job / CronJob
 - **Domain:** kubernetes
 - **Repo:** [kubernetes-sigs/descheduler](https://github.com/kubernetes-sigs/descheduler) → [`kubernetes/cronjob/cronjob.yaml`](https://github.com/kubernetes-sigs/descheduler/blob/master/kubernetes/cronjob/cronjob.yaml), [`kubernetes/job/job.yaml`](https://github.com/kubernetes-sigs/descheduler/blob/master/kubernetes/job/job.yaml) — a real Kubernetes SIG controller that evicts poorly-placed Pods, shipped as both a one-shot Job and a repeating CronJob.
+
+
+
+

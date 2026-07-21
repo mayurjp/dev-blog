@@ -9,6 +9,8 @@ tags: [architecture, plugin-architecture, microkernel, terraform, go]
 
 **TL;DR:** Why does a Terraform provider refuse to start unless a specific environment variable is set? A magic-cookie handshake (`TF_PLUGIN_MAGIC_COOKIE`) proves the process was launched specifically as a Terraform plugin, by Terraform, on purpose — without it, a provider binary run directly or invoked by an unrelated program refuses to start serving requests at all.
 
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: hundreds of independently-developed extensions can't all be bundled into one binary, or trusted to share its process
@@ -117,3 +119,7 @@ Known-stale fact: plugin/microkernel architectures are sometimes assumed to mean
 - **Concept:** Plugin/micro-kernel architecture
 - **Domain:** architecture
 - **Repo:** [hashicorp/terraform](https://github.com/hashicorp/terraform) → [`internal/plugin/serve.go`](https://github.com/hashicorp/terraform/blob/main/internal/plugin/serve.go), [`internal/plugin/plugin.go`](https://github.com/hashicorp/terraform/blob/main/internal/plugin/plugin.go) — a large, real, production infrastructure-as-code tool with hundreds of independently maintained plugin providers.
+
+
+
+

@@ -10,6 +10,8 @@ tags: [dotnet, roslyn, source-generators, compilation, incremental]
 
 **TL;DR:** Why does Roslyn's incremental source generator pipeline cache individual syntax tree state rather than eagerly caching the entire Compilation result? Because a Compilation is a monolithic snapshot where any single file change invalidates everything — syntax trees, by contrast, are immutable, individually diffable, and cheap to compare by reference, so caching at that granularity lets the pipeline skip re-running transform nodes when only one file changed out of thousands, while a single `CompilationCache` layer at the top preserves the reference-equality contract that keeps every downstream generator's `CompilationProvider`-derived cache valid across runs.
 
+> **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
+
 **Real repo:** [`dotnet/roslyn`](https://github.com/dotnet/roslyn)
 
 ---
@@ -255,3 +257,7 @@ A: A generator that implements `IIncrementalGenerator` but registers a `Compilat
 - **Repo:** [dotnet/roslyn](https://github.com/dotnet/roslyn) → [`src/Compilers/Core/Portable/SourceGeneration/SyntaxStore.cs`](https://github.com/dotnet/roslyn/blob/main/src/Compilers/Core/Portable/SourceGeneration/SyntaxStore.cs) — the per-syntax-tree caching engine that diff trees by reference and carry forward cached node state.
 - **Repo:** [dotnet/roslyn](https://github.com/dotnet/roslyn) → [`src/Compilers/Core/Portable/SourceGeneration/CompilationCache.cs`](https://github.com/dotnet/roslyn/blob/main/src/Compilers/Core/Portable/SourceGeneration/CompilationCache.cs) — the Compilation reference preservation layer whose cache hit keeps every downstream generator's CompilationProvider-derived node cached.
 - **Repo:** [dotnet/roslyn](https://github.com/dotnet/roslyn) → [`src/Compilers/Core/Portable/SourceGeneration/GeneratorState.cs`](https://github.com/dotnet/roslyn/blob/main/src/Compilers/Core/Portable/SourceGeneration/GeneratorState.cs) — per-generator state carrying forward pipeline shape, previous outputs, and step execution traces.
+
+
+
+

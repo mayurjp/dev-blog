@@ -7,6 +7,8 @@ categories: angular
 order: 14
 tags: [angular, defer, lazy-loading, chunks, performance, change-detection, onpush]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -332,3 +334,7 @@ The runtime catches the error and transitions the defer block to the `Error` sta
 - [`packages/compiler/src/template/pipeline/src/phases/resolve_defer_deps_fns.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/phases/resolve_defer_deps_fns.ts) — `resolveDeferDepsFns`
 - [`packages/compiler/src/template/pipeline/src/phases/defer_configs.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/phases/defer_configs.ts) — `configureDeferInstructions`
 - [`packages/compiler/src/template/pipeline/src/phases/defer_resolve_targets.ts`](https://github.com/angular/angular/blob/main/packages/compiler/src/template/pipeline/src/phases/defer_resolve_targets.ts) — `resolveDeferTargetNames`
+
+
+
+

@@ -10,6 +10,8 @@ tags: [kubernetes, troubleshooting, debugging, csi, storage, kubelet]
 
 **TL;DR:** The pod is not stuck mounting — it is stuck *attaching*. A ReadWriteOnce PersistentVolume is still recorded as attached to a node that died, so the attach-detach controller in kube-controller-manager refuses to create a `VolumeAttachment` for the new node, and the kubelet's 2-minute mount wait ends in a plain timeout that (since Kubernetes 1.28) produces no event at all.
 
+> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+
 ## The symptom
 
 > "One pod — `grafana-7d9f5c` — has been in `ContainerCreating` for twelve minutes. `kubectl describe pod` shows the container as `Waiting: ContainerCreating` and the Events list has one warning from eleven minutes ago and nothing since. The node it landed on is `Ready`, its kubelet is fine, and three other pods that got scheduled to that same node in the same minute went `Running` in under ten seconds. The image is already in the node's cache. I've deleted the pod twice and it comes back and hangs in exactly the same way."
@@ -244,3 +246,7 @@ The `VolumeAttachment` object and the `external-attacher` sidecar are CSI-specif
 - **Docs/Repo:** [kubernetes/kubernetes — `pkg/controller/volume/attachdetach/attach_detach_controller.go`](https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/volume/attachdetach/attach_detach_controller.go) — `DefaultTimerConfig` with `ReconcilerMaxWaitForUnmountDuration: 6 * time.Minute`
 - **Docs/Repo:** [kubernetes-csi/external-attacher](https://github.com/kubernetes-csi/external-attacher) — the sidecar that watches `VolumeAttachment` objects and issues `ControllerPublishVolume`
 - **Docs/Repo:** [Kubernetes docs — Non-Graceful Node Shutdown](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/) — the `node.kubernetes.io/out-of-service:NoExecute` taint and `NodeOutOfServiceVolumeDetach`, stable since v1.28
+
+
+
+

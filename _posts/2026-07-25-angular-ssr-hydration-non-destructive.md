@@ -7,6 +7,8 @@ categories: angular
 order: 10
 tags: [angular, ssr, hydration, universal, ivy]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -288,3 +290,7 @@ During SSR, empty text nodes are replaced with `<!--ngetn-->` comment markers, a
 - [`packages/core/src/hydration/utils.ts`](https://github.com/angular/angular/blob/main/packages/core/src/hydration/utils.ts) — `retrieveHydrationInfoImpl`, `canHydrateNode`, `processTextNodeMarkersBeforeHydration`, `verifySsrContentsIntegrity`
 - [`packages/core/src/hydration/api.ts`](https://github.com/angular/angular/blob/main/packages/core/src/hydration/api.ts) — `withDomHydration`, `enableHydrationRuntimeSupport`, `withI18nSupport`, `withIncrementalHydration`
 - [`packages/platform-browser/src/hydration.ts`](https://github.com/angular/angular/blob/main/packages/platform-browser/src/hydration.ts) — `provideClientHydration`, feature flags, HTTP transfer cache composition
+
+
+
+

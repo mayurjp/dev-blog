@@ -7,6 +7,8 @@ categories: [angular]
 order: 6
 tags: [angular, routing, lazy-loading, code-splitting, bundle-size, webpack, performance]
 ---
+> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
+
 
 ## TL;DR
 
@@ -229,3 +231,7 @@ Yes. Angular's SSR builder (part of `@angular-devkit/build-angular`) can discove
 | [`packages/router/src/router_config_loader.ts`](https://github.com/angular/angular/blob/main/packages/router/src/router_config_loader.ts) | `angular/angular` — `RouterConfigLoader`, `loadChildren()` |
 | [`packages/router/src/models.ts`](https://github.com/angular/angular/blob/main/packages/router/src/models.ts) | `angular/angular` — `Route` interface, `LoadChildrenCallback` |
 | [`packages/router/src/router.ts`](https://github.com/angular/angular/blob/main/packages/router/src/router.ts) | `angular/angular` — `Router` service, `scheduleNavigation()` |
+
+
+
+
