@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "Kubernetes Interview Questions: 109 Real-World Q&A from Production Manifests"
-description: "109 interview-ready Kubernetes questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "Kubernetes Interview Questions: 111 Real-World Q&A from Production Manifests"
+description: "111 interview-ready Kubernetes questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/kubernetes/
 ---
 
 Bite-sized, standalone interview questions and answers for Kubernetes. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">109</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">111</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -274,6 +274,24 @@ Two things, in order: (1) selector/label mismatch — does the Service's `select
   <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: How do iptables mode and IPVS mode differ for kube-proxy load balancing? <span class="qa-badge qa-intermediate">[Intermediate]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
   <div class="qa-a" markdown="1">
 In iptables mode (default), traffic is sent to a randomly-chosen endpoint using probability rules — statistically even, not sequential. IPVS mode offers real algorithms (round-robin, least-connection, etc.), which is why large clusters prefer IPVS. Newer clusters may also use nftables mode.
+
+<p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: Production traffic is returning 503s, but `kubectl get pods` shows every frontend pod as Running. What do you check first? <span class="qa-badge qa-beginner">[Beginner]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+Check the Service's EndpointSlices before chasing the cloud load balancer. If the EndpointSlice has zero Ready addresses, compare the Service selector with the pod template labels and then check readiness probe failures; `Running` only means the container process exists, not that Service traffic can reach it.
+
+<p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Expert">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: How do you prevent a Helm chart from creating a Service selector mismatch in production? <span class="qa-badge qa-expert">[Expert]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+Generate Service selectors, Deployment selectors, and pod template labels from the same Helm helper or Kustomize label source. Then run `helm template`, `kube-linter`, and server-side dry-run in CI so the rendered manifests are checked before they can create a zero-endpoint Service.
 
 <p class="qa-link">[Full post →]({{ '/kubernetes/services-without-hardcoding-ips/' | relative_url }})</p>
   </div>
@@ -1067,7 +1085,7 @@ A stray `kubectl create secret` or an un-migrated raw `Secret` manifest applied 
 
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 109 across Kubernetes
+**Last updated:** July 2026 | **Total Q&A:** 111 across Kubernetes
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
@@ -1290,6 +1308,22 @@ A stray `kubectl create secret` or an un-migrated raw `Secret` manifest applied 
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "In iptables mode (default), traffic is sent to a randomly-chosen endpoint using probability rules — statistically even, not sequential. IPVS mode offers real algorithms (round-robin, least-connection, etc.), which is why large clusters prefer IPVS. Newer clusters may also use nftables mode."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Production traffic is returning 503s, but `kubectl get pods` shows every frontend pod as Running. What do you check first?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Check the Service's EndpointSlices before chasing the cloud load balancer. If the EndpointSlice has zero Ready addresses, compare the Service selector with the pod template labels and then check readiness probe failures; `Running` only means the container process exists, not that Service traffic can reach it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you prevent a Helm chart from creating a Service selector mismatch in production?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Generate Service selectors, Deployment selectors, and pod template labels from the same Helm helper or Kustomize label source. Then run `helm template`, `kube-linter`, and server-side dry-run in CI so the rendered manifests are checked before they can create a zero-endpoint Service."
       }
     },
     {

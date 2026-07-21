@@ -5,6 +5,24 @@ date: 2025-07-28 09:00:00 +0530
 categories: kubernetes
 order: 3
 tags: [kubernetes, services, dns, kube-proxy, endpointslices]
+production:
+  incident_title: "503s with Running pods but zero ready endpoints"
+  symptom: "Frontend requests fail after deployment while pods still show Running"
+  root_cause: "Service selector drifted from the pod template label, or readiness never passed"
+  cloud: "GKE"
+  tools: [kubectl, EndpointSlice, CoreDNS, kube-proxy, kube-linter, Prometheus]
+  prevention:
+    - "Validate Service selectors against pod template labels in CI"
+    - "Alert when a Service has zero ready endpoints for more than 2 minutes"
+    - "Require readiness probes before Services receive production traffic"
+system_design:
+  scenario: "Design service discovery for a checkout frontend calling nine backends on GKE"
+  scale: "1000 RPS, p99 under 150 ms, zero-downtime deploys"
+  cloud_services: [GKE Service, GKE Gateway, Cloud Load Balancing, Cloud DNS, Cloud Monitoring]
+  tradeoffs:
+    - "ClusterIP versus headless Service"
+    - "kube-proxy iptables versus IPVS or eBPF dataplane"
+    - "plain Kubernetes Services versus service mesh"
 ---
 
 **TL;DR:** How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtual IP and DNS name — in front of the volatile pods, tracking which pods are currently alive and Ready via a label selector so clients never need a pod's real IP.
@@ -217,7 +235,263 @@ spec:
 
 ---
 
-## 5. Question Bank (control-plane depth — the mental-model test)
+## 5. Production Incident: 503s with Running pods and zero endpoints
+
+A checkout frontend deploys successfully during a high-traffic window. `kubectl get pods` shows the new pods as `Running`, but users see a sudden spike in HTTP 503s from `frontend-external`.
+
+The confusing part: the cloud LoadBalancer is healthy, the node pool is healthy, and the Deployment has the expected replica count. The failure sits one layer lower. The Service has no Ready endpoints, so every request that reaches the Service has nowhere valid to go.
+
+Typical root causes:
+
+- The Service selector says `app: frontend`, but the rendered pod template label changed to `app: front-end`.
+- The pods are `Running` but not `Ready` because `/_healthz` fails or points to the wrong port.
+- The Service `targetPort` no longer matches the container port after an app or Helm chart change.
+- A NetworkPolicy allows ingress to pods by old labels, while the Service selector was updated separately.
+
+The important production lesson is that `Running` is not enough. A Service routes only to pods selected by label and marked Ready in EndpointSlice.
+
+---
+
+## 6. Troubleshooting & Resolution: command sequence
+
+Start with the Service, not the cloud load balancer. The Service is the contract between stable DNS and volatile pods.
+
+```bash
+# 1. Check the Service selector.
+kubectl get svc frontend -o jsonpath='{.spec.selector}'
+kubectl describe svc frontend
+
+# 2. Check whether EndpointSlice has any ready backends.
+kubectl get endpointslices \
+  -l kubernetes.io/service-name=frontend \
+  -o wide
+
+kubectl get endpointslices \
+  -l kubernetes.io/service-name=frontend \
+  -o yaml | grep -E 'addresses:|ready:|targetRef:|port:'
+
+# 3. Compare Service selector with actual pod labels.
+kubectl get pods -l app=frontend --show-labels
+kubectl get pods --show-labels | grep frontend
+
+# 4. Check readiness, because Running pods may still be excluded.
+kubectl get pods -l app=frontend
+kubectl describe pod -l app=frontend | grep -A12 -E 'Readiness|Events'
+
+# 5. Verify the app is listening where the Service points.
+kubectl get svc frontend -o jsonpath='{.spec.ports[*].targetPort}'
+kubectl get deploy frontend -o jsonpath='{.spec.template.spec.containers[*].ports[*].containerPort}'
+
+# 6. Confirm DNS from a real client pod.
+kubectl exec -it deploy/frontend -- cat /etc/resolv.conf
+kubectl exec -it deploy/frontend -- nslookup productcatalogservice
+kubectl exec -it deploy/frontend -- nslookup productcatalogservice.default.svc.cluster.local
+```
+
+If the selector drifted, fix the manifest rather than patching the live object by hand:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /_healthz
+            port: http
+```
+
+Resolution path:
+
+1. Correct the rendered YAML in Git.
+2. Apply through the normal deployment path.
+3. Watch EndpointSlice readiness, not just pod status.
+4. Confirm client traffic succeeds through the same DNS name the app uses.
+
+```bash
+kubectl rollout status deploy/frontend
+kubectl get endpointslices -l kubernetes.io/service-name=frontend -w
+kubectl exec -it deploy/frontend -- curl -fsS http://productcatalogservice:3550/healthz
+```
+
+---
+
+## 7. Cloud Lens: GKE production design
+
+On GKE, this pattern usually sits behind a cloud load balancer:
+
+```mermaid
+flowchart LR
+    User["User"] --> GLB["Google Cloud Load Balancer"]
+    GLB --> GW["GKE Gateway or Ingress"]
+    GW --> FESvc["Service: frontend"]
+    FESvc --> FEPods["Ready frontend pods"]
+    FEPods --> Cart["Service: cartservice"]
+    FEPods --> Catalog["Service: productcatalogservice"]
+    FEPods --> Checkout["Service: checkoutservice"]
+    Cart --> CartPods["Ready cart pods"]
+    Catalog --> CatalogPods["Ready catalog pods"]
+    Checkout --> CheckoutPods["Ready checkout pods"]
+```
+
+Use GKE Services for east-west traffic inside the cluster, and GKE Gateway or Ingress for north-south traffic from the internet. The cloud load balancer should not be your first suspect when only one internal dependency fails; first prove that the backing Service has Ready endpoints.
+
+Production checks:
+
+- `Service` and `Deployment` labels are rendered from one shared Helm value or Kustomize label.
+- `targetPort` uses a named container port, such as `http`, instead of a duplicated number.
+- Cloud Monitoring alerts when EndpointSlice has zero Ready addresses for a user-facing Service.
+- CoreDNS latency and error rate are on the service dashboard.
+- GKE Dataplane V2 or IPVS/eBPF behavior is documented, because kube-proxy mode changes the load-balancing mechanics.
+
+---
+
+## 8. Library and Tooling Lens
+
+For Kubernetes manifests, the "library" is usually the delivery toolchain: Helm, Kustomize, policy-as-code, and cluster monitoring.
+
+Helm should generate selector labels from one helper, so the Service and Deployment cannot drift:
+
+{% raw %}
+```yaml
+{{- define "frontend.selectorLabels" -}}
+app.kubernetes.io/name: frontend
+app.kubernetes.io/component: web
+{{- end }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    {{- include "frontend.selectorLabels" . | nindent 4 }}
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+```
+{% endraw %}
+
+The Deployment should use the same helper:
+
+{% raw %}
+```yaml
+spec:
+  selector:
+    matchLabels:
+      {{- include "frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "frontend.selectorLabels" . | nindent 8 }}
+```
+{% endraw %}
+
+CI should render the final manifests, then lint the rendered output:
+
+```bash
+helm template frontend ./charts/frontend > rendered.yaml
+kube-linter lint rendered.yaml
+kubectl apply --dry-run=server -f rendered.yaml
+```
+
+For progressive delivery, Argo Rollouts or Flagger should gate traffic shifts on Service-level health, not just pod availability:
+
+```yaml
+analysis:
+  templates:
+  - templateName: frontend-success-rate
+  args:
+  - name: service
+    value: frontend
+```
+
+---
+
+## 9. Production Design Scenario: service discovery for checkout
+
+Design a checkout frontend on GKE:
+
+- 1000 RPS user traffic.
+- The frontend calls nine backend Services.
+- p99 latency target is below 150 ms.
+- Deployments must be zero downtime.
+- A single backend failure should degrade one feature, not break the whole page.
+
+Baseline design:
+
+- Use `ClusterIP` Services for normal backend discovery.
+- Use short names like `cartservice:7070` only for same-namespace traffic.
+- Use full names like `cartservice.checkout.svc.cluster.local:7070` across namespaces.
+- Use readiness probes to remove cold or degraded pods from Service traffic.
+- Use client timeouts, retries with budgets, and circuit breakers in application code.
+
+Tradeoff table:
+
+| Choice | Use When | Production Failure Mode |
+|---|---|---|
+| `ClusterIP` Service | Most stateless HTTP/gRPC services | Selector drift or readiness failure creates zero endpoints |
+| Headless Service | Stateful clients need individual pod identities | Client must handle balancing and dead endpoints |
+| Service mesh | Need mTLS, retries, traffic splitting, outlier detection | Sidecar config or control-plane outage can affect every hop |
+| GKE Gateway/Ingress | Internet-facing HTTP routing | Backend Service or NEG health mismatch causes 502/503 at the edge |
+
+At 1000 RPS, plain `ClusterIP` is still the default answer. You move to headless Service when the client needs endpoint identity, and you add service mesh when you need cross-cutting traffic policy that is too risky to duplicate in every app.
+
+---
+
+## 10. What breaks at scale
+
+**DNS amplification from `ndots:5`:** External names like `api.stripe.com` may trigger several internal search-domain attempts first. Use FQDNs with a trailing dot for hot external dependencies where the client supports it, or tune DNS behavior deliberately.
+
+**Too many Service rules per node:** Large clusters with many Services and endpoints can make kube-proxy rule updates expensive, especially in iptables mode. Consider IPVS, nftables mode, or GKE Dataplane V2/eBPF where appropriate.
+
+**Readiness checks that lie:** A readiness endpoint that only returns "process is up" will keep routing traffic to a pod that cannot reach Redis, a database, or a required downstream. Readiness should represent whether the pod can serve its critical request path.
+
+**Cross-zone latency:** A Service hides pod IPs, but it does not remove physics. If GKE schedules backend pods in a different zone from the frontend, p99 latency can jump under load. Use topology spread constraints and monitor latency by zone.
+
+---
+
+## 11. Prevention Checklist
+
+- Service selector matches Deployment pod template labels.
+- Deployment `spec.selector.matchLabels` matches `spec.template.metadata.labels`.
+- Readiness probe exists and tests the real serving path.
+- Service uses named `targetPort`, not a duplicated numeric port.
+- CI runs `helm template`, `kube-linter`, and server-side dry-run.
+- Alert fires when a production Service has zero Ready EndpointSlice addresses for more than 2 minutes.
+- Dashboards show Service 5xx rate, EndpointSlice ready count, CoreDNS latency, and rollout revision.
+- Runbook starts with `kubectl get endpointslices`, not with cloud load balancer guesses.
+
+---
+
+## 12. Question Bank (control-plane depth — the mental-model test)
 
 **Q1. When a pod restarts and gets a new IP, how does the Service learn the new IP so fast?**
 A control-plane controller *watches* the API for pod changes and republishes the Service's backing address list within milliseconds. Classically this was the **Endpoints** object (the `Endpoints` controller). **Modern Kubernetes (v1.19+) uses `EndpointSlices`** — the `EndpointSlice` controller writes the pod IPs, ports, and per-address `ready` conditions into sliced objects that scale far better than one giant Endpoints blob. `kube-proxy` and DNS consume those slices to reprogram routing. *(If an interviewer says "Endpoints object," the sharper answer is "EndpointSlices now — Endpoints is the legacy compatibility view.")*

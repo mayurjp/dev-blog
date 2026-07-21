@@ -4,7 +4,7 @@ title: Q&A Bank
 permalink: /qa/
 ---
 
-Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1709 Q&A pairs across 25 domains**, organized for foundational → mid-level → advanced progression within each topic.
+Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1711 Q&A pairs across 25 domains**, organized for foundational → mid-level → advanced progression within each topic.
 
 ## Available domains
 
@@ -23,7 +23,7 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 | [Git]({{ '/qa/git/' | relative_url }}) | 35 |
 | [GitOps]({{ '/qa/gitops/' | relative_url }}) | 88 |
 | [Google Cloud]({{ '/qa/gcp/' | relative_url }}) | 68 |
-| [Kubernetes]({{ '/qa/kubernetes/' | relative_url }}) | 109 |
+| [Kubernetes]({{ '/qa/kubernetes/' | relative_url }}) | 111 |
 | [MLOps]({{ '/qa/mlops/' | relative_url }}) | 91 |
 | [Messaging & Integration]({{ '/qa/messaging/' | relative_url }}) | 35 |
 | [Microservices]({{ '/qa/microservices/' | relative_url }}) | 110 |
