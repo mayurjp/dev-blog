@@ -8,7 +8,7 @@ order: 90
 tags: [cicd, troubleshooting, debugging, github-actions, actions-cache, build-performance]
 ---
 
-**TL;DR:** The cache is being *saved* fine — it is never *found*, because the primary key embeds {% raw %}`${{ github.sha }}`{% endraw %}, which is unique to a commit that has never existed before, and the `restore-keys` list repeats that same SHA-bearing string, so the prefix fallback has nothing broader to match against.
+**TL;DR:** The cache is being *saved* fine — it is never *found*, because the primary key embeds `$&#123;&#123; github.sha &#125;&#125;`, which is unique to a commit that has never existed before, and the `restore-keys` list repeats that same SHA-bearing string, so the prefix fallback has nothing broader to match against.
 
 ## The symptom
 
@@ -59,7 +59,7 @@ Push twice to the same branch with no change to `package-lock.json`. Both runs m
 
 ### 1. The primary key is unique by construction
 
-`actions/cache` looks for an **exact** match on `key` first. A cache key is only useful if the same key can be produced again on a later run — that is the whole contract. {% raw %}`${{ github.sha }}`{% endraw %} is the commit SHA of the run's own commit. By definition, no earlier run ever computed that string, so no cache entry was ever stored under it.
+`actions/cache` looks for an **exact** match on `key` first. A cache key is only useful if the same key can be produced again on a later run — that is the whole contract. `$&#123;&#123; github.sha &#125;&#125;` is the commit SHA of the run's own commit. By definition, no earlier run ever computed that string, so no cache entry was ever stored under it.
 
 The value that belongs there is a hash of whatever genuinely decides "did the dependency set change" — the lockfile:
 
