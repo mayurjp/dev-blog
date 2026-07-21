@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "System Design Interview Questions: 80 Real-World Q&A from Production Manifests"
-description: "80 interview-ready System Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "System Design Interview Questions: 82 Real-World Q&A from Production Manifests"
+description: "82 interview-ready System Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/system-design/
 ---
 
 Bite-sized, standalone interview questions and answers for System Design. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">80</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">82</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -240,6 +240,20 @@ Redis tracks `stat_expiredkeys_active` (background cycle cleanups) separately fr
 The pool is not reset between `evictionPoolPopulate()` calls — candidates discovered during *previous* eviction rounds remain in the pool, so a single eviction decision benefits from a wider window of observed key quality than just the current sample. This improves approximation quality over sampling completely fresh each time.
 
 <p class="qa-link">[Full post →]({{ '/system-design/caching-strategies-ttl-and-eviction/' | relative_url }})</p>
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: Your app's distributed-lock acquisition starts throwing `-OOM command not allowed when used memory > 'maxmemory'` (Redis 5.0.3, `allkeys-lru` configured) while plain GET/SET traffic works fine. What do you check first? <span class="qa-badge qa-beginner">[Beginner]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+Check `INFO server` for `redis_version`: Redis 5.0.0–5.0.9 disabled eviction during Lua script execution, so scripted write paths (distributed locks via EVALSHA) abort mid-script with `-OOM` once memory hits the limit, while plain commands keep evicting normally between commands. Corroborate with `INFO stats` — `evicted_keys` flat while the OOM errors climb means eviction isn't executing. The fix is version-gated: upgrade to ≥ 5.0.10 / 6.0, where PR #6797 checks OOM once at script start instead of failing randomly mid-script.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: `used_memory` is pinned at `maxmemory` and `evicted_keys` is flat despite a real eviction policy — writes are being refused. What two distinct mechanisms cause "eviction not running," and how do you tell them apart? <span class="qa-badge qa-intermediate">[Intermediate]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+First: on Redis 5.0.0–5.0.9, eviction is disabled inside Lua scripts, so any EVALSHA-based write path fails at the limit — identify by checking `redis_version`. Second, on any version, a long-running script occupies the single main thread, so eviction can't run between other clients' commands either — identify via `SLOWLOG GET` showing long `EVALSHA` entries (default `slowlog-log-slower-than` is 10000µs, `lua-time-limit` is 5000ms). Both present identically as "policy configured, nothing evicted," so version plus slowlog is the split.
   </div>
 </div>
 
@@ -790,7 +804,7 @@ Treating a heartbeat timeout as a definitive declaration of death — "ping it, 
 
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 80 across System Design
+**Last updated:** July 2026 | **Total Q&A:** 82 across System Design
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
@@ -981,6 +995,22 @@ Treating a heartbeat timeout as a definitive declaration of death — "ping it, 
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "The pool is not reset between `evictionPoolPopulate()` calls — candidates discovered during *previous* eviction rounds remain in the pool, so a single eviction decision benefits from a wider window of observed key quality than just the current sample. This improves approximation quality over sampling completely fresh each time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Your app's distributed-lock acquisition starts throwing `-OOM command not allowed when used memory > 'maxmemory'` (Redis 5.0.3, `allkeys-lru` configured) while plain GET/SET traffic works fine. What do you check first?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Check `INFO server` for `redis_version`: Redis 5.0.0–5.0.9 disabled eviction during Lua script execution, so scripted write paths (distributed locks via EVALSHA) abort mid-script with `-OOM` once memory hits the limit, while plain commands keep evicting normally between commands. Corroborate with `INFO stats` — `evicted_keys` flat while the OOM errors climb means eviction isn't executing. The fix is version-gated: upgrade to ≥ 5.0.10 / 6.0, where PR #6797 checks OOM once at script start instead of failing randomly mid-script."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "`used_memory` is pinned at `maxmemory` and `evicted_keys` is flat despite a real eviction policy — writes are being refused. What two distinct mechanisms cause \"eviction not running,\" and how do you tell them apart?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "First: on Redis 5.0.0–5.0.9, eviction is disabled inside Lua scripts, so any EVALSHA-based write path fails at the limit — identify by checking `redis_version`. Second, on any version, a long-running script occupies the single main thread, so eviction can't run between other clients' commands either — identify via `SLOWLOG GET` showing long `EVALSHA` entries (default `slowlog-log-slower-than` is 10000µs, `lua-time-limit` is 5000ms). Both present identically as \"policy configured, nothing evicted,\" so version plus slowlog is the split."
       }
     },
     {
