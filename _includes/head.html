@@ -2,6 +2,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   {%- seo -%}
   <link rel="icon" type="image/svg+xml" href="{{ site.logo | relative_url }}">
   <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
@@ -10,20 +12,50 @@
     {%- include google-analytics.html -%}
   {%- endif -%}
   <!--
-    Rouge has no "mermaid" lexer. For a KNOWN language kramdown/Rouge wraps
-    output as <div class="language-X highlighter-rouge"><div class="highlight">
-    <pre class="highlight"><code>...spans...</code></pre></div></div>, but for
-    an UNRECOGNIZED language it falls back to a bare
-    <pre><code class="language-mermaid">escaped text</code></pre> — no
-    wrapping div at all (verified against this site's own build output).
-    Load Mermaid as a classic global script (not an ES module import) —
-    fewer moving parts than dynamic module resolution across a CDN, and the
-    de facto standard integration pattern for static sites without a plugin.
-    No Jekyll plugin needed here either way — this repo's github-pages gem
-    pin doesn't allow one.
+    Mermaid loads ONLY on pages that contain ```mermaid code blocks.
+    Detected by checking for .language-mermaid in the page body at DOMContentLoaded.
+    This avoids a ~1.5MB download on pages without diagrams.
   -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      if (!document.querySelector(".language-mermaid")) return;
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js";
+      s.onload = function () {
+        if (typeof mermaid === "undefined") return;
+        var matches = document.querySelectorAll(".language-mermaid");
+        matches.forEach(function (el) {
+          var code = el.tagName === "CODE" ? el : el.querySelector("code");
+          if (!code) return;
+          var pre = document.createElement("pre");
+          pre.className = "mermaid";
+          pre.textContent = code.textContent;
+          var target = el.closest("div.language-mermaid") || el.closest("pre") || el;
+          target.replaceWith(pre);
+        });
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+          (document.documentElement.getAttribute('data-theme') === 'auto' &&
+           window.matchMedia('(prefers-color-scheme: dark)').matches);
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? 'dark' : 'neutral',
+          securityLevel: "loose"
+        });
+        mermaid.run();
+        document.querySelectorAll('.mermaid').forEach(function (svg) {
+          if (svg.tagName !== 'svg') return;
+          if (!svg.getAttribute('role')) svg.setAttribute('role', 'img');
+          var title = svg.querySelector('title');
+          if (!title) {
+            var t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            t.textContent = 'Diagram';
+            svg.prepend(t);
+          }
+        });
+      };
+      document.head.appendChild(s);
+    });
+
     /* Theme toggle: runs before paint to prevent flash */
     (function () {
       var saved = localStorage.getItem('theme');
@@ -47,40 +79,6 @@
           toggle.setAttribute('aria-pressed', String(nextIsDark));
         });
       }
-
-      /* Mermaid rendering */
-      if (typeof mermaid === "undefined") return;
-      var matches = document.querySelectorAll(".language-mermaid");
-      matches.forEach(function (el) {
-        var code = el.tagName === "CODE" ? el : el.querySelector("code");
-        if (!code) return;
-        var pre = document.createElement("pre");
-        pre.className = "mermaid";
-        pre.textContent = code.textContent;
-        var target = el.closest("div.language-mermaid") || el.closest("pre") || el;
-        target.replaceWith(pre);
-      });
-      if (!matches.length) return;
-      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-        (document.documentElement.getAttribute('data-theme') === 'auto' &&
-         window.matchMedia('(prefers-color-scheme: dark)').matches);
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: isDark ? 'dark' : 'neutral',
-        securityLevel: "loose"
-      });
-      mermaid.run();
-      /* Make mermaid diagrams accessible */
-      document.querySelectorAll('.mermaid').forEach(function (svg) {
-        if (svg.tagName !== 'svg') return;
-        if (!svg.getAttribute('role')) svg.setAttribute('role', 'img');
-        var title = svg.querySelector('title');
-        if (!title) {
-          var t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-          t.textContent = 'Diagram';
-          svg.prepend(t);
-        }
-      });
 
       /* Reading progress bar */
       var bar = document.createElement("div");

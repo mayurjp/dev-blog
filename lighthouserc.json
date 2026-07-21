@@ -1,0 +1,22 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "https://mayurjp.github.io/dev-blog/",
+        "https://mayurjp.github.io/dev-blog/kubernetes/",
+        "https://mayurjp.github.io/dev-blog/qa/",
+        "https://mayurjp.github.io/dev-blog/learn/",
+        "https://mayurjp.github.io/dev-blog/playground/"
+      ],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.8 }],
+        "categories:accessibility": ["warn", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.9 }],
+        "categories:seo": ["warn", { "minScore": 0.9 }]
+      }
+    }
+  }
+}
