@@ -4,7 +4,7 @@ title: Q&A Bank
 permalink: /qa/
 ---
 
-Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1636 Q&A pairs across 22 domains**, organized for foundational → mid-level → advanced progression within each topic.
+Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1721 Q&A pairs across 24 domains**, organized for foundational → mid-level → advanced progression within each topic.
 
 ## Available domains
 
@@ -13,6 +13,9 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 | [.NET]({{ '/qa/dotnet/' | relative_url }}) | 92 |
 | [API Design]({{ '/qa/api-design/' | relative_url }}) | 35 |
 | [Angular]({{ '/qa/angular/' | relative_url }}) | 92 |
+| [ASP.NET WebAPI]({{ '/qa/aspnet-webapi/' | relative_url }}) | 25 |
+| [AWS]({{ '/qa/aws/' | relative_url }}) | 24 |
+| [Azure]({{ '/qa/azure/' | relative_url }}) | 26 |
 | [CI/CD]({{ '/qa/cicd/' | relative_url }}) | 73 |
 | [Databases]({{ '/qa/databases/' | relative_url }}) | 78 |
 | [Design Patterns]({{ '/qa/design-patterns/' | relative_url }}) | 73 |

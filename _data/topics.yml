@@ -70,6 +70,18 @@
   name: .NET
   description: The CLR, the DI container, the middleware pipeline, and other runtime internals, taught from the .NET and ASP.NET Core source.
   glossary: /dotnet/dotnet-key-terms/
+- slug: aspnet-webapi
+  name: ASP.NET WebAPI
+  description: Web API design, routing, middleware pipeline, and REST/GraphQL API patterns on .NET.
+  glossary: /aspnet-webapi/aspnet-webapi-key-terms/
+- slug: azure
+  name: Azure
+  description: Azure services, cloud-native patterns, deployment, and infrastructure as code on Microsoft Azure.
+  glossary: /azure/azure-key-terms/
+- slug: aws
+  name: AWS
+  description: AWS services, cloud patterns, and the serverless-first approach to building distributed systems.
+  glossary: /aws/aws-key-terms/
 - slug: api-design
   name: API Design
   description: REST, gRPC, and the contract decisions — versioning, pagination, errors, and idempotency — behind a good API.
