@@ -1,5 +1,5 @@
 (function () {
-  var DATA_URL = (document.querySelector('meta[name="root-url"]') || {}).content || '';
+  var BASE_URL = (document.getElementById('quiz-app') || {}).getAttribute('data-baseurl') || '';
   var STORAGE_KEY = 'quiz_progress';
 
   var allQuestions = [];
@@ -70,7 +70,7 @@
   /* --- Load data --- */
   function loadQuestions() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/dev-blog/assets/quiz-data.json');
+    xhr.open('GET', BASE_URL + '/assets/quiz-data.json');
     xhr.onload = function () {
       if (xhr.status !== 200) { loading.textContent = 'Failed to load questions.'; return; }
       allQuestions = JSON.parse(xhr.responseText);

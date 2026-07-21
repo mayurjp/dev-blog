@@ -1,0 +1,177 @@
+// Design tokens — CSS custom properties for the entire site.
+// Light theme is the default; dark theme overrides via [data-theme="dark"]
+// and [data-theme="auto"] + prefers-color-scheme: dark.
+
+:root {
+  // --- Color ramp ---
+  --color-bg: #ffffff;
+  --color-bg-alt: #f8f9fa;
+  --color-bg-card: #ffffff;
+  --color-surface: #f1f3f5;
+  --color-border: #e1e4e8;
+  --color-border-light: #eef0f2;
+
+  --color-text: #1a1a2e;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #8b949e;
+
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-brand-light: #dbeafe;
+  --color-brand-text: #1e40af;
+
+  // --- Semantic colors ---
+  --color-success: #059669;
+  --color-success-bg: #d1fae5;
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+  --color-info: #2563eb;
+  --color-info-bg: #dbeafe;
+
+  // --- Difficulty badges ---
+  --color-beginner: #059669;
+  --color-beginner-bg: #d1fae5;
+  --color-intermediate: #d97706;
+  --color-intermediate-bg: #fef3c7;
+  --color-expert: #dc2626;
+  --color-expert-bg: #fee2e2;
+
+  // --- Code ---
+  --color-code-bg: #f6f8fa;
+  --color-code-border: #e1e4e8;
+  --color-highlight-bg: #fff8c5;
+
+  // --- Shadows ---
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  // --- Spacing scale ---
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  // --- Type scale ---
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  --leading-tight: 1.3;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.7;
+
+  // --- Radii ---
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  // --- Z-index ---
+  --z-header: 100;
+  --z-progress: 200;
+  --z-toc: 50;
+  --z-overlay: 300;
+}
+
+// --- Dark theme ---
+[data-theme="dark"] {
+  --color-bg: #0d1117;
+  --color-bg-alt: #161b22;
+  --color-bg-card: #161b22;
+  --color-surface: #1c2128;
+  --color-border: #30363d;
+  --color-border-light: #21262d;
+
+  --color-text: #c9d1d9;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
+
+  --color-brand: #58a6ff;
+  --color-brand-hover: #79c0ff;
+  --color-brand-light: #1c2333;
+  --color-brand-text: #58a6ff;
+
+  --color-success: #3fb950;
+  --color-success-bg: #0d2818;
+  --color-warning: #d29922;
+  --color-warning-bg: #2d1e00;
+  --color-danger: #f85149;
+  --color-danger-bg: #2d0d0d;
+  --color-info: #58a6ff;
+  --color-info-bg: #1c2333;
+
+  --color-beginner: #3fb950;
+  --color-beginner-bg: #0d2818;
+  --color-intermediate: #d29922;
+  --color-intermediate-bg: #2d1e00;
+  --color-expert: #f85149;
+  --color-expert-bg: #2d0d0d;
+
+  --color-code-bg: #1c2128;
+  --color-code-border: #30363d;
+  --color-highlight-bg: #2d333b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+// --- Auto dark (OS preference) ---
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --color-bg: #0d1117;
+    --color-bg-alt: #161b22;
+    --color-bg-card: #161b22;
+    --color-surface: #1c2128;
+    --color-border: #30363d;
+    --color-border-light: #21262d;
+
+    --color-text: #c9d1d9;
+    --color-text-secondary: #8b949e;
+    --color-text-muted: #6e7681;
+
+    --color-brand: #58a6ff;
+    --color-brand-hover: #79c0ff;
+    --color-brand-light: #1c2333;
+    --color-brand-text: #58a6ff;
+
+    --color-success: #3fb950;
+    --color-success-bg: #0d2818;
+    --color-warning: #d29922;
+    --color-warning-bg: #2d1e00;
+    --color-danger: #f85149;
+    --color-danger-bg: #2d0d0d;
+    --color-info: #58a6ff;
+    --color-info-bg: #1c2333;
+
+    --color-beginner: #3fb950;
+    --color-beginner-bg: #0d2818;
+    --color-intermediate: #d29922;
+    --color-intermediate-bg: #2d1e00;
+    --color-expert: #f85149;
+    --color-expert-bg: #2d0d0d;
+
+    --color-code-bg: #1c2128;
+    --color-code-border: #30363d;
+    --color-highlight-bg: #2d333b;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}

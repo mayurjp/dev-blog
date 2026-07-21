@@ -1,0 +1,28 @@
+{%- assign author = site.data.author -%}
+{%- if author -%}
+<div class="author-card">
+  {%- if author.avatar -%}
+  <img class="author-card-avatar" src="{{ author.avatar | relative_url }}" alt="{{ author.name }}" width="80" height="80" loading="lazy" />
+  {%- endif -%}
+  <div class="author-card-info">
+    <p class="author-card-name">{{ author.name }}</p>
+    {%- if author.role -%}
+    <p class="author-card-role">{{ author.role }}</p>
+    {%- endif -%}
+    {%- if author.bio -%}
+    <p class="author-card-bio">{{ author.bio }}</p>
+    {%- endif -%}
+    <div class="author-card-links">
+      {%- if author.social.github -%}
+      <a href="{{ author.social.github }}" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+      {%- endif -%}
+      {%- if author.social.linkedin -%}
+      <a href="{{ author.social.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+      {%- endif -%}
+      {%- if author.social.twitter -%}
+      <a href="{{ author.social.twitter }}" target="_blank" rel="noopener" aria-label="X">X</a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{%- endif -%}

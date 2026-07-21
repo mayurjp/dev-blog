@@ -7,7 +7,7 @@ layout: default
     <h1 class="hero-title">Notes on how real systems actually work</h1>
     <p class="hero-subtitle">Each one starting from a real engineering problem and taught through an actual production repository's code, not hello-world examples.</p>
     <form class="hero-search" role="search" onsubmit="window.location='{{ '/qa/' | relative_url }}?q=' + encodeURIComponent(document.getElementById('hero-search-input').value); return false;">
-      <input type="text" id="hero-search-input" placeholder="Search 1,636 Q&As across 22 domains…" aria-label="Search Q&As" />
+      <input type="text" id="hero-search-input" placeholder="Search {{ site.data.stats.qa_total }} Q&As across {{ site.data.stats.qa_domains }} domains…" aria-label="Search Q&As" />
       <button type="submit" id="hero-search-btn">Search</button>
     </form>
   </div>

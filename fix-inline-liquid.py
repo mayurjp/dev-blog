@@ -20,6 +20,7 @@ Idempotent: a backtick span already containing {% raw %}/{% endraw %} is left
 alone.
 """
 import re
+import sys
 from pathlib import Path
 
 # Single-backtick inline code span, non-greedy, no backtick or newline inside.
@@ -46,12 +47,12 @@ def wrap_prose_line(line):
     return new_line, new_line != line
 
 
-def fix_file(path):
-    lines = path.read_text(encoding='utf-8').split('\n')
+def fix_content(text):
+    """Fix inline Liquid spans. Returns fixed content string."""
+    lines = text.split('\n')
     out = []
     raw_depth = 0
     in_fence = False
-    changed = False
     for line in lines:
         if RAW_OPEN.match(line):
             raw_depth += 1
@@ -68,12 +69,18 @@ def fix_file(path):
         if raw_depth > 0 or in_fence:
             out.append(line)
             continue
-        new_line, did = wrap_prose_line(line)
+        new_line, _ = wrap_prose_line(line)
         out.append(new_line)
-        changed = changed or did
-    if changed:
-        path.write_text('\n'.join(out), encoding='utf-8')
-    return changed
+    return '\n'.join(out)
+
+
+def fix_file(path):
+    original = path.read_text(encoding='utf-8')
+    fixed = fix_content(original)
+    if fixed != original:
+        path.write_text(fixed, encoding='utf-8')
+        return True
+    return False
 
 
 def main():
@@ -84,14 +91,29 @@ def main():
         if p.exists():
             targets.append(p)
 
+    check_mode = '--check' in sys.argv
     fixed = 0
+    needs_fix = []
     for p in sorted(set(targets)):
         text = p.read_text(encoding='utf-8')
         if '{{' in text or '{%' in text:
-            if fix_file(p):
-                fixed += 1
-                print(f"[FIXED] {p.relative_to(root)}")
-    print(f"\n[DONE] Wrapped inline Liquid spans in {fixed} files")
+            if check_mode:
+                if fix_content(text) != text:
+                    needs_fix.append(str(p.relative_to(root)))
+            else:
+                if fix_file(p):
+                    fixed += 1
+                    print(f"[FIXED] {p.relative_to(root)}")
+    if check_mode:
+        if needs_fix:
+            print(f"[FAIL] {len(needs_fix)} files need inline Liquid wrapping:")
+            for f in needs_fix:
+                print(f"  - {f}")
+            sys.exit(1)
+        else:
+            print("[OK] All inline Liquid spans properly wrapped")
+    else:
+        print(f"\n[DONE] Wrapped inline Liquid spans in {fixed} files")
 
 
 if __name__ == '__main__':

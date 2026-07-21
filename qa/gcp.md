@@ -690,6 +690,559 @@ The apply fails because the stable provider's resource schema doesn't know about
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Application Default Credentials and what problem does it solve?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ADC is a fixed, three-step fallback chain (env var, well-known gcloud file, metadata server) that resolves a credential once per process and caches it. It solves the problem of the same code needing to authenticate differently across a developer laptop, CI runner, and GCE/GKE/Cloud Run — without branching on environment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between `gcloud auth login` and `gcloud auth application-default login` in the context of ADC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`gcloud auth login` only authenticates the `gcloud` CLI itself. `gcloud auth application-default login` writes the `application_default_credentials.json` well-known file that `DefaultCredentialProvider` actually looks for in step 2 of the ADC chain. Confusing these two is a common mistake even in Google's own doc comments."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if the GCE metadata server isn't reachable the instant ADC tries to detect it?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`ComputeCredential` pings `169.254.169.254` up to 3 times with a 500ms timeout each. If all fail, it falls back to reading `/sys/class/dmi/id/product_name` (Linux) or `Win32_BIOS` Manufacturer (Windows) for the literal string \"Google\" — a local, network-free way to detect Google hardware."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Workload Identity Federation plug into ADC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WIF doesn't bypass ADC — it feeds step 1. `google-github-actions/auth` writes a short-lived external-account config file and sets `GOOGLE_APPLICATION_CREDENTIALS` to point at it, so the same env-var branch in the fallback chain picks it up. WIF changes what ends up in that file, not how it gets discovered."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake when setting GOOGLE_APPLICATION_CREDENTIALS for a long-lived deployment?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pointing it at a downloaded JSON service account key that never expires. Long-lived exportable keys are actively discouraged; Workload Identity Federation (which writes a short-lived config to the same path) is the current recommendation for anything running on GCE/GKE/Cloud Run."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does ADC use null-coalescing (`??`) instead of try-catch for its fallback chain?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each `GetAdcFrom*Async` method returns null when its source simply isn't present, letting the `??` chain fall through cleanly. A source only throws when it is present but corrupt (e.g. the env var points to an unreadable file), deliberately distinguishing \"not configured\" from \"misconfigured.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Cloud Run achieve scale-to-zero in a way Compute Engine cannot?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cloud Run (built on Knative Serving) models \"zero instances\" as a first-class state with an activator component that intercepts requests and cold-starts an instance. Compute Engine VMs keep running regardless of traffic — they have no equivalent mechanism to stop when idle."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does `targetBurstCapacity` control in Cloud Run?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It controls whether the activator stays in the request path. Setting it to `\"0\"` means the activator only intercepts when there are exactly zero warm instances — specifically the scale-to-zero cold-start path, not a general-purpose traffic router."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use GKE Autopilot over Cloud Run?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need baseline pods running constantly (zero traffic doesn't mean zero instances) and want Kubernetes-native features like DaemonSets, StatefulSets, or complex networking. Autopilot removes node management but the cluster and its pods are still running things — it doesn't scale to zero like Cloud Run."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of using Cloud Run's `containerConcurrency` for autoscaling?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It bases scaling on concurrent in-flight requests per instance rather than a static replica count, which means latency can spike during cold starts from zero. Compute Engine's fixed instance count has no cold-start latency but wastes resources at zero traffic."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if you set `minScale: \"0\"` on Cloud Run and traffic arrives?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The activator intercepts the request, triggers a cold start of a new instance, then routes the request in — the caller experiences added latency for that first request. This is the fundamental latency-vs-cost tradeoff of serverless scale-to-zero."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between `google_project_iam_member` and `google_project_iam_binding` in Terraform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`iam_member` is additive — it grants one member a role without touching any existing members. `iam_binding` is authoritative for that role — it replaces the entire member list, silently dropping anyone not listed in the Terraform config, even principals granted access outside that run."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if you accidentally use `google_project_iam_binding` on a broad role like `roles/owner`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every principal not listed in the binding's members list loses that role on apply — silently, with no warning. The blast radius scales with how much the role could do, which is why authoritative mode on basic roles is particularly dangerous."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you actually want authoritative IAM bindings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need to declare the complete, exclusive set of principals for a tightly-controlled role (e.g., a custom admin role where you want Terraform to be the single source of truth for membership). Authoritative mode is the correct tool for that job — it's not inherently a bug."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake with IAM binding mode in Terraform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reaching for `google_project_iam_binding` (authoritative) when you meant to add one member alongside grants managed by other teams or automation. The resource names look similar, so the destructive one gets used accidentally — the production Terraform IAM module addresses this by surfacing the choice as an explicit `mode` variable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do IAM Conditions compose with additive vs authoritative bindings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IAM Conditions (`title`/`description`/`expression`) are identical regardless of binding mode. Choosing a binding mode and adding a least-privilege condition are two independent decisions — the condition block structure is shared across both resource types in the production module."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the problem with IP-based firewall rules in cloud environments where instances are constantly recreated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IP-based rules are brittle — when instances are destroyed and recreated with different IPs, the rules become stale and either block correct traffic or allow traffic to wrong addresses. Identity-based targeting (network tags or service accounts) survives IP churn because it references who the instance is, not where it happens to be numerically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are secondary IP ranges and why does GKE need them?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A subnet's primary range gives Node VMs their IPs, while separate secondary ranges carve out independent address spaces for Pod IPs and Service IPs (alias IP ranges). This lets thousands of ephemeral Pod IPs coexist cleanly with a much smaller, stable set of Node IPs on the same subnet."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does a firewall rule targeting `source_tags = [\"web-frontend\"]` survive instance recreation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The rule matches by tag, not IP. When a VM tagged `web-frontend` is destroyed and a new one with the same tag is created at a different IP, the rule still matches because it never referenced an IP — only the identity-level tag."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the downside of relying only on IP-based firewall rules in a GCP VPC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You miss the tag and service-account targeting mechanisms the platform offers, and you end up re-fighting the \"instances keep changing IPs\" problem that identity-based targeting exists specifically to solve. A real production rule set commonly mixes IP-range, tag, and service-account targeting in the same ruleset."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does `private_ip_google_access` do on a GCP subnet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It controls whether instances without external IPs can reach Google APIs (Cloud Storage, BigQuery, etc.) over Google's internal network rather than the public internet. It's independent of both firewall rules and secondary IP ranges — a third axis of traffic configuration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What actions does a Cloud Storage lifecycle rule support beyond deletion?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`SetStorageClass` transitions an object to a cheaper storage class (STANDARD → NEARLINE → COLDLINE), and `Delete` removes it. Cost-driven transitions are arguably the more common real-world use case — deletion is just one option."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the purpose of the `matches_storage_class` condition in a lifecycle rule?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It scopes a rule to only fire on objects currently in a specific storage class, enabling correct staged transitions — e.g., a rule that only moves objects from NEARLINE to COLDLINE won't accidentally re-apply to objects already in COLDLINE or still in STANDARD."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between `age` and `days_since_noncurrent_time` as lifecycle conditions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`age` measures time since the object was uploaded. `days_since_noncurrent_time` measures time since a version stopped being current (was superseded by a newer version). A version could be years old but only recently become noncurrent — these target different lifecycle events."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake when writing lifecycle rules for versioned buckets?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Using `num_newer_versions` without understanding it only prunes noncurrent versions, not the current one. A rule with `num_newer_versions = 3` keeps the 3 most recent versions and deletes older noncurrent ones — it never touches the live object, which is a materially different operation than blanket age-based deletion."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use `days_since_custom_time` instead of `age`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When the business-relevant age of an object isn't when it was uploaded, but when it became relevant (e.g., a document's retention period starts from when it was last reviewed, not when it was uploaded). You set `custom_time` on the object explicitly, and `days_since_custom_time` measures from that user-defined point."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is TrueTime and how does it differ from a standard synchronized clock?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TrueTime is a globally-synchronized clock with a bounded uncertainty interval, not just \"a clock that's close enough.\" It lets Spanner assign real, externally-ordered timestamps to transactions without a global lock — the server, not the client, is the authority on what timestamp a staleness bound resolves to."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does `TimestampBound.OfExactStaleness` differ from `TimestampBound.OfMaxStaleness`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`OfExactStaleness` reads at a timestamp exactly `duration` old, chosen once near the start — useful for nearby replicas without distributed timestamp negotiation overhead. `OfMaxStaleness` reads at `NOW - duration` or newer, which requires more coordination to determine \"now\" precisely."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a client's local clock is badly skewed when reading from Spanner?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The read is still correct because the timestamp is chosen by Spanner's server using TrueTime, not derived from the client's clock. A client with a badly skewed local clock still gets correct, bounded results for staleness reads."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of using `TimestampBound.Strong` vs `OfMaxStaleness`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`Strong` reads the absolute latest committed data but may cross regions to confirm, adding latency. `OfMaxStaleness` reads from a nearby replica with lower latency but guarantees data is no older than the specified duration. The choice is per query, not fixed for the database."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake when choosing between Cloud SQL and Spanner?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating it as just a scale decision (\"Spanner for bigger workloads\") when the real difference is architectural. Spanner's value — horizontal write scalability with strong cross-region consistency — depends on TrueTime; choosing it for workloads that don't need global distribution pays its complexity without using the capability that justifies it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does a Pub/Sub client library automatically extend a message's ack deadline mid-processing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The broker can't distinguish \"still processing\" from \"consumer died.\" Without auto-extension, a slow-but-healthy consumer's in-progress message gets redelivered to a different consumer, causing duplicate processing or two consumers racing on the same work."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the problem if ack deadline auto-extension timing is not clamped to a minimum?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A very short ack deadline combined with a large extension window could produce a negative or near-zero delay — causing the client to extend \"immediately, constantly\" instead of on a sane schedule. The `MinimumLeaseExtensionDelay` clamp exists to prevent this."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if an event-driven Cloud Function throws during processing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The underlying HTTP response signals an error to Eventarc, which triggers the event source's retry logic — the same at-least-once redelivery semantics as a Pub/Sub subscriber. Completion without throwing = success; throwing = failure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the gotcha with Pub/Sub's exactly-once delivery mode vs at-least-once?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They aren't the same mechanism with a label. The client library maintains two separate `LeaseTiming` instances per channel — one for exactly-once, one for normal delivery — confirming genuinely different lease-management behavior under the hood, not just a naming difference."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What problem does `ExtendQueueThrottleInterval` solve in Pub/Sub?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Under high message volume, sending an individual extend-deadline call the instant every message's timer fires creates a real load problem. The throttle interval batches/paces that traffic to prevent spiking the broker with extend requests."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the two bindings Workload Identity requires, and why is each alone insufficient?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Binding 1 is an IAM grant (`roles/iam.workloadIdentityUser`) authorizing the KSA to impersonate the GSA. Binding 2 is a KSA annotation telling the metadata server which GSA to hand tokens for. The IAM grant alone doesn't tell the metadata server what to hand out; the annotation alone doesn't grant impersonation permission."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the special identity format used in Workload Identity IAM bindings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`serviceAccount:PROJECT.svc.id.goog[NAMESPACE/KSA_NAME]` — a specific syntax GCP IAM understands as \"this exact Kubernetes ServiceAccount in this exact namespace.\" Getting any part wrong (wrong namespace, wrong KSA name) means the binding silently doesn't apply to the Pod you think it does."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of Workload Identity vs a downloaded service account key?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Workload Identity eliminates long-lived exportable secrets but requires both bindings to be correctly configured and adds the runtime token-fetched-on-demand step. Downloaded keys are simpler to set up but create a persistent, exportable credential that leaks mean permanent access."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake when configuring Workload Identity?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Configuring only one of the two required bindings — the IAM grant or the KSA annotation. Missing either half is a real, common misconfiguration: the IAM grant alone doesn't tell the metadata server what to hand out, and the annotation alone doesn't authorize impersonation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Workload Identity differ from WIF (Workload Identity Federation)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Workload Identity is for workloads running inside GKE — a KSA impersonates a GSA via two bindings and the metadata server. WIF is for external identities (GitHub Actions, other clouds) — it exchanges an OIDC token via Google STS with nothing stored on either side. Different trust boundaries, different mechanisms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the actual transport mechanism behind event-driven Cloud Functions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every Cloud Function is invoked over plain HTTP, regardless of trigger type. For event-driven functions, Eventarc wraps the event as a CNCF CloudEvents-formatted HTTP POST, and the Functions Framework's `CloudEventAdapter` parses it back into a structured `CloudEvent`. The transport is uniform — \"event-driven\" describes the encoding and source, not a separate mechanism."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a Cloud Function receives a malformed event (not parseable as CloudEvent)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The framework returns HTTP 400 before the user's function code ever runs. Event-parsing failures and function-logic failures are separate error classes — a 400 in the framework logs means the event itself was malformed, distinct from an exception inside the handler."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What legacy behavior does CloudEventAdapter maintain for older GCF functions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It falls back to `GcfConverters.ConvertGcfEventToCloudEvent` for requests that aren't standard CloudEvents — evidence Google Cloud Functions' event format predates CNCF CloudEvents standardization, and the framework preserves backward compatibility for first-generation functions using the proprietary format."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the gotcha with determining success/failure in a Cloud Function handler?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The `ICloudEventFunction.HandleAsync` interface returns no success/failure value — completion itself IS the signal. The CLR's exception mechanism is the entire error-reporting channel, so throwing = failure triggers redelivery, while returning normally = success with no extra translation needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you choose an HTTP-triggered Cloud Function over an event-driven one?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need request-response semantics (the caller expects a synchronous reply) rather than fire-and-forget event processing. HTTP functions return a response to the caller; event-driven functions process asynchronously with at-least-once delivery and retry semantics managed by Eventarc."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does a single global anycast IP route users to the nearest regional backend without DNS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A single `google_compute_global_address` is announced from many Google edge locations simultaneously. BGP-level anycast routing sends each user's traffic to the nearest edge at the network layer — no DNS TTL, no caching delay, no per-region IP management."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a Serverless NEG and why does Cloud Run need a different NEG type than VM backends?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Serverless NEG (`network_endpoint_type = \"SERVERLESS\"`) references a Cloud Run service by name rather than IP or instance group. Serverless backends get their own NEG type because \"backend address\" isn't a meaningful concept for something that scales to zero with no persistent instances."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the problem with DNS-based geo-routing for global load balancing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "DNS caching and TTLs delay failover, and it requires managing multiple separate IPs and LB instances, one per region. GCP's global HTTP(S) load balancer is one resource with one global anycast IP — failover happens at the network layer without DNS propagation delay."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the gotcha when deploying Cloud Run in multiple regions behind one global load balancer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You need one Serverless NEG per region, each independently resolving to that region's Cloud Run service. The global load balancer is aware of regional backend topology — one NEG per region per backend, not a single global reference."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does a Serverless NEG handle Cloud Run scaling to zero?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The NEG references the service by name, and Google's infrastructure resolves that name to the service's current backend dynamically. The load balancer never needs to be told about instance count changes because it was never tracking individual instances — it just knows the service name."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the core mechanism behind Workload Identity Federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An OAuth2 token exchange (RFC 8693) where GitHub's own OIDC token is swapped for a Google Cloud token via Google STS. Google verifies the token against GitHub's public keys and hands back a federated access token, with nothing long-lived stored on either side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of WIF vs a stored service account JSON key for CI/CD?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WIF eliminates long-lived secrets entirely — every run re-proves identity from scratch with a fresh token exchange. The tradeoff is setup complexity: you need a configured Workload Identity Pool/Provider on GCP and proper OIDC trust conditions, whereas a JSON key is simpler to set up but creates a persistent credential leak risk."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the WIF federated token cached for only 30 seconds?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A deliberately short cache window avoids hammering the STS endpoint for every API call while still re-exchanging frequently enough that the cached token's own short lifetime doesn't become a practical long-lived credential in its own right."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake when configuring WIF audience values?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Passing a raw string instead of the structured resource path `//iam.googleapis.com/projects/.../workloadIdentityPools/.../providers/...`. Google's STS uses the audience to know which configured trust relationship to check the incoming token against — the wrong provider causes the exchange to fail safely rather than silently succeeding."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does `credential-source` in the WIF credential file embed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The exact URL and header needed to FETCH GitHub's OIDC token, not the token itself. This lets downstream tools (Terraform, gcloud) authenticate the same way without the auth action handing them a live token that could go stale mid-run — the file describes how to fetch a fresh token when needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between the federated token and service account impersonation in WIF?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The federated token alone can call GCP APIs if granted permissions directly. Service account impersonation is an optional layer on top where the federated token is exchanged for a scoped token of a specific service account, useful when permissions should live on a dedicated service account rather than the federated identity itself."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Cloud Logging automatically correlate log entries to distributed traces?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`SetTraceAndSpanIfAny` stamps the currently-active trace and span ID onto every `LogEntry` at creation time — a concrete field, not a UI inference from timestamps. This is what powers Cloud Console's \"view logs for this trace\" feature."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between structured JsonPayload and a formatted text string in Cloud Logging?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "JsonPayload is a structured `Struct` where individual fields remain genuinely queryable in Cloud Logging's query language after the fact. A formatted string is only discoverable via full-text search — you can't reliably filter by `user_id=123` without parsing the string back out."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when a log call is made outside any active trace context?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`SetTraceAndSpanIfAny` is conditional — it simply doesn't attach trace/span fields rather than failing or writing empty placeholders. Trace correlation is opportunistic: present when there's an active context, silently absent otherwise."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why can't a logger configured for an Organization target attach trace correlation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cloud Trace is a project-level concept. A logger writing at organization scope (`logTarget.Kind != Project`) structurally can't attach trace correlation — the code computes `_traceTarget` as null for non-Project targets rather than attempting it and failing at request time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the gotcha with relying on timestamps to correlate logs and traces?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Timestamps are unreliable under concurrent traffic and don't scale. The real correlation is the trace ID and span ID stamped on each log entry by `SetTraceAndSpanIfAny` at creation time — a concrete, exact match, not a proximity guess."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do ambient scopes and current scopes combine on a log entry?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Two separate `ApplyTo(entry)` calls merge labels from both ambient context (a using-block scope wrapping an operation) and thread-local current scope state. Labels attached at different call stack levels all end up on the same log line without the innermost call needing to know about them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does a Terraform module need both the `google` and `google-beta` providers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GCP's stable and beta API surfaces graduate features independently. The `google` provider tracks stable APIs; `google-beta` tracks the beta surface. A module needing even one beta-only feature routes that specific resource through `google-beta` while everything else defaults to stable `google`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common mistake about using `google-beta` in Terraform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Assuming it means \"this whole configuration is experimental.\" In practice, production modules routinely use `google-beta` for specific, well-established resource configurations that simply haven't graduated to the stable API surface — it's a resource-by-resource API-surface selection, not a blanket risk signal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between the two providers' version constraints?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They're independent — bumping the beta provider's allowed version range doesn't require touching the stable provider's constraint, and vice versa, because they genuinely track different underlying API surfaces with different release timelines."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do both `google` and `google-beta` need their own `provider_meta` block?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`provider_meta` attributes API calls back to the specific module that generated them for usage telemetry. Since the same module makes calls through both providers, both need attribution wired up independently — calls via `google-beta` would go unattributed otherwise."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if you apply a beta-only feature using only the stable `google` provider?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The apply fails because the stable provider's resource schema doesn't know about the beta-only field or resource type. The fix is routing that specific resource through `google-beta` via an explicit `provider = google-beta` attribute, not converting the entire module to beta."
+      }
+    }
+  ]
+}
+</script>
+
 <script>
 (function () {
   var search = document.getElementById('qa-search');

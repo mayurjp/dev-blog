@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Install Python dependencies
+        run: pip install Pillow
+
+      - name: Generate OG images
+        run: python scripts/generate-og-images.py
+
+      - name: Check Liquid in code blocks
+        run: python fix-liquid-codeblocks.py --check
+
+      - name: Check inline Liquid spans
+        run: python fix-inline-liquid.py --check
+
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --trace
+        env:
+          JEKYLL_ENV: production
+
+      - name: Check HTML integrity
+        run: bundle exec htmlproofer ./_site --disable-external --allow-missing-href true --ignore-urls "/qa/,/assets/og/"

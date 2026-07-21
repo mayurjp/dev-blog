@@ -677,6 +677,551 @@ State and provider versions are tightly coupled. If state records `schemaVersion
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What problem does multi-cloud solve, and why isn't \"avoiding lock-in\" usually a sufficient driver?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Multi-cloud addresses specific constraints: compliance requiring data in a jurisdiction a single provider doesn't serve, genuine DR with RTO/RPO targets, or documented negotiating leverage. Vague \"avoid lock-in\" doesn't justify the ongoing dual-schema maintenance cost because AWS and GCP model the same concept (e.g., HA databases) with structurally different Terraform resource schemas — flat booleans vs. nested enums — that can't be collapsed by find-and-replace."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does AWS RDS's `multi_az` field differ structurally from GCP Cloud SQL's `availability_type`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AWS's `multi_az` is a flat top-level boolean on `aws_db_instance`. GCP's `availability_type` is a string enum (`REGIONAL`/`ZONAL`) nested inside a `settings` block, with engine-conditional dependencies — `binary_log_enabled` for MySQL vs. `point_in_time_recovery_enabled` for Postgres — that don't exist on the AWS side. A module trying to abstract \"make this database HA\" must branch on provider internally because the field shapes are genuinely different, not just differently named."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the ongoing engineering cost of multi-cloud that most tutorials skip?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every resource type used across clouds must be written, tested, and kept in sync as two structurally different Terraform configurations. For backup retention alone, AWS uses a flat integer (0–35 days) while GCP nests retention settings three levels deep with a separate `retention_unit` field — assuming parity between them breaks silently because the numbers represent different underlying product limits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a well-written Terraform module eliminate the schema divergence between AWS and GCP resources?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It can reduce authoring cost by hiding divergence behind one input interface, but the underlying shape mismatch (flat boolean vs. nested enum, depth-3 retention settings vs. flat integer) still has to be handled somewhere in the module's own code. The cost moves from \"every caller handles it\" to \"the module maintainer handles it once\" — a real improvement, but not the same as the divergence disappearing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when a team assumes `backup_retention_period` on AWS and `retained_backups` on GCP are interchangeable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AWS's `backup_retention_period` is capped at 35 days via `IntBetween(0, 35)` — the limit is absolute. GCP's `retained_backups` is paired with a `retention_unit` field that could theoretically mean something other than days. Copying the same numeric value across providers without verifying each provider's actual semantics and limits produces a configuration that looks correct but silently applies different retention behavior."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What problem does Terraform's provider protocol solve for multi-cloud?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It decouples Terraform Core from provider-specific schemas by defining a fixed gRPC interface (`tfplugin6.proto`) that every provider implements. Core never needs provider-specific code — it sends the same `PlanResourceChange` and `ApplyResourceChange` RPCs regardless of whether the target is AWS or GCP, and learns each provider's resource schema at runtime via `GetProviderSchema`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Terraform Core avoid compile-time coupling to any specific cloud's resource schema?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Resource field values travel across the protocol as `DynamicValue` — opaque `bytes msgpack` / `bytes json` that Core passes through without parsing. Core only learns what those bytes mean by calling `GetProviderSchema` at startup, which returns a runtime-discovered `map<string, Schema>` populated by the provider, not compiled into Core."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What makes it possible for Terraform to support 3,000+ providers without an equally large switch statement in Core?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The `type_name` field in `PlanResourceChange` is a bare string, not a fixed enum. There is no list of \"known\" resource types anywhere in the protocol — any string a provider declares in its `GetProviderSchema` response is automatically something Core can plan and apply, as long as the provider answers the corresponding RPCs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is each Terraform provider a separate OS process rather than a library linked into Core?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Separate processes let providers evolve independently — a provider can add, remove, or reshape a resource type in its own release without requiring a Core release. Since `resource_schemas` is discovered at runtime, not compiled in, the provider's schema change is transparent to Core."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When debugging a plan/apply discrepancy for a specific resource, is the bug more likely in Terraform Core or in the provider?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Overwhelmingly in the provider. Core's protocol is schema-agnostic — it relays opaque bytes and calls generic RPCs. Resource-shape bugs (unexpected field behavior, spurious diffs) live in the provider's own schema/plan logic, which is the code that actually interprets and transforms the resource's field values."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Terraform handle state upgrades when a provider changes a resource's schema?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Core calls a dedicated `UpgradeResourceState` RPC on the provider, passing the old state bytes. The provider itself is responsible for migrating its own old schema to the new one — Core cannot perform the migration because it doesn't understand the resource's shape. This is why downgrading a provider version after a schema bump can leave state unreadable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why doesn't a Kubernetes ServiceAccount granting cloud IAM permissions work identically on GKE and EKS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Kubernetes-side object is the same (a `ServiceAccount` with an annotation), but the cloud-side binding is structurally different. GKE Workload Identity requires a bidirectional binding: a separate GCP service account plus an explicit `google_service_account_iam_member` grant naming the exact Kubernetes ServiceAccount. AWS IRSA uses a unilateral trust policy inside the IAM role itself, matching the OIDC token's `sub` claim against `system:serviceaccount:<ns>:<name>`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What per-cluster prerequisite does AWS IRSA require that GKE Workload Identity does not?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IRSA requires an OIDC provider resource created and associated with each cluster's issuer URL before any role trust policy referencing it can work. GKE's identity pool (`PROJECT.svc.id.goog`) is implicit for every cluster in a project — no equivalent registration step exists on the GCP side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if the OIDC provider ARN in an IRSA trust policy doesn't match the actual cluster's issuer URL?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The trust policy's `sub` condition still matches (it's just a string comparison), but the JWT signature validation fails because the OIDC provider's thumbprints don't correspond to the actual token issuer. The pod gets no credentials silently — there's no obvious error; the environment variables just never materialize."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does AWS IRSA's `aud` (audience) condition differ from anything in GKE Workload Identity?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IRSA's federation model requires validating both who the token is for (`sub` claim) and what it's valid for (`aud`, pinned to `sts.amazonaws.com`) — two independent checks. GKE's binding-based model doesn't need an audience check because the trust boundary is enforced by the IAM binding's own scoping, not by validating claims inside a presented token."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the migration of a workload's cloud-IAM binding from EKS to GKE just a matter of changing the annotation value?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. GKE uses a two-resource explicit-grant shape (annotate the KSA, then separately grant `workloadIdentityUser` on the GCP side). AWS uses a one-resource embedded-trust-policy shape (the role's own `assume_role_policy` contains the OIDC condition). A migration script treating this as \"swap the annotation\" would move the right information into the wrong kind of Terraform resource."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does application code need to know which cloud's identity mechanism is in use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For credential acquisition, largely no — cloud SDKs handle the protocol internally (AWS SDK checks IRSA's injected env vars and mounted token; GCP SDK checks Workload Identity's metadata-server response). The infrastructure config wiring up that path is not portable, but the application code consuming the result often is."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the three-layer object model in Crossplane that bridges a developer's YAML claim to actual cloud resources?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A **Claim** (namespaced, developer-facing, describes what they want) is reconciled into a **Composite Resource** (cluster-scoped, internal), which is then reconciled into **Managed Resources** (provider-specific objects that map 1:1 to cloud API calls). Each layer adds provider-specific detail the layer above doesn't know about."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What role does the Composition's gRPC function pipeline play in Crossplane?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Composition Functions run in sequence as gRPC calls — each function receives the accumulated state of all composed resources and can modify desired state before passing it along. Functions are OCI-packaged, independently versioned executables, and order matters (e.g., `patch-and-transform` running before `auto-ready` can inject defaults that the ready-checker then validates)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why doesn't updating a Composition instantly affect all running Claims?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Compositions are immutable once applied to a claim. The revision reconciler detects spec changes via hash comparison, creates a new immutable `CompositionRevision` with an incremented revision number, and each claim references a specific revision. Only an explicit upgrade or re-reconciliation picks up the new revision."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Crossplane avoid loading watches for every possible cloud resource type at startup?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The `ControllerEngine` starts watches on demand via `StartWatches`, only creating a new informer when a Composition references a previously unseen GVK. `GarbageCollectCustomResourceInformers` cleans up when CRDs are deleted. This lazy-loading lets a single Crossplane installation support thousands of resource types without running out of memory."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Crossplane's circuit breaker do and when does it trigger?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When a watched resource triggers too many reconciliations (e.g., two controllers fighting over the same object), the token-bucket circuit breaker opens and drops events for a configurable cooldown period. The burst capacity, refill rate, and cooldown are exposed as CLI flags (`CircuitBreakerBurst`, `CircuitBreakerRefillRate`, `CircuitBreakerCooldown`) because the right thresholds depend on reconcile volume."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the `BetaFallBackFunctionRunnerServiceClient` and why does it exist?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It tries the v1 gRPC API for a Composition Function first, falling back to v1beta1 if the Function doesn't implement v1 yet. This maintains backward compatibility as the Function SDK evolves — a Function written in any language looks the same from Crossplane's side regardless of which API version it supports."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a Composition only patches into Managed Resources but never patches back to the Claim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The developer gets no way to see connection strings, endpoints, or status — they applied the claim but can't connect to the database. Compositions must use `ToCompositeFieldPath` patches for outputs (status values, connection details) in addition to `FromCompositeFieldPath` for inputs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the three distinct mechanisms Consul uses for multi-cloud networking, and what does each handle?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "**WAN federation** handles control-plane gossip (encrypted, Raft-overlaid) between server clusters. **Mesh gateways** handle data-plane traffic by terminating and re-originating mTLS at the VPC boundary. **Peering** is a lighter alternative to full federation using one-time `PeeringToken` exchange instead of shared gossip, sharing only service catalog information (not Raft state)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the `PeerThroughMeshGateways` boolean in MeshConfigEntry control?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When `true`, Consul servers advertise the mesh gateway's address instead of their own for the peering gRPC stream. This means only the mesh gateway needs cross-cloud network access (one port on one host), instead of all server ports on all servers being directly reachable. The default is `false`, which is why fresh peering works within a single cloud but breaks across clouds."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens after peering is established but before `exported-services` is configured?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No service traffic flows. Peering is opt-in at the service level — even after the control-plane link is established, each service must be explicitly declared in an `exported-services` config entry with the correct peer name before it becomes discoverable on the remote side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a team use both WAN federation and peering for the same pair of datacenters?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — they are mutually exclusive for the same pair. Federation gives full Raft state sharing (KV stores, ACL tokens, intentions replicated). Peering gives service catalog sharing only. Mixing them creates undefined behavior."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a `PeeringToken` and what does it contain?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A `PeeringToken` is a one-time-use serialized credential exchanged between clusters during peering setup. It contains server addresses, the CA chain, a one-time establishment secret, and remote metadata (partition, datacenter, locality). The receiving side uses the server addresses to establish a gRPC streaming connection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What fails silently if the `exported-services` entry has a typo in the peer name?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The service is exported to a non-existent peer, making it unreachable. The `Peers` field must exactly match the `-peer` name used during `consul peering establish` — a typo doesn't cause an error from the config write, it just results in no traffic flowing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the three failure modes of storing long-lived AWS access keys as GitHub Actions secrets?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "(1) No automatic expiry — compromised keys persist until manually rotated. (2) Overprivileged identities — teams reuse one key pair across staging and production, so a staging compromise pivots to production. (3) No workload attestation — the cloud provider can't distinguish a legitimate workflow run from a script on someone's laptop using the same key."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What must the OIDC provider's `client_id_list` include for GitHub Actions OIDC federation to work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It must include `sts.amazonaws.com` — this is the `aud` (audience) claim AWS STS validates against. Without it, `AssumeRoleWithWebIdentity` fails with an invalid client ID error. The trust policy's `aud` condition uses `StringEquals` (not `StringLike`) with this exact value."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Terraform retry role creation when using OIDC federation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "IAM is eventually consistent. When an OIDC provider and a role referencing it are created in the same `terraform apply`, the provider ARN may not be recognized by IAM's policy evaluation engine immediately. The `retryCreateRole` function retries on \"Invalid principal in policy\" errors up to `propagationTimeout`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if you use a `*` wildcard in the trust policy's `sub` condition in production?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Any workflow in your GitHub organization could assume the role, not just the intended one. Use `StringLike` with a specific pattern like `repo:org/repo:ref:refs/heads/main` to scope access to specific repos, branches, and workflows — the OIDC JWT's `sub` claim encodes all three."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the `thumbprint_list` empty for GitHub's OIDC provider?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AWS uses its own CA library for well-known OIDC endpoints (GitHub, GitLab, Google, Auth0). It doesn't need a manually provided thumbprint — it fetches GitHub's JWKS endpoint at validation time, so key rotation is transparent. For non-well-known IdPs, you must provide the thumbprint."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does the S3 compatibility abstraction break when using MinIO across clouds?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The data plane (Put/Get/Delete bytes) is genuinely portable. The metadata plane — object tagging, retention policies, replication configuration, lifecycle rules — carries provider-specific semantics. MinIO stubs unsupported S3 features with dummy handlers returning empty HTTP 200s rather than errors, but the behavioral divergence between S3's WORM retention, GCS's lack of equivalent, and Azure's blob lease model means metadata-heavy pipelines aren't portable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does MinIO use \"dummy call\" handlers (GetBucketACL returning empty 200) instead of returning 401/403?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "S3 client libraries expect specific HTTP status codes for specific errors — a 401 from GetBucketACL would trigger retry logic or credential refresh. A successful 200 with an empty body is the correct S3-compatible behavior for \"this feature exists in the protocol but is not implemented here.\" It's the honest version of an abstraction."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does MinIO's `rejectedObjAPIs` and `rejectedBucketAPIs` list represent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An explicit contract of what \"S3-compatible\" does NOT mean. It lists features (torrent, intelligent-tiering, analytics, inventory, ownershipControls, publicAccessBlock) that MinIO deliberately declines. Any abstraction layer claiming broader compatibility than this list is lying about its coverage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the `ObjectInfo` struct in MinIO not cloud-portable?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Its metadata fields (`ReplicationStatus`, `TransitionedObject`, `UserTags`) are all S3-flavored — they encode AWS-specific governance models (WORM compliance, Glacier-style tier transitions). A genuinely cloud-agnostic struct would need provider-specific branches for each of these fields, which is why most \"cloud-agnostic\" storage wrappers end up being S3-specific wrappers with adapters bolted on."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a gotcha when using MinIO's extension APIs in cloud-agnostic code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MinIO extends S3 with endpoints like `ListObjectsV2M` (metadata=true), `ReplicationMetricsV2`, and `ResetReplicationStatus` — none of which exist in AWS S3. A client coded against MinIO's full API surface is MinIO-specific, not S3-portable. The abstraction leak runs both directions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does CoreDNS resolve multi-cluster service names differently from single-cluster names?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When the `multicluster` directive is set in the Corefile, the `kubernetes` plugin branches on `isMultiClusterZone()` — local queries hit `findServices()` using the `SvcIndex`, while multi-cluster queries hit `findMultiClusterServices()` using the `SvcImportIndex` to consult `ServiceImport` objects instead of plain `Service` objects. These are two separate code paths, not a fallback chain."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if the `fallthrough` directive is omitted from the CoreDNS Corefile for a multi-cluster zone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The `kubernetes` plugin returns `NXDOMAIN` on its own zone even when a downstream plugin (like `forward` or a custom plugin) could answer. Without `fallthrough`, the query never reaches the external resolvers that might have the answer from another cluster."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does plugin ordering in the Corefile matter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CoreDNS builds a linked list of handlers at startup by iterating plugins backwards. If `cache` sits before `kubernetes`, cached responses for a zone that the `kubernetes` plugin can answer will shadow live data — the cache plugin returns the stale answer before the authoritative plugin ever sees the query."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between `multicluster` and `forward` for cross-cluster DNS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`multicluster` resolves names directly from Kubernetes MCS API objects (`ServiceImport`) within the same CoreDNS process — in-process resolution. `forward` delegates the query to an external resolver (which may itself be CoreDNS in another cluster). They are complementary: `multicluster` for direct resolution, `forward` for delegation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens at startup if `multicluster` is set in the Corefile but the MCS API CRDs are not installed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CoreDNS fails to initialize the multi-cluster controller during `InitKubeCache()` and returns an error at startup. The `sigs.k8s.io/mcs-api` CRDs (`ServiceImport`, `EndpointSlice` for multi-cluster) must be present before CoreDNS boots."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Istio need east-west gateways for multi-cluster across cloud VPCs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Pod CIDRs across cloud VPCs are unreachable from each other — they can't be simply peered, and cloud firewall rules don't cross account boundaries. The east-west gateway is a dedicated Envoy at each cluster's edge that accepts cross-network traffic and tunnels it into the destination cluster's pod network. Without it, the `EndpointsByNetworkFilter` silently generates EDS entries pointing at unreachable private IPs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the `EndpointsByNetworkFilter` in Istio's endpoint builder actually do?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It rewrites what each sidecar proxy sees: endpoints on the proxy's own network are passed through as raw pod IPs; endpoints on remote networks are replaced with weighted E/W gateway addresses, with load distributed proportionally across all available gateways. If no reachable gateway exists for a remote network, the endpoint is silently dropped."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the `forceGateway` edge case in `EndpointsByNetworkFilter` and why does it matter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When `ISTIO_META_NETWORK` isn't set on a sidecar, the proxy's network is empty (`\"\"`), but endpoints have a real network and gateways exist. Without `forceGateway`, the proxy treats remote endpoints as directly reachable (because `InNetwork(\"\")` returns true for any network) and generates broken EDS entries. The `forceGateway` path ensures gateway-based routing is used even when the proxy forgot to declare its own network."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does `selectNetworkGateways` prefer gateways in the same cluster as the target endpoints?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To minimize an extra cross-cluster hop. If a gateway in cluster A can reach the target endpoint's network, using it avoids routing through cluster B's gateway first. The function checks `GatewaysForNetworkAndCluster` before falling back to `GatewaysForNetwork`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the ambient (non-sidecar) mode differ from sidecar mode in the gateway endpoint's wire protocol?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sidecar mode uses a plain IP:port with mTLS metadata (`TLSMode: IstioMutual`). Ambient mode uses an `inner_connect_originate` internal address for double-HBONE tunneling — an HBONE connection to the E/W gateway, which establishes a second HBONE connection to the destination pod. Same structural replacement of pod-with-gateway, completely different tunnel protocol."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the common misconfiguration that causes cross-cluster traffic to fail silently?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Missing `ISTIO_META_NETWORK` on sidecar proxies. Without it, the proxy's network is `\"\"`, and depending on gateway configuration, either broken direct-routing EDS entries are generated or the `forceGateway` path is inconsistently triggered. This is one of the most frequent production misconfigs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why can't AWS Cost Explorer tell you which Kubernetes namespace consumed 400 CPU-core-hours of EC2 spend?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cost Explorer sees the EC2 instance; Kubernetes sees the workload. It has no concept of namespaces, pods, or containers — it bills at the infrastructure level. Bridging the gap requires reading real-time resource-usage metrics from the cluster (CPU cores allocated, RAM requested, PVC attached) and multiplying them by per-resource pricing from the cloud billing APIs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does OpenCost's allocation engine compute per-namespace costs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It fires 30+ parallel Prometheus queries (CPU allocated, RAM bytes, GPU usage, PVC info, namespace labels, pod owner references) and stitches the results into an `AllocationSet` keyed by `cluster/node/namespace/pod/container`. Each allocation carries a cost computed by multiplying resource-usage rates by the node's per-hour pricing (from the cloud billing API)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do OpenCost's Prometheus collectors read from an in-memory `ClusterCache` rather than depending on kube-state-metrics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reading from the same in-memory cache that watches the API server directly ensures metrics are always current with the API server's view and have zero scrape-delay compared to a separate KSM deployment. The `EmitKubeStateMetrics` flag controls whether these collectors are registered at all, allowing operators who already run KSM to avoid double-emission."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a node's Spot price changes mid-allocation window?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The `nodePricing` struct is resolved per-query-window. Kubecost does not backfill historical Spot pricing from AWS Spot Price History — the allocation reflects the pricing snapshot used during computation, not the actual fluctuating Spot price over the window. This is a known limitation for cost accuracy with volatile pricing models."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does `ComputeAllocation` batch Prometheus queries into windows instead of querying the full range at once?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prometheus has a maximum query duration limit. For a 30-day allocation request, `ComputeAllocation` fires multiple `BatchDuration`-sized parallel query batches, computes per-batch `AllocationSet` objects, then accumulates them. Annotations and labels are propagated post-accumulation because `Properties.Intersection` does not carry map values through for performance reasons."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why can't you run a single etcd cluster stretched across two clouds for unified multi-cloud state?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Raft requires a strict majority (N/2 + 1) of nodes to acknowledge every committed write. A 5-node cluster split 3/2 across clouds means a cross-cloud partition leaves the minority side (2 nodes) with no quorum — it completely stops accepting writes. The majority side keeps running, but the minority side doesn't degrade, it halts entirely."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does etcd's lessor (lease manager) do that makes a stretched cluster particularly bad?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The lessor elects exactly one primary for the entire cluster — the Raft leader's lessor. All other nodes' lessors are fully demoted (lease expiry tracking stopped, leases set to \"forever\"). In a stretched cluster, one cloud's nodes are completely demoted during normal operation, not \"lower priority active.\" Lease-based key expirations silently don't happen on the minority side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the production pattern for multi-cloud etcd, and what tradeoff does it accept?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Independent clusters with async cross-replication. Each cloud runs its own complete, self-quorum'd etcd cluster with its own leader. State replicates asynchronously, accepting bounded staleness (writes in one cloud appear in the other after a delay, typically seconds). The tradeoff: a few seconds of staleness during normal operation in exchange for full availability during a cloud outage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do cross-cloud network latencies of 10-80 ms cause problems for a stretched etcd cluster even without a full partition?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The heartbeat timeout (`rafthttp.ConnWriteTimeout`) is tuned for intra-cloud latency (1–5 ms). Cross-cloud RTTs cause frequent leader elections even during normal operation — each election causes a brief write stall across the entire cluster, including the healthy cloud. A longer timeout just delays failover when you actually need it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the RPO when using independent etcd clusters with async replication?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It equals the time between the last successful cross-cluster replication cycle and the moment of failure. If the replication interval is 1 second, worst-case RPO is approximately 1 second. It's never zero — that's the explicit tradeoff for bounded staleness during normal operation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does Terraform's real lock-in live — in HCL syntax or in the state file?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In the state file. HCL is genuinely provider-agnostic DSL, but the state file records each resource's `ProviderConfig` address, `SchemaVersion`, and an opaque `Private` byte blob that only the originating provider can decode. Swapping `provider =` in HCL doesn't transform these state-level bindings — Terraform Core can no longer read its own state for those resources."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is `Private []byte` in the state file and why is it the deepest lock-in mechanism?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Providers store opaque blobs — computed defaults, internal tracking IDs, SDK-specific metadata — that only they can decode. Terraform Core treats these as raw bytes. Swap the provider, and these blobs become unreadable dead weight. Each provider's SDK (`terraform-plugin-sdk` vs. `terraform-plugin-framework`) serializes private data differently with no standard encoding."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does `terraform state pull` on a state file from another team sometimes download providers you don't use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`State.ProviderAddrs()` scans every resource in the state file and extracts the provider address each one references. Terraform treats the state file as an active dependency manifest — it attempts to download and run every provider referenced, even if your local HCL doesn't reference those providers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the practical escape hatch for cross-cloud migration in Terraform?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treat it as a controlled destroy-and-recreate, not a state transformation. Write new HCL for the target provider, `terraform destroy` the source resources, and `terraform apply` the new configuration. `UpgradeResourceState` is per-provider (for upgrading a provider's own schema versions), not cross-provider. The state file cannot be transformed from one provider to another."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does OpenTofu's state format differ from Terraform's in ways that affect portability?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. OpenTofu adopted the same provider protocol and state format (v4) for backward compatibility. The state-level lock-in mechanism — provider-bound attributes, schema versions, and private blobs — is identical. The fork's value is governance and licensing, not a different state architecture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if you downgrade a provider version after a schema bump that changed `SchemaVersion`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "State and provider versions are tightly coupled. If state records `schemaVersion: 2` and the downgraded provider only understands `schemaVersion: 1`, `UpgradeResourceState` may not handle the reverse migration. This can leave state unreadable — the provider refuses to decode attributes it doesn't recognize from a newer schema version."
+      }
+    }
+  ]
+}
+</script>
+
 <script>
 (function () {
   var search = document.getElementById('qa-search');

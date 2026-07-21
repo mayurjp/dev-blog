@@ -1,0 +1,13 @@
+name: Mayur
+full_name: Mayur
+role: Software Engineer
+bio: >-
+  Building production systems and learning how they work from the inside out.
+  Writing about Kubernetes, Docker, Security, System Design, and 20+ other domains
+  — every lesson grounded in a real production repository's code.
+location: ""
+avatar: /assets/img/mayur.jpg
+social:
+  github: https://github.com/mayurjp
+  linkedin: https://linkedin.com/in/mayurjp
+  twitter: https://x.com/mayurjp

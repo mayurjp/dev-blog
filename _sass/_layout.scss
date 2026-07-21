@@ -1,0 +1,67 @@
+// Layout — wrapper, header, footer, page grid.
+
+.wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.page-content {
+  min-height: calc(100vh - 120px);
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-3xl);
+}
+
+// --- Site header ---
+.site-header {
+  border-top: none;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-logo {
+  height: 22px;
+  width: 22px;
+  vertical-align: -4px;
+  margin-right: 6px;
+}
+
+// --- Reading progress bar ---
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: var(--color-brand);
+  z-index: var(--z-progress);
+  transition: width 0.1s linear;
+}
+
+// --- Footer ---
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-lg) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.social-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: var(--space-md);
+
+  a {
+    color: var(--color-text-secondary);
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--color-brand);
+    }
+  }
+}

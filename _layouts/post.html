@@ -21,6 +21,9 @@ layout: default
       <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
         {{ page.date | date: date_format }}
       </time>
+      {%- if site.data.author -%}
+        <span class="post-author">&middot; {{ site.data.author.name }}</span>
+      {%- endif -%}
       {%- if page.categories.size > 0 -%}
         {%- assign topic = site.data.topics | where: "slug", page.categories.first | first -%}
         {%- if topic -%}
@@ -66,7 +69,8 @@ layout: default
       {%- assign prev_index = current_index | minus: 1 -%}
       {%- assign prev_post = topic_posts[prev_index] -%}
     {%- endif -%}
-    {%- if current_index < total -%}
+    {%- assign last_index = total | minus: 1 -%}
+    {%- if current_index < last_index -%}
       {%- assign has_next = true -%}
       {%- assign next_index = current_index | plus: 1 -%}
       {%- assign next_post = topic_posts[next_index] -%}
@@ -95,6 +99,29 @@ layout: default
 
 </article>
 
+{%- include author-card.html -%}
+
+{%- if page.categories.size > 0 -%}
+  {%- assign cat = page.categories.first -%}
+  {%- assign cat_posts = site.categories[cat] | sort: "order" -%}
+  {%- assign related = "" | split: "" -%}
+  {%- for p in cat_posts -%}
+    {%- if p.url != page.url and related.size < 3 -%}
+      {%- assign related = related | push: p -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if related.size > 0 -%}
+  <div class="related-posts">
+    <h3>Related posts</h3>
+    <ul>
+      {%- for p in related -%}
+      <li><a href="{{ p.url | relative_url }}">{{ p.title | escape }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+  {%- endif -%}
+{%- endif -%}
+
 <!-- Newsletter signup -->
 {%- if site.newsletter_action -%}
 <div class="newsletter-box">
@@ -119,8 +146,8 @@ layout: default
   "datePublished": "{{ page.date | date_to_xmlschema }}",
   "author": {
     "@type": "Person",
-    "name": "{{ site.author }}",
-    "url": "https://github.com/mayurjp"
+    "@id": "{{ site.url }}{{ site.baseurl }}/about/#author",
+    "name": "{{ site.data.author.name | default: site.author }}"
   },
   "publisher": {
     "@type": "Organization",
@@ -183,11 +210,11 @@ layout: default
       btn.setAttribute('tabindex', btn.classList.contains('active') ? '0' : '-1');
       if (!btn.id) btn.id = 'tab-' + Math.random().toString(36).slice(2, 8);
     });
-    panels.forEach(function (panel) {
+     panels.forEach(function (panel) {
       panel.setAttribute('role', 'tabpanel');
-      var对应btn = tabs.querySelector('[data-tab="' + panel.id + '"]');
-      if (对应btn) {
-        panel.setAttribute('aria-labelledby', 对应btn.id);
+      var tabBtn = tabs.querySelector('[data-tab="' + panel.id + '"]');
+      if (tabBtn) {
+        panel.setAttribute('aria-labelledby', tabBtn.id);
       }
     });
 

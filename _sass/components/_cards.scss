@@ -1,0 +1,87 @@
+// Topic cards and learning path cards.
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+  margin: var(--space-lg) 0;
+}
+
+.topic-card {
+  display: block;
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.topic-card-name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text);
+}
+
+.topic-card-description {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-md);
+  line-height: var(--leading-normal);
+}
+
+.topic-card-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+// Learning paths
+.learning-paths {
+  margin-bottom: var(--space-xl);
+}
+
+.path-card {
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+  background: var(--color-bg-card);
+}
+
+.path-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+
+  h3 {
+    margin: 0;
+    font-size: var(--text-lg);
+
+    a {
+      color: var(--color-text);
+      text-decoration: none;
+
+      &:hover { color: var(--color-brand); }
+    }
+  }
+}
+
+.path-count {
+  font-size: var(--text-sm);
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+.path-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}

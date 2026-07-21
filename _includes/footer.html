@@ -1,0 +1,25 @@
+<footer class="site-footer">
+  <div class="wrapper">
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <p class="footer-author">
+          {%- if site.data.author -%}
+            {{ site.data.author.name | escape }}
+          {%- elsif site.author -%}
+            {{ site.author | escape }}
+          {%- else -%}
+            {{ site.title | escape }}
+          {%- endif -%}
+        </p>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        {%- include social.html -%}
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>{{- site.description | escape -}}</p>
+      </div>
+    </div>
+  </div>
+</footer>

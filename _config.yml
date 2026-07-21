@@ -15,10 +15,13 @@ url: "https://mayurjp.github.io"
 baseurl: "/dev-blog"
 
 # --- Theme & build -----------------------------------------------------------
-theme: minima
 markdown: kramdown
 highlighter: rouge
 permalink: /:categories/:title/
+
+sass:
+  sass_dir: _sass
+  style: compressed
 
 # GitHub Pages builds with minima 2.5.1 (pinned by the github-pages gem,
 # regardless of what Gemfile says), which predates minima's skin: and
@@ -33,7 +36,7 @@ logo: /assets/logo.svg
 
 # Default image for Open Graph / Twitter Card previews when sharing
 # (jekyll-seo-tag uses this as fallback when a post has no image: in front matter)
-image: /assets/logo.svg
+image: /assets/og/default.png
 
 # Explicit header nav whitelist -- without this, minima lists every page with
 # a `title:` (including the topic pages under topics/ and domain pages under qa/).
@@ -46,11 +49,13 @@ header_pages:
   - search/index.md
   - faq/index.md
   - about.md
+  - work.md
   - archive.md
 
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap
 
 # Render posts even if their front-matter `date` is later than the build
 # clock. Legacy GitHub Pages builds only rebuild on push (no scheduled
@@ -60,6 +65,9 @@ future: true
 
 # Analytics (set to your Google Analytics measurement ID to enable)
 google_analytics: ""  # e.g. G-XXXXXXXXXX
+
+# Google Search Console verification (add the HTML-tag content here)
+google_site_verification: ""
 
 # Newsletter (set to your form action URL to enable)
 newsletter_action: ""  # e.g. https://formspree.io/f/xxxxx
@@ -85,3 +93,5 @@ exclude:
   - fix-qa-links.py
   - lighthouserc.json
   - scripts
+  - node_modules
+  - package.json

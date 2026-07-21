@@ -1,0 +1,83 @@
+// Code Playground.
+
+.playground-container {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.playground-toolbar {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.playground-run-btn {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background: var(--color-success);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.playground-clear-btn {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-sm);
+  background: none;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.playground-editor-wrap {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.playground-editor {
+  width: 100%;
+  min-height: 200px;
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.playground-output-wrap {
+  background: #0d1117;
+}
+
+.playground-output-header {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-xs);
+  color: #8b949e;
+  border-bottom: 1px solid #21262d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.playground-output {
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+  color: #c9d1d9;
+}
+
+.log-line { color: #c9d1d9; }
+.warn-line { color: #d29922; }
+.error-line { color: #f85149; }
+.done-line { color: #3fb950; }
+.dim-line { color: #6e7681; }

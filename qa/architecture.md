@@ -758,6 +758,623 @@ Treating architecture as a static, one-time analysis — a diagram drawn once, a
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is dependency inversion in a layered architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Domain defines an interface like `IOrderRepository`, and Infrastructure implements it. The compile-time reference points inward (Infrastructure → Domain) even though the runtime call flows outward (Domain → persistence), decoupling business logic from infrastructure technology."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does a real layered codebase differ from the textbook N-tier diagram?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The textbook diagram shows every layer depending strictly on the layer below it. In reality, Domain depends on nothing — it declares interfaces — and Infrastructure depends inward on Domain. The compiled dependency direction is opposite to the conceptual layer ordering at the Domain/Infrastructure seam."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if Domain gets a compile-time reference to Infrastructure?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The whole point of layering collapses: business logic becomes coupled to Entity Framework or RabbitMQ, making it impossible to unit-test without a real database and impossible to swap persistence technology without touching core logic."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does the repository interface live, and why does that matter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The interface lives in the Domain project (the consumer of the capability), not Infrastructure (the provider). This placement is what forces the compiled dependency arrow to point inward — Infrastructure must reference Domain to implement the contract, not the reverse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the common mistake with \"clean\" layered architectures?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating \"layered\" as meaning every layer's compiled reference points physically downward. The real rule is that the core defines the contracts it needs; infrastructure implements them. Strict downward references break the moment Domain needs a capability only the edge can provide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between a port and an adapter in hexagonal architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A port is an interface declared inside the domain project — the domain's own vocabulary for a capability it needs (e.g., `IOrderRepository`). An adapter is the infrastructure-layer implementation that satisfies a port using a specific technology (e.g., EF Core + Postgres)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does hexagonal architecture enforce the boundary differently from just \"using interfaces\"?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An interface alone doesn't prevent a domain project from also referencing the database package. The real enforcement is project-level: the domain's `.csproj` has zero package or project references to EF Core or the infrastructure project, so `using Microsoft.EntityFrameworkCore;` fails to compile."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if someone adds `using Microsoft.EntityFrameworkCore` inside the Domain class?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The build fails immediately — the assembly isn't referenced from that project at all. This is the core enforcement mechanism: the violation is impossible to compile, not merely easy to spot in review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is hexagonal architecture's isolation valuable for testing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A test project referencing only Domain inherits that project's restricted reference list. Tests can construct domain objects and call methods with no database, no EF Core, and no infrastructure reference — the project graph makes touching the database structurally impossible."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's a common gotcha with claiming hexagonal architecture is satisfied?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "People treat \"the domain depends on an interface, not a concrete class\" as sufficient. But an interface can live in a project that also references infrastructure packages — a future edit could import infrastructure types directly into domain code. The stronger version requires a genuine assembly boundary with a restricted reference list."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you choose hexagonal architecture over a simpler layered approach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need to swap database providers or test domain logic without any infrastructure spinning up — and you want the compiler to enforce that boundary, not rely on discipline or code review."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does the Application layer reference the base EF Core package if Infrastructure owns the database?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Application needs `DbSet<T>` to describe a provider-agnostic persistence shape inside its own `IApplicationDbContext` interface. The base EF Core package provides that abstraction; the actual database provider packages (Npgsql, SQLite) are referenced only from Infrastructure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does clean architecture organize code differently from traditional layered folders?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Instead of horizontal folders (`Commands/`, `Handlers/`, `Validators/`) shared by every use case, clean architecture uses vertical slices — each use case (e.g., `CreateTodoItem`) gets its own folder containing its command, handler, and validator together."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the precise line the dependency rule draws in this codebase?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No specific database engine package (Npgsql, SQLite, SQL Server) exists outside Infrastructure. Application carries a narrow ORM-shaped dependency (base EF Core for `DbSet<T>`), but zero provider packages. Swapping PostgreSQL for SQL Server touches only Infrastructure's `.csproj` and its concrete `DbContext`."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of exposing `DbSet<T>` in the Application interface?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You accept a narrow, ORM-shaped dependency in Application to avoid reimplementing query composition that EF Core already provides. The alternative — a fully custom repository interface — removes even that reference at the cost of duplicating querying capabilities."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does clean architecture differ from hexagonal architecture in practice?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They're the same dependency-inversion idea with different vocabulary. The mechanism — inward-pointing project references, compiler-enforced boundaries — is identical. What differs is how strictly the boundary is drawn: Clean Architecture here tolerates a base ORM package that a stricter Hexagonal reading might exclude."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the common mistake when grouping code in a clean architecture codebase?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Splitting code into horizontal folders (`Commands/`, `Handlers/`, `Validators/`) shared across all use cases, so understanding one complete use case means tracing references across three or four separate folders mixed with dozens of unrelated ones."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What would actually change to split a modular monolith into microservices?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only the concrete class wired to `IEventsBus` — modules already communicate solely through published integration-event contracts and an event-bus interface. Swapping `InMemoryEventBusClient` for a real network client (RabbitMQ, Kafka) is a composition-root-only change with no module's business logic touched."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the modular monolith enforce boundaries between modules?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each module exposes a small, public `IntegrationEvents` contracts project. Other modules reference only this contracts project — never the originating module's Domain, Application, or Infrastructure. This is enforceable from `.csproj` reference lists, like a domain/infrastructure boundary applied between peer modules."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when `InMemoryEventBusClient` is used — is there a real network call?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No — `InMemoryEventBusClient.Publish` calls `InMemoryEventBus.Instance.Publish()`, a static, in-process singleton. Every cross-module communication is mechanically just a method call within the same .NET process. The event-driven shape is identical to a distributed system; only the transport differs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is splitting into microservices too early expensive?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Real network calls between services introduce real failure modes — timeouts, partial failures, retries, eventual consistency — that don't exist when two pieces of code are objects calling each other in the same process. Getting boundaries wrong across a network is far more expensive to fix than getting them wrong within one process."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the composition root seam that enables an eventual split?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`EventsBusStartup.SubscribeToIntegrationEvents` resolves `IEventsBus` from the DI container rather than constructing the concrete type directly. Changing which class gets registered against that interface is a composition-root-only change — no module's code needs modification."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's a gotcha with the \"monolith vs microservices\" framing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They're often presented as a binary choice, with modular monolith as a compromise. In reality, strict module isolation, published-contract-only communication, and a swappable transport are exactly the disciplines that make microservices safe to adopt later — a team with all of that has already solved the hard boundary-design problem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What problem does AWS Lambda SnapStart solve?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Expensive one-time initialization (opening DB connections, loading config) hurts every cold start. SnapStart snapshots an already-initialized environment and restores copies instantly, skipping re-running that initialization for new execution environments."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What breaks when you clone an already-initialized serverless function?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Anything meant to be unique per environment — a random identifier, a fresh network handle — gets shared across every restored copy because they're all restored from the same frozen snapshot state."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AfterRestore hook fix the shared-state problem?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It runs specifically when a new execution environment is materialized from a snapshot — not during original initialization, not on warm reuse. Application code regenerates per-environment state (e.g., a new `Guid`) at that exact moment, giving each restored environment its own fresh value."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the constructor's initial GUID assignment not dead code?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It ensures correctness when SnapStart is not active — local testing or deployments with the feature disabled — where the AfterRestore callback simply never fires. The class must behave correctly both with and without the snapshot mechanism."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the tradeoff of using SnapStart?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You eliminate cold-start latency but introduce a new correctness requirement: application code must explicitly distinguish state safe to reuse across unbounded restored environments from state that must be regenerated freshly. Forgetting to register an AfterRestore hook silently shares state."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do the two hook registries differ in execution order?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`_beforeSnapshotRegistry` is a `ConcurrentStack` (LIFO — hooks run in reverse-registration order, like unwinding teardown logic), while `_afterRestoreRegistry` is a `ConcurrentQueue` (FIFO — hooks run in original registration order, matching initialization order)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the common mistake with mental models of serverless initialization?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Assuming \"the code runs once at cold start\" is always true. Under SnapStart, constructor code runs once per snapshot taken but is silently reused across an unbounded number of independently restored environments — a distinction with zero equivalent in a traditional long-running server process."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the core mechanism of space-based architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Data is partitioned across a cluster of nodes' RAM using a deterministic affinity function. Computation is routed to whichever node already holds the relevant data, so most work becomes a local in-memory read instead of a network call."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does grouping keys by partition reduce network round trips?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Without grouping, N keys require N individual network calls. By calling `affinityFunc.partition(k)` for every key locally first, you group them into as few partitions as possible — then send one task per partition. Each task computes locally via `cache.localPeek()`, and only small partial results cross the network."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is `cache.localPeek()` only safe inside an affinity-routed task?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`localPeek` reads from local memory, guaranteed to be a local read only because `compute.affinityCall` already routed the task to the node that owns the relevant partition. Calling `localPeek` from a node that doesn't own the data returns null or stale data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does space-based architecture differ from a read-through cache?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A read-through cache still funnels computation through one central place — every request does its work wherever the application code runs. Space-based architecture routes the computation itself out to wherever the data lives, so most work never leaves the owning node."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use space-based architecture over traditional database scaling?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you have a huge in-memory working set and extreme request volume where even scaling the app tier doesn't help because they all compete for the same database connection pool and disk I/O — the shared database becomes the ceiling."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the common mistake with space-based architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating it as equivalent to \"put a cache in front of the database.\" A cache speeds up reads but computation still runs centrally. The defining trait is sending the computation to the data, not pulling data to the compute — a fundamentally different programming model."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What problem does the Terraform plugin architecture solve?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Terraform Core needs hundreds of independently developed, independently versioned cloud providers without bundling them into one binary, allowing one provider's bug to crash the whole process, or letting an unrelated program invoke a provider binary as if it were a plugin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the TF_PLUGIN_MAGIC_COOKIE handshake for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It proves a provider binary was launched specifically as a Terraform plugin by Terraform, on purpose. The binary checks for the exact hardcoded value in an environment variable; if missing or wrong, it refuses to serve. This prevents accidental invocation or a malicious substitute impersonating a real provider."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Terraform use separate OS processes for plugins instead of loading shared libraries?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A provider that panics terminates its own process — Core observes a broken connection and reports a clean error. A shared-library plugin crash could corrupt Core's memory space. The IPC overhead per call is the explicit tradeoff for genuine fault isolation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Terraform Core handle multiple plugin protocol versions simultaneously?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`VersionedPlugins` is keyed by protocol version (5 and 6), and Core registers plugin sets for both. This lets Core negotiate down to whichever version a given provider supports — older providers built against protocol 5 keep working with newer Core, without every provider needing to rebuild in lockstep."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the downsides of the microkernel approach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Every provider call incurs IPC serialization overhead across a process boundary, which is more expensive than an in-process function call. You also need to manage the lifecycle of many separate processes and negotiate protocol versions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the magic cookie value not a secret even though it's checked?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Its only purpose is proving the process was launched as a Terraform plugin, not that the launcher is trustworthy. It's visible in the plugin's own source code, checked in plaintext — a cheap, effective guard against accidental invocation, not a security credential."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the gotcha with assuming plugin/microkernel means shared-library loading?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Many assume plugins are loaded as `.so`/`.dll` shared libraries into the host process. Terraform deliberately does the opposite — each provider is a separate OS process communicating over gRPC. The tradeoff is higher per-call cost for real crash containment that a shared-library model structurally cannot provide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Envoy's filter chain handle an async operation like token validation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A filter returns `StopIteration`, which halts the chain at that filter's position. When the async call completes, the filter calls `continueDecoding()` from outside the original synchronous flow, and the chain resumes from where it paused."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the difference between `StopIteration` and `StopAllIterationAndBuffer`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`StopIteration` halts the chain at the current filter's position; the filter resumes later at that same spot. `StopAllIterationAndBuffer` halts the entire chain and retains all buffered data so far, rather than discarding it — used when a filter needs the full remaining request body before proceeding."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why can't a filter in a pipe-and-filter system just block the thread during an async call?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Blocking the thread would stall the entire proxy process — all other requests and filters would freeze. The `StopIteration` + later `continueDecoding()` pattern lets one filter pause its own position in the chain without blocking the event loop serving other requests."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the pipe-and-filter pattern differ from Unix shell pipes?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unix shell pipes are synchronous and always flow straight through. Real production pipe-and-filter systems like Envoy need richer flow control: any filter can halt the pipeline for an arbitrary time (async call, rate-limit check, WAF inspection), optionally buffer data while halted, and resume later from unrelated code."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a filter's return status is not handled in the switch statement?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Envoy uses `PANIC_DUE_TO_CORRUPT_ENUM` for unhandled filter status cases. For a proxy processing untrusted network traffic, silently falling through an unhandled status would be a dangerous runtime inconsistency — explicit exhaustive handling turns \"forgot a case\" into a loud compile-time or test-time failure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the tradeoff of adding more filters to a request chain?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each filter adds processing overhead per request, and a filter that returns `StopAllIterationAndBuffer` forces the proxy to retain buffered data in memory for the entire chain's duration. The composability benefit is real, but filter ordering and buffer consumption are performance-critical concerns."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use pipe-and-filter over a simpler middleware pattern?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need independently addable, removable, and reorderable processing steps with complex async flow control — and when different steps need different buffering behaviors, not just \"process and pass along.\""
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is an Architecture Decision Record?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A small, dated, immutable document per architectural decision with a fixed structure: Title (imperative sentence), Status (Proposed/Accepted/Rejected/Superseded/Deprecated), Context (the situation), Decision (what was chosen), and Consequences (what becomes easier or harder)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What makes an ADR different from a design wiki page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An ADR is never edited in place after acceptance. A changed decision produces a new, separately dated ADR that references and supersedes the old one. The old one's content stays intact — preserving the actual history of reasoning instead of collapsing it into whatever the current page says."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the Context section important even if the Decision section answers \"what\"?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Context explains the operational scenario that motivated the change — the background a future reader needs to understand *why* the decision was made. Without it, six months later a reader sees only the current rule with no trace of what problem it was solving or what alternatives were considered."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if a team rewrites an ADR in place instead of writing a new one?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The history of reasoning collapses — a reader has no way to know what the original decision was, what alternatives were considered, or why the current version differs from the original. The whole value of an ADR is the traceable sequence, not the individual document."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does an ADR handle a decision being reversed months later?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A new ADR is written with Status `Accepted`, referencing and superseding the old one. The old ADR's Status is updated to `Superseded` but its content stays unchanged. A reader sees both decisions and the full reasoning trail."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the common mistake with ADR adoption?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating them as a bureaucratic checkbox — writing one once and then ignoring them, or confusing ADRs with general design documents that get updated in place. The discipline that makes them useful is specifically that they don't get rewritten, preserving the chronological sequence of reasoning."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Redis's `appendfsync` setting control?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It controls when the OS is told to flush write-ahead-log data to disk: `no` lets the OS decide (fastest, least durable), `always` fsyncs after every write (slowest, safest), and `everysec` fsyncs once per second (the documented compromise and default)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do quality-attribute tradeoffs compound in Redis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "`no-appendfsync-on-rewrite yes` temporarily suspends fsync entirely during a BGSAVE or AOF rewrite. So the effective durability at any moment depends on both `appendfsync`'s value AND whether a background save is running — neither setting alone describes the full picture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is `everysec` the default instead of the safest option?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Because defaulting to an extreme optimizes for one quality attribute at the total expense of the other. `everysec` is a named, deliberate middle ground — fast enough for most use cases, durable enough to lose at most one second of writes on crash."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to durability when a background save runs with `no-appendfsync-on-rewrite yes`?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The effective durability drops to the same level as `appendfsync no` — up to ~30 seconds of writes could be lost on crash during that window, because fsync is suspended entirely to avoid disk I/O contention from hurting foreground write latency."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is \"always fsync\" not the universally safe default?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It's very slow — every single write incurs a disk fsync call. A session cache can tolerate losing the last second of writes after a crash; forcing `always` on it pays a massive latency cost for durability the application doesn't need."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's a common mistake when reasoning about NFR tradeoffs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating it as a single, one-time global decision — \"we prioritize durability.\" Real systems have multiple interacting settings and operational states (is a background save running now?) that change the effective posture at runtime. The real guarantee depends on how settings compound and what the system is doing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the value of naming consequences directly in configuration comments?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It makes the tradeoff legible at the point of decision — an operator reading `redis.conf` sees \"Faster,\" \"Slow, Safest,\" \"Compromise\" next to each option, without needing external documentation. The default is documented as a compromise, not silently set to whichever extreme is easiest."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What problem does the C4 model solve for architecture diagrams?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hand-drawn diagrams at different zoom levels inevitably drift apart. C4 defines the system once as a model, then generates multiple diagram views from that single source of truth — a change to one element reflects in every view that includes it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Structurizr prevent two diagrams from drifting out of sync?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Diagrams are declared as views *of* a single model, not drawn independently. A `systemContext` view and a `container` view are different filters and zoom levels applied to the same underlying data — changing an element once in the model updates every view that includes it automatically."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does `include *` mean in a Structurizr view?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It's a filter expression saying \"show everything relevant to this view's scope from the model\" at whichever zoom level the view is declared at. It doesn't redefine elements — it selects from the already-defined model."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does hierarchical addressing (`ss.wa`) make multi-view diagramming work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Containers are addressed as children of their software system, mirroring C4's zoom-level hierarchy (context → containers → components). This nesting in the model is what makes \"define once, filter into multiple views\" structurally possible."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use C4 over general-purpose diagramming tools (slides, whiteboards)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you need multiple diagrams at different zoom levels that must stay consistent with each other and with the actual system. C4 treats diagrams as generated projections of a model, not independent artifacts that must be manually kept in sync."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the gotcha with treating architecture diagrams as documentation artifacts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A picture exported once and pasted into a wiki is expected to be manually kept up to date. C4 generates views from a source-of-truth model — closer to a compiler generating outputs from one source file than a designer maintaining separate image files. The generated views structurally cannot drift apart the way hand-maintained diagrams do."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is an architecture fitness function?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An architecture rule expressed as an executable test that runs automatically on every build. It fails exactly like any other failing test when the rule is violated — no separate review process to remember to run."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does ArchUnit verify architecture rules at the bytecode level?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It analyzes compiled class dependencies, not just source text or naming conventions. A class that dynamically references another via reflection or looks compliant in file path while bytecode dependencies violate the rule is still caught."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when an architecture rule is enforced only by human vigilance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A new engineer adds a convenient import that crosses the forbidden boundary; code review misses it, especially in a large diff. The rule silently stops being true, with no mechanism to signal the violation happened."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does ArchUnit dogfood its own architecture enforcement?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The project's own codebase defines its six-layer structure (`Root`, `Base`, `Core`, `Lang`, `Library`, `JUnit`) as ArchUnit rules and runs them on every build of ArchUnit itself — the tool enforces its own architecture constraints using its own library."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the downside of not having automated architecture checks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You have no way to know *when* an architecture rule stopped being true — only, eventually, that it no longer is, discovered whenever someone happens to notice. A codebase changes on every commit; a rule verified on day one has no guarantee of staying true on day two without an automated check."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When would you use ArchUnit over simply documenting architecture rules in an ADR?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Always — ADRs capture *why* a decision was made, but they can't prevent the next commit from violating it. Fitness functions close the gap by making the check as continuous as the change itself, catching violations on every build rather than whenever someone remembers to look."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's a common mistake with evolutionary architecture?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Treating architecture as a static, one-time analysis — a diagram drawn once, an ADR accepted once, both assumed to remain true indefinitely. Evolutionary architecture specifically names the gap: without an automated check running on every commit, architecture rules decay silently."
+      }
+    }
+  ]
+}
+</script>
+
 <script>
 (function () {
   var search = document.getElementById('qa-search');

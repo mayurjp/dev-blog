@@ -4,6 +4,23 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   {%- seo -%}
+  {%- if site.data.author -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": "{{ site.url }}{{ site.baseurl }}/about/#author",
+    "name": "{{ site.data.author.full_name | default: site.data.author.name }}",
+    "jobTitle": "{{ site.data.author.role }}",
+    "url": "{{ site.url }}{{ site.baseurl }}/about/",
+    "sameAs": [
+      {%- if site.data.author.social.github -%}"{{ site.data.author.social.github }}"{%- endif -%}
+      {%- if site.data.author.social.linkedin -%}, "{{ site.data.author.social.linkedin }}"{%- endif -%}
+      {%- if site.data.author.social.twitter -%}, "{{ site.data.author.social.twitter }}"{%- endif -%}
+    ]
+  }
+  </script>
+  {%- endif -%}
   <link rel="icon" type="image/svg+xml" href="{{ site.logo | relative_url }}">
   <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
   {%- feed_meta -%}

@@ -6,7 +6,7 @@ permalink: /learn/
 
 Interactive quiz with spaced repetition. Wrong answers come back more often. All progress saved in your browser — no account needed.
 
-<div class="quiz-app" id="quiz-app">
+<div class="quiz-app" id="quiz-app" data-baseurl="{{ site.baseurl }}">
   <div class="quiz-controls">
     <select id="quiz-domain" aria-label="Filter by domain">
       <option value="all">All domains</option>
