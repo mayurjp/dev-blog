@@ -250,6 +250,34 @@ resource "google_redis_instance" "cache" {
 
 The decision: **in-process for data that must never leave the pod and can tolerate per-instance staleness, managed shared cache when invalidation has to mean one thing across the fleet** — and whichever layer holds the data, the stampede lock and the incident's `-OOM` failure mode live at the client and the server respectively, which is why "we set an eviction policy" is the beginning of the review, not the end of it.
 
+### Production design on GCP (real services, real config)
+
+Wiring the verified pieces together — the same shape as the incident's deployment (a distributed lock registry sharing the cache instance):
+
+```mermaid
+flowchart TD
+    subgraph APP["GKE pods, cache-aside + rebuild lock"]
+        P1["pod A: GET, miss,<br/>LockTake OK, rebuilds"]
+        P2["pod B: GET, miss,<br/>LockTake fails, waits"]
+    end
+    MS[("Memorystore STANDARD_HA primary<br/>maxmemory-policy allkeys-lru<br/>maxmemory-gb 8 of 10 GB")]
+    REP[("replica, async replication<br/>failover can lose up to 30MB")]
+    DB[("Cloud SQL, source of truth")]
+
+    P1 -->|"GET / SET EX"| MS
+    P2 -->|"GET"| MS
+    P1 -->|"only the lock holder reads"| DB
+    MS -.->|"async"| REP
+
+    classDef risk fill:#f8d7da,stroke:#c62828,color:#5c1a1a;
+    class REP risk;
+```
+
+- **Placement is a hard constraint, not a tuning knob:** clients must sit in the same authorized VPC as the instance (private IP only) — the GKE cluster and Memorystore are peers in one network, which is also where the sub-millisecond access the service promises comes from.
+- **`maxmemory-gb 8` on a 10 GB instance is section 7's headroom rule expressed as config** — the default is the full capacity, so headroom is a deliberate choice, not something the tier gives you.
+- **The rebuild lock's TTL must outlive a slow DB rebuild.** If the lock expires before pod A finishes reading Cloud SQL and populating the key, pod B takes the lock and rebuilds a second time — the stampede the lock exists to prevent, one TTL-misconfiguration away.
+- **Locks and cache share one instance here, so memory pressure takes down both.** That is exactly section 5's blast radius: `used_memory` at the limit didn't just risk evicting cached products, it made `EVALSHA` lock acquisition fail. The replica (red) is the second lossy surface: async replication means a failover can drop recent writes — acceptable for cache entries, another reason correctness lives in Cloud SQL plus delete-on-write invalidation, never in Redis.
+
 ---
 
 ## Source
