@@ -5,6 +5,103 @@
   margin: 0 auto;
 }
 
+/* SRS transparency note */
+.quiz-srs-note {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.quiz-srs-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-brand);
+  background: var(--color-brand-light);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.quiz-srs-detail {
+  display: none;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+
+  ul {
+    margin: var(--space-xs) 0;
+    padding-left: var(--space-lg);
+  }
+}
+
+.quiz-srs-detail-show {
+  display: block;
+}
+
+/* Progress ring */
+.quiz-progress-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.quiz-progress-svg {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.quiz-progress-bg {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 6;
+}
+
+.quiz-progress-ring {
+  fill: none;
+  stroke: var(--color-brand);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 263.89;
+  stroke-dashoffset: 263.89;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.quiz-progress-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quiz-progress-num {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.quiz-progress-sub {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Controls */
 .quiz-controls {
   display: flex;
   flex-wrap: wrap;
@@ -21,7 +118,7 @@
   }
 }
 
-.quiz-reset-btn {
+.quiz-control-btn {
   padding: var(--space-sm) var(--space-md);
   font-size: var(--text-sm);
   background: none;
@@ -31,8 +128,8 @@
   cursor: pointer;
 
   &:hover {
-    color: var(--color-danger);
-    border-color: var(--color-danger);
+    color: var(--color-text);
+    border-color: var(--color-text-secondary);
   }
 }
 
@@ -42,6 +139,7 @@
   margin-bottom: var(--space-md);
 }
 
+/* Card */
 .quiz-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -54,6 +152,17 @@
   text-align: center;
   color: var(--color-text-muted);
   padding: var(--space-xl);
+}
+
+/* Error state */
+.quiz-error {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.quiz-error-msg {
+  color: var(--color-danger);
+  margin-bottom: var(--space-md);
 }
 
 .quiz-meta {
@@ -102,12 +211,34 @@
   font-size: var(--text-sm);
 }
 
+/* Explanation after wrong answer */
+.quiz-explanation {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-alt);
+  border-left: 3px solid var(--color-brand);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.quiz-explanation-label {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.quiz-explanation p:last-child {
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
 .quiz-empty {
   text-align: center;
   padding: var(--space-xl);
   color: var(--color-text-muted);
 }
 
+/* Actions */
 .quiz-actions {
   margin-top: var(--space-md);
   display: flex;
@@ -137,4 +268,23 @@
 .quiz-btn-wrong {
   background: var(--color-danger);
   color: #fff;
+}
+
+/* Keyboard hint */
+.quiz-keyboard-hint {
+  margin-top: var(--space-md);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+
+  kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 var(--color-border);
+  }
 }
