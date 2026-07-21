@@ -65,8 +65,23 @@ layout: default
     {%- endfor -%}
   </div>
 
-  <p class="archive-link"><a href="{{ "/archive/" | relative_url }}">Browse all posts &rarr;</a></p>
-
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
+  <div class="home-secondary-links">
+    <a class="home-link-card" href="{{ '/archive/' | relative_url }}">
+      <span class="home-link-icon">📚</span>
+      <span>Browse all {{ site.posts.size }} posts</span>
+    </a>
+    <a class="home-link-card" href="{{ '/faq/' | relative_url }}">
+      <span class="home-link-icon">❓</span>
+      <span>FAQ — common questions answered</span>
+    </a>
+    <a class="home-link-card" href="{{ '/search/' | relative_url }}">
+      <span class="home-link-icon">🔍</span>
+      <span>Search across all posts</span>
+    </a>
+    <a class="home-link-card" href="{{ '/feed.xml' | relative_url }}">
+      <span class="home-link-icon">📡</span>
+      <span>Subscribe via RSS</span>
+    </a>
+  </div>
 
 </div>

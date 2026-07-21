@@ -86,3 +86,9 @@
   name: Event-Driven Architecture
   description: Event sourcing, CQRS, the outbox pattern, and choreography vs orchestration in event-driven systems.
   glossary: /event-driven/event-driven-key-terms/
+- slug: networking
+  name: Networking
+  description: DNS, TLS, load balancers, CDNs, and HTTP protocols — the infrastructure underneath every request.
+- slug: platform-engineering
+  name: Platform Engineering
+  description: Internal developer platforms, golden paths, Backstage portals, and the self-service infrastructure that scales past kubectl.

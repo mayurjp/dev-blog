@@ -38,6 +38,8 @@ header_pages:
   - learn/index.md
   - challenges/index.md
   - roadmap/index.md
+  - search/index.md
+  - faq/index.md
   - about.md
   - archive.md
 
@@ -50,6 +52,13 @@ plugins:
 # rebuild), so without this, forward-dated posts stay invisible until
 # someone pushes again on/after their date.
 future: true
+
+# Analytics (set to your Google Analytics measurement ID to enable)
+google_analytics: ""  # e.g. G-XXXXXXXXXX
+
+# Newsletter (set to your form action URL to enable)
+newsletter_action: ""  # e.g. https://formspree.io/f/xxxxx
+newsletter_label: "Get new posts in your inbox"
 
 # --- Housekeeping ------------------------------------------------------------
 exclude:

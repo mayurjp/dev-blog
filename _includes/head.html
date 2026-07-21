@@ -74,6 +74,20 @@
         var h = document.documentElement.scrollHeight - window.innerHeight;
         bar.style.width = h > 0 ? (window.scrollY / h * 100) + "%" : "0%";
       }, { passive: true });
+
+      /* Back to top button */
+      var btt = document.createElement("button");
+      btt.className = "back-to-top";
+      btt.innerHTML = "&#8679;";
+      btt.setAttribute("aria-label", "Back to top");
+      btt.setAttribute("title", "Back to top");
+      document.body.appendChild(btt);
+      window.addEventListener("scroll", function () {
+        btt.classList.toggle("visible", window.scrollY > 400);
+      }, { passive: true });
+      btt.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
     });
   </script>
 </head>
