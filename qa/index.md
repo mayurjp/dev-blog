@@ -4,7 +4,7 @@ title: Q&A Bank
 permalink: /qa/
 ---
 
-Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1721 Q&A pairs across 24 domains**, organized for foundational → mid-level → advanced progression within each topic.
+Interview-ready questions and answers distilled from every blog post — bite-sized for quick review during spare time. **1709 Q&A pairs across 25 domains**, organized for foundational → mid-level → advanced progression within each topic.
 
 ## Available domains
 
@@ -13,9 +13,6 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 | [.NET]({{ '/qa/dotnet/' | relative_url }}) | 92 |
 | [API Design]({{ '/qa/api-design/' | relative_url }}) | 35 |
 | [Angular]({{ '/qa/angular/' | relative_url }}) | 92 |
-| [ASP.NET WebAPI]({{ '/qa/aspnet-webapi/' | relative_url }}) | 25 |
-| [AWS]({{ '/qa/aws/' | relative_url }}) | 24 |
-| [Azure]({{ '/qa/azure/' | relative_url }}) | 26 |
 | [CI/CD]({{ '/qa/cicd/' | relative_url }}) | 73 |
 | [Databases]({{ '/qa/databases/' | relative_url }}) | 78 |
 | [Design Patterns]({{ '/qa/design-patterns/' | relative_url }}) | 73 |
@@ -35,5 +32,8 @@ Interview-ready questions and answers distilled from every blog post — bite-si
 | [Security]({{ '/qa/security/' | relative_url }}) | 78 |
 | [Software Architecture]({{ '/qa/architecture/' | relative_url }}) | 76 |
 | [System Design]({{ '/qa/system-design/' | relative_url }}) | 78 |
+| [Aspnet Webapi]({{ '/qa/aspnet-webapi/' | relative_url }}) | 25 |
+| [Aws]({{ '/qa/aws/' | relative_url }}) | 24 |
+| [Azure]({{ '/qa/azure/' | relative_url }}) | 24 |
 
 New posts automatically generate 5-7 Q&A per post and are appended to the relevant domain.
