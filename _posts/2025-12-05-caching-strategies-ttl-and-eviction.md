@@ -75,6 +75,20 @@ def update_product(id, data):
 # Write-through
 def update_product_wt(id, data):
     cache.set(id, data)                 # cache itself propagates to DB synchronously
+
+# Eviction: sampled approximation, not a perfect LRU list
+def evict_to_make_room():
+    sample = random.sample(all_keys, MAXMEMORY_SAMPLES)   # ~5 keys per round
+    pool.insert_by_idle_time(sample)                      # pool persists ACROSS rounds
+    evict(pool.worst())                                   # worst candidate seen so far
+
+# Expiry: two complementary mechanisms for TTL'd keys
+def lazy_expire(key):        # only when the key is accessed
+    if past_ttl(key): delete(key); return MISS
+
+def active_expire_cycle():   # periodic background cycle, catches keys nobody reads
+    for key in sample_of_keys_with_ttl():
+        if past_ttl(key): delete(key)
 ```
 
 ---
@@ -136,6 +150,8 @@ Known-stale fact: fixed-TTL invalidation alone is a naive strategy for data wher
 
 **Blast radius:** every write path implemented as a script, fleet-wide, while memory hovers at the limit — lock acquisition fails, so scheduled jobs and mutex-protected sections stop. Plain commands are unaffected because eviction still runs between them, which is exactly what makes the failure so confusing to diagnose. Affected versions: 5.0.0 through 5.0.9 (the same failure was reported in the wild on 5.0.3 via Spring's lock registry).
 
+The business impact hides behind the exception type: a lock that *throws* on acquisition fails one of two ways. **Fail-closed** — the guarded work simply doesn't run (the scheduled service in the #8623 report). **Fail-open** — the caller treats the error as "not acquired" and proceeds anyway, so two workers execute a section the mutex existed to serialize. Neither direction surfaces as a cache problem on an application dashboard; both are business-visible.
+
 ```mermaid
 sequenceDiagram
     participant APP as App instance (lock registry)
@@ -195,7 +211,13 @@ Source: [Eviction does not occur during lua scripts · redis/redis#6565](https:/
 ## 7. Prevention & production checklist
 
 - **Pin a version floor of Redis ≥ 5.0.10 (or 6.0+) everywhere scripts touch memory-limited instances.** Enforce it in the base image or the Terraform module's version constraint — the failure is silent until the first script executes against a full instance, so no staging idle-run will catch it.
-- **Alert on divergence between client `-OOM` errors and server `evicted_keys`.** Client-visible OOM errors climbing while the server's eviction counter stays flat means eviction is not executing — an alert on `evicted_keys` alone reads this as "nothing to evict," and an alert on errors alone reads as generic pressure. The pair is the signal.
+- **Alert on divergence between client `-OOM` errors and server `evicted_keys`.** Client-visible OOM errors climbing while the server's eviction counter stays flat means eviction is not executing — an alert on `evicted_keys` alone reads this as "nothing to evict," and an alert on errors alone reads as generic pressure. The pair is the signal. As a concrete expression (oliver006 `redis_exporter` metric names, verified against its exporter source; `and on()` because the two sides carry different label sets):
+
+  ```promql
+  (sum(rate(redis_errors_total{err="OOM"}[5m])) > 0) and on() (sum(rate(redis_evicted_keys_total[5m])) == 0)
+  ```
+
+  The `err="OOM"` label comes from Redis's `errorstat_*` INFO counters, which exist only in Redis 6.2+ (confirmed in `src/server.c` — absent from the 5.0 branch) — on the affected 5.0.x versions the client-side error rate is the only half of this pair you can measure, itself an argument for the version floor. On Memorystore the early-warning half is a native metric: alert on `redis.googleapis.com/keyspace/keys_with_expiration` sitting at zero under a `volatile-*` policy — GCP's docs spell out the consequence, with no expirable keys there is nothing to evict when the instance reaches `maxmemory-gb`.
 - **Set `maxmemory` below instance capacity, not equal to it.** Script setup allocations (arguments plus the Lua stack) land on top of `used_memory` — with zero headroom, a script that passes the pre-script check can still push the instance over mid-execution. GCP's Memorystore docs describe exactly this pattern: on a 10 GB instance, set `maxmemory-gb` to 8 and keep 2 GB as overhead.
 - **Load-test the scripted write path against a *full* instance.** A test that only sends plain `SET`/`HSET` cannot reproduce this failure — eviction runs between those commands and everything looks fine. Reproduction needs `EVALSHA` arriving while `used_memory` sits at `maxmemory`.
 - **Watch `SLOWLOG` for `EVALSHA`, not just for slow reads.** A script exceeding `lua-time-limit` (5000ms, and unmodifiable on Memorystore) doesn't just add latency — it starves eviction fleet-wide for its whole runtime, and on Memorystore an indefinitely-running Lua script even blocks a `limited-data-loss` manual failover.
@@ -212,7 +234,19 @@ This lesson's mechanisms — TTL expiry, sampled eviction, cache-aside invalidat
 | Managed shared | [Memorystore for Redis](https://cloud.google.com/memorystore/docs/redis/memorystore-for-redis-overview), Basic vs Standard tier | The tier decides what a failure costs: Basic has **no replication and no failover** — a node failure is a flushed cache. Standard replicates across zones, but replication is asynchronous — even a *manual* failover's default `limited-data-loss` mode proceeds with up to 30 MB of unreplicated writes lost ([failover docs](https://cloud.google.com/memorystore/docs/redis/about-manual-failover)). And the provider owns the config surface: the [default `maxmemory-policy` is `volatile-lru`](https://cloud.google.com/memorystore/docs/redis/supported-redis-configurations), which evicts **only keys with TTLs** — a cache-aside `SET` without `EXPIRE` is unevictable, so a full instance walks straight into section 5's `-OOM` wall under a policy that *looks* correct. `lua-time-limit` is pinned at 5000 and unmodifiable. |
 | Client library | [`StackExchange/StackExchange.Redis`](https://github.com/StackExchange/StackExchange.Redis) (curated repo) | The expiry stampede: a hot key's TTL fires, every instance misses at once, every instance rebuilds from the database. The fix lives in the client — an atomic `SET NX PX` rebuild lock so exactly one caller recomputes. On AWS, ElastiCache for Redis exposes the same `maxmemory-policy` knob through its parameter group ([docs](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/ParameterGroups.Redis.html)) — same decision, different console. |
 
-The rebuild lock is real code in the curated repo, not a pattern diagram — `LockTake` *is* an atomic set-if-absent:
+The in-process row of the table gets its stampede protection for free, and the real library shows why: Caffeine's `LoadingCache.get` coalesces concurrent loads of the same key into one computation, per its own JavaDoc:
+
+```java
+// ben-manes/caffeine, caffeine/src/main/java/com/github/benmanes/caffeine/cache/LoadingCache.java
+// JavaDoc on get(K): "If another call to get is currently loading the value
+// for the key, this thread simply waits for that thread to finish and returns
+// its loaded value... the function is applied at most once per key."
+LoadingCache<String, Product> local = Caffeine.newBuilder()
+    .expireAfterWrite(Duration.ofMinutes(5))
+    .build(id -> db.query(id));   // N threads miss together -> ONE db.query, per pod
+```
+
+"At most once per key" is scoped to the instance — 50 pods still issue 50 queries for the same expired key. The Redis-backed rebuild lock exists precisely because coalescing has to span pods, and it is real code in the curated repo, not a pattern diagram — `LockTake` *is* an atomic set-if-absent:
 
 ```csharp
 // src/StackExchange.Redis/RedisDatabase.cs
@@ -256,9 +290,9 @@ Wiring the verified pieces together — the same shape as the incident's deploym
 
 ```mermaid
 flowchart TD
-    subgraph APP["GKE pods, cache-aside + rebuild lock"]
-        P1["pod A: GET, miss,<br/>LockTake OK, rebuilds"]
-        P2["pod B: GET, miss,<br/>LockTake fails, waits"]
+    subgraph APP["GKE pods, L1 in-process + L2 shared cache-aside"]
+        P1["pod A: L1 Caffeine miss,<br/>L2 GET miss, LockTake OK, rebuilds"]
+        P2["pod B: L1 miss, L2 GET miss,<br/>LockTake fails, waits"]
     end
     MS[("Memorystore STANDARD_HA primary<br/>maxmemory-policy allkeys-lru<br/>maxmemory-gb 8 of 10 GB")]
     REP[("replica, async replication<br/>failover can lose up to 30MB")]
@@ -274,7 +308,8 @@ flowchart TD
 ```
 
 - **Placement is a hard constraint, not a tuning knob:** clients must sit in the same authorized VPC as the instance (private IP only) — the GKE cluster and Memorystore are peers in one network, which is also where the sub-millisecond access the service promises comes from.
-- **`maxmemory-gb 8` on a 10 GB instance is section 7's headroom rule expressed as config** — the default is the full capacity, so headroom is a deliberate choice, not something the tier gives you.
+- **`maxmemory-gb 8` on a 10 GB instance is section 7's headroom rule expressed as config** — the default is the full capacity, so headroom is a deliberate choice, not something the tier gives you. And on Standard Tier, GCP's right-sizing docs reserve **10% of instance capacity as a replication buffer** — provision for it, because the 10 GB you buy is not the 10 GB you can fill.
+- **On the managed tier, section 5's wall wears a different error string:** at 100% system memory usage ratio, Memorystore blocks writes with `-OOM command not allowed under OOM prevention` and tracks how long in the `system_memory_overload_duration` metric — the documented alert threshold is 80%, and GCP's own docs note eviction is a background process a high write-rate can outpace. The headroom rule above is what keeps you off that wall.
 - **The rebuild lock's TTL must outlive a slow DB rebuild.** If the lock expires before pod A finishes reading Cloud SQL and populating the key, pod B takes the lock and rebuilds a second time — the stampede the lock exists to prevent, one TTL-misconfiguration away.
 - **Locks and cache share one instance here, so memory pressure takes down both.** That is exactly section 5's blast radius: `used_memory` at the limit didn't just risk evicting cached products, it made `EVALSHA` lock acquisition fail. The replica (red) is the second lossy surface: async replication means a failover can drop recent writes — acceptable for cache entries, another reason correctness lives in Cloud SQL plus delete-on-write invalidation, never in Redis.
 
