@@ -294,3 +294,24 @@
   font-size: var(--text-lg);
   margin: 0;
 }
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+
+  a {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-brand);
+    background: var(--color-brand-light);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}

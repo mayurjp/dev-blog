@@ -4,8 +4,6 @@ title: About
 permalink: /about/
 ---
 
-# About
-
 {%- assign author = site.data.author -%}
 
 <div class="about-author">
@@ -13,7 +11,7 @@ permalink: /about/
   <img class="about-avatar" src="{{ author.avatar | relative_url }}" alt="{{ author.name }}" width="120" height="120" loading="lazy" />
   {%- endif -%}
   <div>
-    <h2 id="author">{{ author.name }}</h2>
+    <h2>{{ author.name }}</h2>
     <p class="about-role">{{ author.role }}</p>
   </div>
 </div>
@@ -53,11 +51,11 @@ Each post follows the same structure:
   {%- if author.social.github -%}
   <a href="{{ author.social.github }}">GitHub</a>
   {%- endif -%}
-  {%- if author.social.twitter -%}
-  <a href="{{ author.social.twitter }}">X / Twitter</a>
-  {%- endif -%}
   {%- if author.social.linkedin -%}
   <a href="{{ author.social.linkedin }}">LinkedIn</a>
+  {%- endif -%}
+  {%- if author.social.twitter -%}
+  <a href="{{ author.social.twitter }}">X / Twitter</a>
   {%- endif -%}
   <a href="{{ '/feed.xml' | relative_url }}">RSS Feed</a>
 </div>
