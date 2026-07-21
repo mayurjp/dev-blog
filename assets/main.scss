@@ -38,7 +38,7 @@
 .hero {
   text-align: center;
   padding: 48px 20px 32px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .hero-title {
@@ -83,7 +83,7 @@
     background: $brand-color;
     color: #fff;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s ease;
 
     &:hover { opacity: 0.9; }
   }
@@ -304,7 +304,7 @@
     display: block;
     padding: 3px 0 3px 12px;
     border-left: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s ease, border-color 0.15s ease;
 
     &:hover, &.active {
       color: $brand-color;
@@ -367,7 +367,7 @@
   color: $grey-color;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
+  transition: opacity 0.15s ease, background 0.15s ease;
   z-index: 5;
 
   &:hover {
@@ -404,7 +404,7 @@ pre[class*="language-"]:hover .copy-btn {
   border-radius: 8px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
     border-color: $brand-color;
@@ -569,7 +569,7 @@ pre[class*="language-"]:hover .copy-btn {
 
   a {
     color: $grey-color;
-    transition: color 0.15s;
+    transition: color 0.15s ease;
     display: flex;
     align-items: center;
 
@@ -600,7 +600,7 @@ pre[class*="language-"]:hover .copy-btn {
   color: $grey-color;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s ease, border-color 0.15s ease;
 
   &:hover { color: $text-color; }
   &.active {
@@ -833,7 +833,7 @@ pre[class*="language-"]:hover .copy-btn {
   color: $text-color;
   vertical-align: middle;
   margin-left: 8px;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s ease, border-color 0.15s ease;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
@@ -1168,7 +1168,7 @@ pre[class*="language-"]:hover .copy-btn {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s ease, transform 0.1s ease;
 
   &:active { transform: scale(0.97); }
 }
@@ -1212,13 +1212,13 @@ pre[class*="language-"]:hover .copy-btn {
 
 /* ===== Breadcrumbs ===== */
 .breadcrumbs {
-  font-size: 0.85rem;
-  color: #6a737d;
+  font-size: 14px;
+  color: $grey-color;
   margin-bottom: 12px;
-  a { color: #0366d6; text-decoration: none; &:hover { text-decoration: underline; } }
+  a { color: $brand-color; text-decoration: none; &:hover { text-decoration: underline; } }
 }
-.breadcrumb-sep { margin: 0 6px; color: #aaa; }
-.breadcrumb-current { color: #586069; }
+.breadcrumb-sep { margin: 0 6px; color: $grey-color-light; }
+.breadcrumb-current { color: $grey-color; }
 
 /* ===== Social sharing ===== */
 .post-share {
@@ -1226,9 +1226,9 @@ pre[class*="language-"]:hover .copy-btn {
   align-items: center;
   gap: 8px;
   margin-top: 8px;
-  font-size: 0.85rem;
+  font-size: 14px;
 }
-.post-share-label { color: #6a737d; }
+.post-share-label { color: $grey-color; }
 .post-share-link {
   display: inline-flex;
   align-items: center;
@@ -1236,25 +1236,25 @@ pre[class*="language-"]:hover .copy-btn {
   width: 28px;
   height: 28px;
   border-radius: 4px;
-  background: #f1f3f5;
-  color: #333;
+  background: rgba($grey-color, 0.08);
+  color: $text-color;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 12px;
   text-decoration: none;
-  transition: background 0.15s;
-  &:hover { background: #0366d6; color: #fff; }
+  transition: background 0.15s ease;
+  &:hover { background: $brand-color; color: #fff; }
 }
 
 /* ===== Newsletter ===== */
 .newsletter-box {
   margin: 40px 0;
   padding: 24px;
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
+  background: rgba($grey-color, 0.05);
+  border: 1px solid $grey-color-light;
   border-radius: 8px;
   text-align: center;
 }
-.newsletter-title { font-weight: 600; margin-bottom: 12px; font-size: 1.05rem; }
+.newsletter-title { font-weight: 600; margin-bottom: 12px; font-size: 17px; }
 .newsletter-form {
   display: flex;
   gap: 8px;
@@ -1263,30 +1263,31 @@ pre[class*="language-"]:hover .copy-btn {
   input[type="email"] {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #d1d5da;
+    border: 1px solid $grey-color-light;
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 15px;
   }
   button {
     padding: 8px 20px;
-    background: #0366d6;
+    background: $brand-color;
     color: #fff;
     border: none;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
-    &:hover { background: #0256b9; }
+    transition: opacity 0.15s ease;
+    &:hover { opacity: 0.9; }
   }
 }
 
 /* ===== Comments ===== */
 .comments-section {
-  margin: 3rem 0 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e1e4e8;
+  margin: 48px 0 32px;
+  padding-top: 32px;
+  border-top: 1px solid $grey-color-light;
   h2 {
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
+    font-size: 22px;
+    margin-bottom: 16px;
   }
 }
 
@@ -1298,18 +1299,18 @@ pre[class*="language-"]:hover .copy-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #0366d6;
+  background: $brand-color;
   color: #fff;
   border: none;
-  font-size: 1.4rem;
+  font-size: 22px;
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   &.visible { opacity: 1; visibility: visible; }
-  &:hover { background: #0256b9; }
+  &:hover { opacity: 0.9; }
 }
 
 /* ===== Search page ===== */
@@ -1317,10 +1318,10 @@ pre[class*="language-"]:hover .copy-btn {
 #post-search {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e1e4e8;
+  border: 1px solid $grey-color-light;
   border-radius: 8px;
-  font-size: 1.05rem;
-  &:focus { border-color: #0366d6; outline: none; }
+  font-size: 17px;
+  &:focus { border-color: $brand-color; outline: none; }
 }
 .search-results { margin-top: 16px; }
 .search-result {
@@ -1331,14 +1332,14 @@ pre[class*="language-"]:hover .copy-btn {
   border-radius: 6px;
   text-decoration: none;
   color: inherit;
-  border: 1px solid #e1e4e8;
-  transition: border-color 0.15s;
-  &:hover { border-color: #0366d6; background: #f6f8fa; }
+  border: 1px solid $grey-color-light;
+  transition: border-color 0.15s ease;
+  &:hover { border-color: $brand-color; background: rgba($grey-color, 0.05); }
 }
-.search-result-title { font-weight: 600; color: #0366d6; }
-.search-result-meta { font-size: 0.85rem; color: #6a737d; margin-top: 2px; }
-.search-empty { color: #6a737d; font-style: italic; }
-.search-hint { color: #6a737d; font-size: 0.9rem; }
+.search-result-title { font-weight: 600; color: $brand-color; }
+.search-result-meta { font-size: 14px; color: $grey-color; margin-top: 2px; }
+.search-empty { color: $grey-color; font-style: italic; }
+.search-hint { color: $grey-color; font-size: 14px; }
 
 /* ===== FAQ page ===== */
 .faq-search {
@@ -1346,25 +1347,25 @@ pre[class*="language-"]:hover .copy-btn {
   input {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e1e4e8;
+    border: 1px solid $grey-color-light;
     border-radius: 8px;
-    font-size: 1.05rem;
-    &:focus { border-color: #0366d6; outline: none; }
+    font-size: 17px;
+    &:focus { border-color: $brand-color; outline: none; }
   }
 }
 .faq-grid {
-  h2 { border-bottom: 2px solid #e1e4e8; padding-bottom: 8px; margin-top: 32px; }
-  h3 { color: #0366d6; margin-top: 16px; font-size: 1.05rem; }
+  h2 { border-bottom: 1px solid $grey-color-light; padding-bottom: 8px; margin-top: 32px; }
+  h3 { color: $brand-color; margin-top: 16px; font-size: 17px; }
   p { line-height: 1.7; }
-  a { color: #0366d6; }
+  a { color: $brand-color; }
 }
 
 /* ===== 404 page ===== */
 .page-not-found {
   text-align: center;
   padding: 60px 20px;
-  h1 { font-size: 4rem; color: #d1d5da; margin-bottom: 8px; }
-  p { font-size: 1.1rem; color: #586069; }
+  h1 { font-size: 64px; color: $grey-color-light; margin-bottom: 8px; }
+  p { font-size: 18px; color: $grey-color; }
 }
 .search-suggestions {
   margin-top: 30px;
@@ -1374,7 +1375,7 @@ pre[class*="language-"]:hover .copy-btn {
   margin-right: auto;
   ul { list-style: none; padding: 0; }
   li { margin: 8px 0; }
-  a { color: #0366d6; font-size: 1rem; }
+  a { color: $brand-color; font-size: 16px; }
 }
 
 /* ===== About page ===== */
@@ -1387,14 +1388,14 @@ pre[class*="language-"]:hover .copy-btn {
     a {
       display: inline-block;
       padding: 8px 16px;
-      background: #f6f8fa;
-      border: 1px solid #e1e4e8;
+      background: rgba($grey-color, 0.05);
+      border: 1px solid $grey-color-light;
       border-radius: 6px;
       text-decoration: none;
-      color: #0366d6;
+      color: $brand-color;
       font-weight: 500;
-      transition: border-color 0.15s;
-      &:hover { border-color: #0366d6; background: #f0f6ff; }
+      transition: border-color 0.15s ease;
+      &:hover { border-color: $brand-color; background: rgba(71, 138, 201, 0.08); }
     }
   }
 }
@@ -1412,22 +1413,22 @@ pre[class*="language-"]:hover .copy-btn {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
+  background: rgba($grey-color, 0.05);
+  border: 1px solid $grey-color-light;
   border-radius: 8px;
   text-decoration: none;
-  color: #24292e;
-  font-size: 0.9rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  &:hover { border-color: #0366d6; box-shadow: 0 2px 8px rgba(3,102,214,0.1); }
+  color: $text-color;
+  font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  &:hover { border-color: $brand-color; box-shadow: 0 2px 8px rgba(71, 138, 201, 0.1); }
 }
-.home-link-icon { font-size: 1.1rem; }
+.home-link-icon { font-size: 18px; }
 
 /* ===== Dark mode additions ===== */
 [data-theme="dark"] {
   .breadcrumbs { color: #8b949e; a { color: #58a6ff; } }
   .breadcrumb-current { color: #8b949e; }
-  .post-share-link { background: #21262d; color: #c9d1d9; &:hover { background: #0366d6; color: #fff; } }
+  .post-share-link { background: #21262d; color: #c9d1d9; &:hover { background: #58a6ff; color: #fff; } }
   .newsletter-box { background: #161b22; border-color: #30363d; }
   .newsletter-form input[type="email"] { background: #0d1117; border-color: #30363d; color: #c9d1d9; }
   #post-search { background: #0d1117; border-color: #30363d; color: #c9d1d9; &:focus { border-color: #58a6ff; } }

@@ -23,7 +23,7 @@ Each post follows the same structure:
 - **350+ posts** across 22 domains
 - **1,636 Q&A pairs** for interview prep
 - **22 glossaries** with cross-referenced terms
-- **8 hands-on challenges** — find the bug in a real manifest
+- **37 hands-on challenges** — find the bug in a real manifest
 - **CKA/CKAD roadmap** mapped to blog posts
 
 ## The tech stack

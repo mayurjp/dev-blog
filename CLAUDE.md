@@ -106,6 +106,19 @@ at the repo root does this mechanically for every block that contains `{{`/`{%` 
 already inside a raw block. Verify with `bundle exec jekyll build` after any post edit
 that introduces template syntax.
 
+The same syntax also breaks when it appears **inline in prose** (a single-backtick code
+span or plain text, e.g. `` `${{ steps.x.outputs.y }}` `` explaining GitHub Actions
+syntax) rather than inside a fenced block — `fix-liquid-codeblocks.py` doesn't catch
+this since it only scans triple-backtick fences. `fix-inline-liquid.py` (also at the
+repo root) handles this case: it wraps only the Liquid-looking text *inside inline
+backtick spans*, which is deliberately narrower than "any `{{`/`{%` in the file" because
+real in-body Jekyll links (`{{ '/topic/slug/' | relative_url }}`, used for glossary and
+"next in series" links) are never backtick-quoted — wrapping those in `{% raw %}` would
+silently break the link instead of fixing a bug. Found and fixed 2026-07-21: 6 posts and
+3 `qa/*.md` pages had inline GitHub Actions/Go-template/Angular/PromQL syntax rendering
+blank or erroring. Run both scripts and `bundle exec jekyll build` after any bulk content
+edit.
+
 ## kramdown gotcha: markdown is NOT parsed inside raw HTML blocks
 
 When emitting HTML directly (as `publish-qa.py` does for the Q&A cards), kramdown does
@@ -213,7 +226,7 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 ### Interactive features
 - **Dark mode** — `data-theme` attribute, localStorage, auto-detect `prefers-color-scheme`, mermaid switches theme
 - **Interactive quiz** (`/learn/`) — spaced repetition (localStorage), domain/difficulty filters, streak/accuracy
-- **Break This Manifest** (`/challenges/`) — 8 Kubernetes challenges, click-to-reveal
+- **Break This Manifest** (`/challenges/`) — 37 challenges across Kubernetes, Docker, CI/CD, Security, Database, and Networking, click-to-reveal, category filters
 - **CKA/CKAD Roadmap** (`/roadmap/`) — tabbed, linked to posts + Q&A
 - **Q&A Bank** (`/qa/`) — 1636 pairs, accordion cards, expand-all, difficulty badges
 - **Post search** (`/search/`) — client-side title search, live results
