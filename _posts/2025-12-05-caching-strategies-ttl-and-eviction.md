@@ -10,15 +10,49 @@ tags: [system-design, caching, redis, eviction, ttl]
 
 **TL;DR:** What happens when your cache fills up, and who's actually responsible for keeping it in sync? Sync is a choice between cache-aside (the app checks the cache, falls back to the DB on a miss, and invalidates on write) and write-through (writes flow through the cache itself); eviction under memory pressure is handled by sampling a handful of random keys and evicting the worst-scored one from a small candidate pool, not by maintaining a perfectly-ordered LRU list.
 
+> **In plain English (30 seconds):** you already know this pattern — it's memoization. If `get_user(id)` hits the database on every call, you put a dict in front of it: check the dict first, call the database only on a miss, and store the result for next time. That dict is a cache. This post answers the three questions the pattern raises once it's real: who deletes `cache[id]` when the database row changes (cache-aside vs write-through), what gets thrown out when the dict is full (eviction), and how entries with an expiry time actually disappear (TTL cleanup).
+
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 
 ## 1. The Engineering Problem: two separate questions hide under "add a cache"
 
-"Add caching" conflates two genuinely separate design decisions. First: **who keeps the cache and the source of truth in sync, and when** — does the application check the cache and fall back to the database on a miss (with the database always the authority), or does every write flow *through* the cache layer, which then propagates to the database itself? These have different staleness and complexity tradeoffs. Second, entirely independent of the first: **what happens when the cache is full and a new entry needs room** — under a fixed memory budget, something has to be evicted, and doing that "correctly" (evict the truly least-valuable entry) at real throughput is itself a nontrivial systems problem, not a one-line "just track access order."
+Start with a function every developer has written:
+
+```python
+def get_user(id):
+    return db.query(id)      # ~100ms, every single call
+```
+
+Call it a thousand times a second and the database falls over. So you put a dict in front of it:
+
+```python
+cache = {}
+
+def get_user(id):
+    if id in cache:
+        return cache[id]     # ~0ms, database not touched
+    user = db.query(id)
+    cache[id] = user
+    return user
+```
+
+That dict is a cache, and it works — until two questions show up that the dict can't answer on its own.
+
+**Question 1: who keeps the cache and the database saying the same thing?** When the row changes in the database, `cache[id]` still holds the old value. Something has to delete or refresh it — and what that "something" is turns out to be a real design decision with different failure modes, not a detail.
+
+**Question 2: what happens when the cache fills up?** Memory is finite, so a new entry eventually needs room — something has to be thrown out, and choosing *what* at thousands of requests per second is its own problem. Entries with an expiry time (TTL) also have to actually disappear, without scanning every key on every pass.
+
+The two questions are independent: you can pick any answer to the first with any answer to the second. Most "caching is hard" stories are one of them answered badly.
 
 ---
 
 ## 2. The Technical Solution: cache-aside vs write-through for sync; sampled approximation for eviction and expiry
+
+### Part A — who syncs: your app (cache-aside) or the cache itself (write-through)
+
+**Cache-aside: your application owns both steps.** Read: check the cache first, and on a miss read the database and put the result in the cache. Write: write the database first, then *delete* the cache key. The delete-on-write is the part that actually keeps the cache correct — a TTL only limits how long a wrong value can live, it never makes the cache right.
+
+**Write-through: the cache owns the write path.** The app writes only to the cache, and the cache synchronously writes to the database. No stale window, and reads always see the latest write — but every write now pays for two systems, and if the cache is down you can't write at all.
 
 ```mermaid
 flowchart TD
@@ -36,7 +70,27 @@ flowchart TD
     class WT through;
 ```
 
-Redis's own eviction mechanism, when memory is full, doesn't maintain a perfectly-ordered LRU/LFU list — that would need constant, expensive bookkeeping on every access across the whole keyspace. Instead it **samples**: pick a handful of random keys, score them by idle time (or inverse access frequency for LFU), keep a small pool of the best eviction candidates seen so far, and evict from that pool:
+Cache-aside's write path has a real race window, and it's the one that bites in production: a reader can re-fill the cache with a stale value *after* the writer already deleted the key —
+
+```mermaid
+sequenceDiagram
+    participant A2 as App 2, reader
+    participant C as cache
+    participant D as database
+    A2->>C: GET id, miss
+    A2->>D: read, gets v1
+    Note over D: App 1 writes v2, deletes cache key
+    A2->>C: SET id = stale v1
+    Note over C: cache serves v1 while DB has v2
+```
+
+The window is small but it never closes on its own — "we delete on write" is a guarantee about the common case, not about every possible interleaving.
+
+### Part B — when the cache is full: sample a few keys, don't sort them all
+
+The obvious design is a perfect LRU list: track the exact access order of every key and evict the true oldest. At real throughput that's too expensive — every single read would have to update the ordering.
+
+What Redis does instead is cheaper and almost as good: **pick ~5 random keys, score them by idle time, and evict the worst of that tiny sample.** It also keeps a small pool (16 slots) of the best eviction candidates seen *across* rounds, so each eviction decision benefits from keys sampled in previous rounds too. The sample size is a tunable (`maxmemory_samples`): more samples means closer to perfect LRU, at more CPU per eviction.
 
 ```mermaid
 flowchart TD
@@ -52,9 +106,14 @@ flowchart TD
     class SAMPLE,POOL sample;
 ```
 
-Expiry (TTL) uses two *complementary* mechanisms, not one: **lazy expiration** removes a key only when something actually tries to access it and notices it's past its expiry; **active expiration** is a separate periodic background cycle that proactively finds and removes expired keys even if nobody ever reads them again. Lazy alone would leak memory for keys nobody revisits; active alone (constantly scanning everything) would waste CPU on keys that get naturally cleaned up by normal access anyway.
+### Part C — expired keys: deleted on read (lazy), and by a background cleaner (active)
 
-Core truths: **a TTL guarantees eventual removal, not synchronized correctness** — it bounds worst-case staleness, it doesn't keep a cache-aside cache correct the moment the underlying data changes; explicit invalidation on write is what actually does that, with TTL as the safety net underneath it. And **eviction sampling is a deliberate, documented tradeoff**, not an accidentally-cut corner — Redis's own source comments frame it explicitly as constant-memory approximation traded for giving up perfect LRU ordering.
+A TTL'd key disappears in two independent ways, and you need both:
+
+- **Lazy expiration:** when a key is accessed, Redis checks whether it's past its TTL and deletes it on the spot. Free, but a key nobody ever reads would sit in memory forever.
+- **Active expiration:** a background cycle runs at `server.hz` (default 10 times a second) and checks a small batch of TTL'd keys per pass (`ACTIVE_EXPIRE_CYCLE_KEYS_PER_LOOP`, 20). If more than 10% of a sample turns out to be expired (`ACTIVE_EXPIRE_CYCLE_ACCEPTABLE_STALE`), it puts in extra effort instead of waiting for the next pass — and a fast variant of the cycle is capped at 1000 microseconds, so cleanup can never stall requests. Lazy alone leaks memory; active alone wastes CPU on keys normal access would have cleaned up anyway.
+
+Core truths to hold: **a TTL guarantees eventual removal, not synchronized correctness** — Part A's delete-on-write is the correctness mechanism, TTL is the safety net under it. And **eviction sampling is a deliberate, documented tradeoff** — Redis's own source comments describe it as a constant-memory approximation, not a cut corner.
 
 ---
 
