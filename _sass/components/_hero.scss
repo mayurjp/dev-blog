@@ -2,14 +2,14 @@
 
 .hero {
   text-align: center;
-  padding: var(--space-2xl) var(--space-md) var(--space-lg);
-  margin-bottom: var(--space-lg);
+  padding: 24px var(--space-md) 16px;
+  margin-bottom: 0;
 }
 
 .hero-title {
   font-size: var(--text-3xl);
   font-weight: 700;
-  margin: 0 0 var(--space-md);
+  margin: 0;
   color: var(--color-text);
 }
 
