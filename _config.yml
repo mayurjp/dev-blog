@@ -41,10 +41,9 @@ image: /assets/og/default.png
 # Explicit header nav whitelist -- without this, minima lists every page with
 # a `title:` (including the topic pages under topics/ and domain pages under qa/).
 header_pages:
-  - qa.md
-  - learn/index.md
+  - qa/index.md
   - challenges/index.md
-  - archive.md
+  - learn/index.md
 
 plugins:
   - jekyll-feed

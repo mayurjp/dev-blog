@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Learn — Interactive Quiz"
+title: "Interactive Quiz"
 description: "Test your knowledge with 1,600+ spaced-repetition quiz questions across Kubernetes, Docker, Security, Microservices, and 18 more domains. Wrong answers come back more often."
 permalink: /learn/
 ---
