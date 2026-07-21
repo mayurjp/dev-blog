@@ -33,6 +33,12 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
+
+  h3 {
+    padding: var(--space-md);
+    margin: 0;
+    font-size: var(--text-base);
+  }
 }
 
 .challenge-yaml {
@@ -44,21 +50,46 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.challenge-reveal {
-  padding: var(--space-md);
-  background: var(--color-bg-alt);
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  cursor: pointer;
+.challenge details {
+  border-top: 1px solid var(--color-border-light);
 
-  &:hover {
-    background: var(--color-surface);
+  summary {
+    display: block;
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-brand);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+
+    &::-webkit-details-marker { display: none; }
+
+    &::before {
+      content: '+ ';
+      font-family: var(--font-mono);
+    }
+
+    &:hover {
+      background: var(--color-bg-alt);
+    }
+  }
+
+  &[open] summary::before {
+    content: '\2212  ';
+  }
+
+  &[open] summary {
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-bg-alt);
   }
 }
 
-.challenge:not(.revealed) .challenge-reveal {
-  color: var(--color-text-muted);
-  font-style: italic;
+.challenge details > *:not(summary) {
+  padding: var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 .challenges-footnote {
