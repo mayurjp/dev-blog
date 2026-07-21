@@ -134,8 +134,10 @@ The homepage is **not** a flat list of every post — that broke down once curri
 past a handful of posts per topic. Current structure (added 2026-07-19):
 
 - **`_data/topics.yml`** — the single source of truth for each topic's slug, display
-  name, and one-line description. Add a new domain here (plus one page below) and both
-  the homepage and its topic page pick it up automatically; no other file needs editing.
+  name, one-line description, and optional `glossary:` link. Add a new domain here
+  (plus one page below) and both the homepage and its topic page pick it up
+  automatically; no other file needs editing. Topics with a `glossary:` field show a
+  "📖 Key terms" link on their topic page (`_layouts/category.html`).
 - **`_layouts/home.html`** — renders a card grid from `site.data.topics` (name,
   description, live post count per card), not post lists. Links to `/<slug>/`.
 - **`topics/<slug>.md`** — one thin page per topic (`layout: category`, `category:
@@ -149,10 +151,11 @@ past a handful of posts per topic. Current structure (added 2026-07-19):
 - **`archive.md`** (`permalink: /archive/`) — renders via **`_layouts/archive.html`**, a
   flat reverse-chronological list of every post across all topics, with a topic tag on
   each entry.
-- **`_config.yml`'s `header_pages:`** is an explicit whitelist (`about.md`, `archive.md`)
-  — without it, minima would list every page with a `title:` in the top nav, including
-  all the topic pages (which are meant to be reached only via the homepage cards) and,
-  previously, `CLAUDE.md` itself (see below).
+- **`_config.yml`'s `header_pages:`** is an explicit whitelist — without it, minima would
+  list every page with a `title:` in the top nav, including all the topic pages (which
+  are meant to be reached only via the homepage cards) and, previously, `CLAUDE.md`
+  itself (see below). Current entries: qa, learn, challenges, roadmap, playground,
+  search, faq, about, archive.
 
 ## `CLAUDE.md` is excluded from the built site
 
@@ -168,7 +171,7 @@ The site currently uses minima's stock (light) styling with no color overrides. 
 
 `github_username` and `logo` in `_config.yml` are unrelated to the skin issue — they're read directly by minima 2.5.1's `_includes/social.html` and are unaffected by the `skin:` limitation.
 
-## Mermaid.js diagram rendering (added 2026-07-19)
+## Mermaid.js diagram rendering (added 2026-07-19, lazy-loaded 2026-08-22)
 
 Every lesson diagram is now a fenced `` ```mermaid `` code block (`flowchart` or
 `sequenceDiagram` — see `../blog-pipeline`'s SKILL.md for the generation rules),
@@ -176,6 +179,15 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 `github-pages` gem pin doesn't allow custom plugins — so it's done entirely in
 `_includes/head.html`:
 
+- **Mermaid is lazy-loaded (changed 2026-08-22).** The script tag was moved from a
+  static `<script src="...">` in `<head>` to a dynamically created `<script>` element
+  appended only when `document.querySelector(".language-mermaid")` finds diagrams on
+  the page. This avoids downloading ~1.5MB on pages without diagrams (homepage, QA,
+  search, etc.). The trade-off is a slight delay on first mermaid render, but pages
+  without diagrams see a significant improvement.
+- **`_includes/head.html` also has `<link rel="preconnect">` hints** for
+  `cdn.jsdelivr.net` and `cdnjs.cloudflare.com` (the CDNs used by mermaid, sql.js,
+  and pyodide), reducing DNS+TLS latency when those resources are eventually fetched.
 - **The HTML shape kramdown/Rouge produces depends on whether the language is
   recognized.** A known language (`yaml`, `dockerfile`, ...) gets wrapped as
   `<div class="language-X highlighter-rouge"><div class="highlight"><pre
@@ -214,14 +226,16 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 ### Layouts
 - `_layouts/post.html` — article with breadcrumbs, social sharing (X/LinkedIn/HN), prev/next nav, TOC, copy buttons, code tabs, newsletter signup, JSON-LD structured data, reading time
 - `_layouts/home.html` — hero, search bar, learning paths (3 hardcoded), topic grid (auto from topics.yml), secondary links (FAQ/search/RSS/archive)
-- `_layouts/category.html` — topic page with glossary link, posts sorted by `order:` ascending
+- `_layouts/category.html` — topic page with glossary link (when `glossary:` field in topics.yml), posts sorted by `order:` ascending
 - `_layouts/archive.html` — reverse-chronological flat list with topic tags
 - `_layouts/default.html` — minima's default (header + content + footer)
 
 ### Includes
-- `_includes/head.html` — SEO tag, feed meta, dark mode script (pre-paint), mermaid rendering, reading progress bar, back-to-top button
+- `_includes/head.html` — SEO tag, feed meta, dark mode script (pre-paint), mermaid lazy-loading (only on pages with diagrams), reading progress bar, back-to-top button, preconnect hints for CDNs
 - `_includes/header.html` — sticky header, nav from `header_pages`, dark mode toggle
 - `_includes/social.html` — GitHub, X, LinkedIn, RSS SVG icons
+- `_includes/comments.html` — Giscus comments, gated on `giscus_repo` config key
+- `_includes/google-analytics.html` — GA4 gtag script, gated on `google_analytics` config key + `jekyll.environment == 'production'`
 
 ### Interactive features
 - **Dark mode** — `data-theme` attribute, localStorage, auto-detect `prefers-color-scheme`, mermaid switches theme
@@ -231,6 +245,7 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 - **Q&A Bank** (`/qa/`) — 1636 pairs, accordion cards, expand-all, difficulty badges
 - **Post search** (`/search/`) — client-side title search, live results
 - **FAQ page** (`/faq/`) — curated questions with search, links to posts
+- **Code Playground** (`/playground/`) — client-side execution (JavaScript native, Python via Pyodide, SQL via sql.js), tab-to-indent, Ctrl+Enter to run
 
 ### SEO
 - `_config.yml`: `jekyll-seo-tag` + `jekyll-feed` plugins
@@ -239,12 +254,35 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 - `404.html` — custom 404 with navigation suggestions
 - `description:` front matter on all posts (required since 2026-07-20)
 - JSON-LD structured data on every post (`BlogPosting` schema)
+- `image: /assets/logo.svg` — default OG image fallback in `_config.yml`
+- RSS feed at `/feed.xml` via `jekyll-feed` (no custom layout needed)
+- Social sharing buttons (X/LinkedIn/HN) on every post
+- `jekyll-seo-tag` handles Open Graph + Twitter Card meta tags from `description:` + `image:` front matter
+
+### Accessibility (WCAG 2.1 AA, added 2026-08-22)
+- Skip-nav link + `#main-content` on `<main>` (`_layouts/default.html`)
+- Global `*:focus-visible` styles (outline on keyboard navigation only)
+- `.sr-only` utility class for screen-reader-only content
+- ARIA attributes on: header nav (`aria-label`), social links (`aria-label`), breadcrumbs (`aria-hidden` separators, `aria-current`), QA accordions (`role="button"`, `tabindex="0"`, `aria-expanded`), code tabs (`role="tablist/tab/tabpanel"`, keyboard nav), copy buttons (`aria-label`), TOC (`aria-label`, `aria-current` on active), theme toggle (`aria-pressed`), nav hamburger (`aria-label`)
+- `prefers-reduced-motion` media query disables smooth scroll and animations
+- Mermaid SVGs get `role="img"` + `<title>` for screen readers
+- Newsletter signup has visible `<label>` (was hidden without label)
+- Back-to-top button uses `textContent` (not `innerHTML`), respects `prefers-reduced-motion`
+- Reading progress bar has `aria-hidden="true"`
+
+### Performance (added 2026-08-22)
+- Mermaid lazy-loaded: only downloads on pages with `.language-mermaid` elements (~1.5MB saved on most pages)
+- `<link rel="preconnect">` for `cdn.jsdelivr.net` and `cdnjs.cloudflare.com`
+- System font stack (no web font downloads)
+- CDN libs load on demand: sql.js (playground SQL), Pyodide (playground Python), Giscus (comments), GA gtag (production only)
+- `lighthouserc.json` — config for running Lighthouse CI against 5 key pages
+- `scripts/audit-dependencies.sh` — prints gem versions, CDN deps, plugins, exclusions
 
 ### Content structure
-- 22 domains in `_data/topics.yml` (including networking, platform-engineering)
+- 24 domains in `_data/topics.yml` (22 original + networking + platform-engineering)
 - 350+ posts in `_posts/`, all with `order:` for curriculum sorting
 - Each domain has a `topics/<slug>.md` page
-- 22 glossary posts (`order: 99`), 22 "101" posts (`order: 0`)
+- 24 glossary posts (`order: 99`), 24 "101" posts (`order: 0`) — all domains covered
 - 15 unpublished posts (`published: false`) — deliberate, see "Unpublishing" section
 
 ### Build pipeline
@@ -253,6 +291,7 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 - `bundle exec jekyll serve` for local preview
 - `future: true` renders forward-dated posts immediately
 - Liquid `{{`/`{%` in code fences breaks the build — use `{% raw %}` wrapper
+- `bundle exec jekyll build` to verify build locally (no other build commands)
 
 ### Two-repo system
 - `dev-blog` — the Jekyll site (this repo)
@@ -260,14 +299,14 @@ rendered into a real graphic client-side. There is no Jekyll plugin for this —
 - Never hand-edit `qa/*.md` — regenerated by `publish-qa.py`
 - Content tracker at `blog-pipeline/content-tracker.md` is the source of truth for curriculum progress
 
-### Domains with posts but NO topic page before 2026-08-22
-- `networking` — 7 posts (now added to topics.yml + topic page)
-- `platform-engineering` — 6 posts (now added to topics.yml + topic page)
-
 ### Config keys that matter
-- `google_analytics:` — set to measurement ID to enable GA (currently empty)
-- `newsletter_action:` — set to form URL to enable newsletter (currently empty)
-- `header_pages:` — whitelist for nav links (qa, learn, challenges, roadmap, search, faq, about, archive)
+- `google_analytics:` — set to GA4 measurement ID (e.g. `G-XXXXXXXXXX`) to enable; currently empty
+- `newsletter_action:` — set to form URL to enable newsletter signup; currently empty
+- `newsletter_label:` — text for newsletter CTA
+- `giscus_repo:`, `giscus_repo_id:`, `giscus_category:`, `giscus_category_id:` — Giscus config; all empty (comments gated on `giscus_repo` being non-empty)
+- `header_pages:` — whitelist for nav links (qa, learn, challenges, roadmap, playground, search, faq, about, archive)
 - `github_username:`, `twitter_username:`, `linkedin_username:` — used by social.html
 - `logo:` — SVG favicon + header logo
+- `image: /assets/logo.svg` — default OG image fallback
 - `permalink: /:categories/:title/` — all post URLs are `/<category>/<title>/`
+- `future: true` — renders forward-dated posts immediately
