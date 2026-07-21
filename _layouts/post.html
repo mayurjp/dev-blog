@@ -184,8 +184,11 @@ layout: default
     });
   });
 
-  document.querySelectorAll('.highlight, pre[class*="language-"]').forEach(function (block) {
+  document.querySelectorAll('.highlight').forEach(function (block) {
     if (block.querySelector('.copy-btn')) return;
+  });
+  document.querySelectorAll('pre[class*="language-"]').forEach(function (block) {
+    if (block.closest('.highlight') || block.querySelector('.copy-btn')) return;
     var btn = document.createElement('button');
     btn.className = 'copy-btn';
     btn.textContent = 'Copy';
