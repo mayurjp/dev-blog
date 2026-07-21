@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "System Design Interview Questions: 78 Real-World Q&A from Production Manifests"
-description: "78 interview-ready System Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "System Design Interview Questions: 80 Real-World Q&A from Production Manifests"
+description: "80 interview-ready System Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/system-design/
 ---
 
 Bite-sized, standalone interview questions and answers for System Design. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">78</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">80</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -591,6 +591,20 @@ Before any cache keys are even sent to Redis. `IsOverLimitWithLocalCache` is che
   </div>
 </div>
 
+<div class="qa-item" data-diff="Beginner">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: Your rate limiter returns 429s for a client, but the descriptor's Redis counter is under its limit — what do you check first? <span class="qa-badge qa-beginner">[Beginner]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+Whether the verdict is coming from the pod's local over-limit cache rather than the shared counter: the service's debug-port `/stats` shows `over_limit` climbing while the Redis counter sits below threshold. The isolating test is restarting one ratelimit pod — false rejections stop immediately because the cached verdict (freecache) dies with the pod. The classic cause is a descriptor using dynamic per-request limit overrides: the local cache stores the "over limit" verdict but not the limit that produced it, so a verdict cached under a low limit wrongly rejects later requests carrying a higher one.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3 class="qa-q" role="button" tabindex="0" aria-expanded="false">Q: How do you operate a shared-state rate limiter that needs per-request dynamic limits without false rejections? <span class="qa-badge qa-intermediate">[Intermediate]</span> <span class="qa-toggle" aria-hidden="true">▸</span></h3>
+  <div class="qa-a" markdown="1">
+Disable the local over-limit cache for that deployment (`LocalCacheSizeInBytes: 0`) and accept one Redis round-trip per check. The local cache keys only on the descriptor, not descriptor-plus-limit, so no configuration keeps both dynamic overrides and the local cache correct — the cache is only safe for static-limit descriptors, where a cached verdict can't go stale.
+  </div>
+</div>
+
 ## Topic: Consistent Hashing (Order 10)
 {: .qa-topic }
 
@@ -776,7 +790,7 @@ Treating a heartbeat timeout as a definitive declaration of death — "ping it, 
 
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 78 across System Design
+**Last updated:** July 2026 | **Total Q&A:** 80 across System Design
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 
@@ -1255,6 +1269,22 @@ Treating a heartbeat timeout as a definitive declaration of death — "ping it, 
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Before any cache keys are even sent to Redis. `IsOverLimitWithLocalCache` is checked in a loop over all descriptors *before* the pipeline is built. This ordering is deliberate: a client hammering an endpoint while already over its limit generates zero Redis traffic for those requests past the first rejection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Your rate limiter returns 429s for a client, but the descriptor's Redis counter is under its limit — what do you check first?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Whether the verdict is coming from the pod's local over-limit cache rather than the shared counter: the service's debug-port `/stats` shows `over_limit` climbing while the Redis counter sits below threshold. The isolating test is restarting one ratelimit pod — false rejections stop immediately because the cached verdict (freecache) dies with the pod. The classic cause is a descriptor using dynamic per-request limit overrides: the local cache stores the \"over limit\" verdict but not the limit that produced it, so a verdict cached under a low limit wrongly rejects later requests carrying a higher one."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you operate a shared-state rate limiter that needs per-request dynamic limits without false rejections?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Disable the local over-limit cache for that deployment (`LocalCacheSizeInBytes: 0`) and accept one Redis round-trip per check. The local cache keys only on the descriptor, not descriptor-plus-limit, so no configuration keeps both dynamic overrides and the local cache correct — the cache is only safe for static-limit descriptors, where a cached verdict can't go stale."
       }
     },
     {
