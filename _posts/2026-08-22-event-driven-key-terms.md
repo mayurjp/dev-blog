@@ -33,10 +33,13 @@ CloudEvents is a CNCF specification (cloudevents/spec) that defines a vendor-neu
 ### Eventual consistency
 Eventual consistency means a read model may briefly lag the write model because it is updated asynchronously by events that have not yet been processed. After the event propagates, all readers converge on the same value; there is no global lock enforcing instant agreement. The trade-off is that a just-written value is not guaranteed to be readable immediately, which is the central thing developers must design around.
 
+### Correlation / Causation ID
+A correlation ID traces a chain of events back to the original user request across multiple services — when OrderPlaced triggers FulfillmentStarted which triggers ItemShipped, the same correlation ID rides on every event so you can reconstruct the full flow. A causation ID identifies which specific event caused another (FulfillmentStarted was caused by OrderPlaced). Both are propagated as metadata fields on events and are essential for distributed tracing and debugging.
+
 ## Event sourcing & CQRS
 
 ### Event sourcing
-Event sourcing stores state as a sequence of events instead of mutating a current row — the `Order` aggregate's state is the fold of every `OrderPlaced`, `ItemAdded`, and `OrderShipped` event in its stream. To get current state you replay the stream (or load a snapshot plus later events) and apply each event in order. This gives you a complete audit log for free and lets you rebuild any past state, at the cost of a growing log and the need for snapshots.
+Event sourcing stores state as a sequence of events instead of mutating a current row — the `Order` aggregate's state is the fold of every `OrderPlaced` and `FulfillmentStarted` event in its stream. To get current state you replay the stream (or load a snapshot plus later events) and apply each event in order. This gives you a complete audit log for free and lets you rebuild any past state, at the cost of a growing log and the need for snapshots.
 
 ### CQRS
 CQRS (Command Query Responsibility Segregation) splits a model into a write side that handles commands and produces events, and a read side that serves queries from a denormalized view. The two sides can use different stores — Postgres for writes, Elasticsearch for reads — because they are updated by the same event stream. The benefit is that read and write workloads scale and evolve independently; the cost is that the read side is derived, so it is eventually consistent.
@@ -48,7 +51,7 @@ The write model is the command-handling side of CQRS: it loads the aggregate, va
 The read model (or projection) is a purpose-built, denormalized store populated by consuming events — a "orders by customer" view in a fast key-value store, for example. It is tuned for the exact queries the UI needs, so reads are cheap and don't join across services. Because it is rebuilt from events, you can delete and recreate it at any time without losing source data.
 
 ### Projection
-A projection is a specific read model built by subscribing to an event stream and folding events into a queryable shape — the "open orders dashboard" is a projection of `OrderPlaced` minus `OrderShipped`. It is just a consumer with a table; when the logic changes you reset its offset and replay. Projections are how CQRS turns the write-side event log into many optimized read APIs.
+A projection is a specific read model built by subscribing to an event stream and folding events into a queryable shape — the "open orders dashboard" is a projection of `OrderPlaced` events before `FulfillmentStarted`. It is just a consumer with a table; when the logic changes you reset its offset and replay. Projections are how CQRS turns the write-side event log into many optimized read APIs.
 
 ### Snapshot
 A snapshot is a periodically saved aggregate state (e.g. every 100 events) so you don't replay the entire stream to load an entity. On load you read the latest snapshot and apply only the events after it, bounding reconstruction cost. Without snapshots a long-lived aggregate's startup time grows linearly with its event count.
@@ -64,6 +67,12 @@ The outbox pattern avoids the dual-write problem by writing the domain change an
 ### Transaction outbox
 The transaction outbox is the concrete implementation of the outbox pattern: a `outbox` table co-located with the business tables, written inside the same ACID transaction as the state change. A polling publisher or a log-based CDC tool (like Debezium reading the write-ahead log) drains the outbox and sends each row to Kafka exactly once per row. It is the mechanism that makes "did the event get sent?" answerable with a database query instead of hope.
 
+### Inbox pattern
+The inbox pattern is the pull-based complement to the outbox: instead of pushing events to a broker, a consumer polls a "pending events" table in the database, processes each event, and marks it as processed. It ensures at-least-once delivery without requiring CDC tooling, making it simpler than the outbox pattern but adding polling latency. Useful when the consumer owns both the events table and the processing logic in the same database.
+
+### CDC (Change Data Capture)
+CDC is a pattern that streams database row changes (INSERT/UPDATE/DELETE) as events. Tools like Debezium attach to the database's WAL or binlog and publish change events to Kafka in near real-time. CDC is the engine behind the outbox pattern (draining the outbox table) and is also used for database replication and keeping derived data stores in sync.
+
 ### Idempotent handler
 An idempotent handler is a consumer that produces the same result whether an event is processed once or delivered five times. It does this by recording processed event ids (or using the event's natural key) so a redelivery is a no-op rather than a duplicate order. At-least-once delivery makes idempotency mandatory, because the bus will resend after timeouts and crashes.
 
@@ -72,6 +81,9 @@ A dead-letter queue (DLQ) is where a broker routes events that repeatedly fail t
 
 ### Schema evolution
 Schema evolution is the disciplined practice of changing an event's structure without breaking existing consumers — adding optional fields, never removing required ones, and versioning via the CloudEvents `type` or a schema registry. A consumer written for v1 must still read v2 events, so changes are backward-compatible by rule. The schema registry (e.g. Confluent's) enforces compatibility at publish time so a bad change is rejected before it reaches production.
+
+### Event versioning
+When an event schema evolves (new fields, changed types), old consumers must still read old versions. Strategies include a `version` field in the event type, a schema registry (like Confluent's) to enforce backward compatibility, or CloudEvents `datacontenttype` versioning. Without versioning, deploying a new consumer that expects a field older producers don't send causes runtime failures.
 
 ### Exactly-once vs at-least-once
 At-least-once delivery means the bus may send an event more than once after a failure, so consumers must be idempotent. Exactly-once is stronger — the event is processed once and only once — but in practice it is usually "effectively once," achieved by idempotent producers plus transactional reads/writes (Kafka's transactions) rather than a magic guarantee. Most systems choose at-least-once plus idempotency because it is simpler and nearly as safe.

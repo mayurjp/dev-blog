@@ -19,7 +19,7 @@ A commit is a content-addressed object in Git's object database (`objects/`), ad
 A tree object stores the directory structure of a single commit snapshot: a list of (mode, filename, object-hash) entries, where each entry points either to a blob (a file) or to another tree (a subdirectory). A commit points to one top-level tree, and that tree recursively references every file in the repository at that moment. Trees are themselves content-addressed, so unchanged subtrees are shared across commits by hash.
 
 ### blob
-A blob is the lowest-level object: the raw, uncompressed-with-zlib bytes of a file's contents, with no name, no path, and no metadata. Git hashes the content (with a small header, `blob <size>\0`) to get the blob's SHA-1, so two identical files anywhere in history collapse to one blob. Git stores blobs in `objects/` and never stores deltas at this layer — delta compression is a later packfile optimization.
+A blob is the lowest-level object: the raw bytes of a file's contents (the object itself is zlib-compressed on disk), with no name, no path, and no metadata. Git hashes the content (with a small header, `blob <size>\0`) to get the blob's SHA-1, so two identical files anywhere in history collapse to one blob. Git stores blobs in `objects/` and never stores deltas at this layer — delta compression is a later packfile optimization.
 
 ### annotated tag
 An annotated tag is a full Git object (like a commit) holding a target object hash, a tagger name/date, and an optional message; it is addressed by its own SHA-1. A lightweight tag, by contrast, is just a ref file pointing straight at a commit and stores no extra metadata. Use annotated tags for releases so the tag itself carries who created it and when.
@@ -52,6 +52,9 @@ Rebase replays a sequence of commits onto a new base commit by computing each co
 
 ### cherry-pick
 Cherry-pick applies the diff introduced by a single existing commit onto the current HEAD as a brand-new commit with a new hash. It is effectively a one-commit rebase: Git computes the change between that commit and its parent, then replays it. The result is the same logical edit but a different object, with its own author/committer timestamps.
+
+### revert
+`git revert` creates a new commit that undoes the changes from a previous commit. Unlike `reset`, it doesn't rewrite history — safe for shared branches. The undone commit remains in the history. This is the standard way to undo on shared branches.
 
 ### reflog
 The reflog is a per-ref (and global HEAD) append-only log of every place that ref has pointed, with a timestamp and the command that moved it. It is local to your repository and is what makes "lost" commits recoverable — a hard reset or rebase leaves the old tips in `HEAD`'s reflog for 30–90 days. `git reflog` is the standard escape hatch when you think you destroyed commits.
@@ -98,6 +101,15 @@ Bisect is a binary-search tool over the commit DAG to find which commit introduc
 
 ### hook
 A hook is a script placed in `.git/hooks/` (or configured centrally) that Git executes at a lifecycle point — `pre-commit`, `commit-msg`, `pre-push`, `post-checkout`, and others. Hooks let you enforce linting, block bad commit messages, or trigger deploys, but they are local and not transferred with the repo unless you commit them into a `hooks` directory and install them. They are the in-repo extension point for custom policy and automation.
+
+### submodule
+A git repository embedded inside another repository at a specific commit. The parent repo records the submodule's commit hash, not its contents. Useful for vendoring dependencies or sharing code across repos, but adds operational complexity (must `git submodule update` after clone).
+
+### worktree
+`git worktree` lets you check out multiple branches simultaneously in separate directories. Useful for working on a hotfix while keeping your feature branch intact, or for running CI on one branch while developing on another. Less disruptive than stashing.
+
+### rerere
+"Reuse Recorded Resolution" — when enabled (`git config rerere.enabled true`), Git remembers how you resolved a merge conflict and auto-resolves the same conflict the next time it appears. Useful for long-lived feature branches that rebase frequently.
 
 ---
 

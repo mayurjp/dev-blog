@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "Git Interview Questions: 30 Real-World Q&A from Production Manifests"
-description: "30 interview-ready Git questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "Git Interview Questions: 35 Real-World Q&A from Production Manifests"
+description: "35 interview-ready Git questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/git/
 ---
 
 Bite-sized, standalone interview questions and answers for Git. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">30</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">35</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -249,9 +249,48 @@ A hook is a script placed in `.git/hooks/` (or configured centrally) that Git ex
   </div>
 </div>
 
+## Topic: Revert, recovery & advanced (Order 5)
+{: .qa-topic }
+
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is the difference between `git revert` and `git reset`? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+`git reset` moves the branch pointer backward, potentially discarding commits (with `--hard`) and rewriting history. It's safe only on local branches no one else has pulled. `git revert` creates a new commit that undoes the changes from a previous commit — the original commit stays in the history, and the branch pointer only moves forward. Use revert on shared branches (main, develop) because it doesn't rewrite history; use reset on local feature branches where you want to clean up.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] How do you recover a deleted branch? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+Run `git reflog` to find the hash of the last commit on the deleted branch — reflog records every HEAD movement for about 90 days. Then either `git checkout -b recovered-branch <hash>` to recreate the branch, or `git reset --hard <hash>` to move the current branch to that point. The key insight: Git doesn't immediately delete commit objects when a branch is deleted; they become unreachable but remain in the object store until garbage collection runs.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Expert">
+  <h3>Q: [Expert] What is `rerere` and when would you use it? <span class="qa-badge qa-expert">[Expert]</span></h3>
+  <div class="qa-a" markdown="1">
+`rerere` (Reuse Recorded Resolution) is a Git feature that remembers how you resolved a merge conflict and auto-resolves the same conflict the next time it appears. Enable it with `git config rerere.enabled true`. It's most useful for long-lived feature branches that rebase frequently onto main — each time you rebase, the same conflicts recur, and rerere applies your previous resolution automatically. It records resolutions in `.git/rr-cache/` and can be trained on complex conflicts.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is a refspec and how does push/pull use it? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+A refspec maps a local ref to a remote ref, formatted as `+<src>:<dst>` (the `+` allows non-fast-forward). When you run `git push origin main`, Git uses the default refspec to map your local `main` to `origin/main`. You can customize this for advanced workflows: `git push origin main:refs/heads/production` pushes your main to a different remote branch. Fetch refspecs control which remote branches are downloaded and under what local names.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3>Q: [Beginner] What is `git submodule` and when should you use it? <span class="qa-badge qa-beginner">[Beginner]</span></h3>
+  <div class="qa-a" markdown="1">
+A submodule embeds one Git repository inside another at a specific commit. The parent repo records the submodule's commit hash (not its contents), so you must run `git submodule update --init` after cloning to fetch the submodule's code. Use submodules for vendoring a dependency you don't control, or sharing code across repos without merging. The downside: every clone requires an extra step, and updating the submodule is a manual process. Modern alternatives include monorepos or package managers.
+  </div>
+</div>
+
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 30 across Git
+**Last updated:** July 2026 | **Total Q&A:** 35 across Git
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 

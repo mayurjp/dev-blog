@@ -38,8 +38,11 @@ A partition key is a value (often a field like `order_id`) hashed by the produce
 ### Consumer group
 A consumer group is a named set of consumers that share the work of reading a topic, with each partition assigned to exactly one member of the group. Adding consumers scales throughput up to the partition count, after which extra consumers sit idle. Kafka tracks the group's progress with a single committed offset per partition.
 
+### Consumer group rebalancing
+When a consumer joins or leaves a group, Kafka redistributes partitions among the remaining consumers — this is a rebalance. During the rebalance, processing pauses briefly while partitions are reassigned. Assignment strategies include Range (assign contiguous partitions), RoundRobin (distribute evenly), and Sticky (minimize partition movement). If a consumer crashes mid-processing before committing its offset, the rebalance hands its partitions to another consumer, which may reprocess messages already handled.
+
 ### Offset
-An offset is the integer position of a record within a Kafka partition, and the consumer group's committed offset marks the next record to read. Because the log is durable, a consumer can rewind by resetting its offset to replay or reprocess history. Offsets are committed to Kafka's internal `__consumer_offsets` topic, not stored in the consumer.
+An offset is the integer position of a record within a Kafka partition, and the consumer group's committed offset marks the next record to read. Because the log is durable, a consumer can rewind by resetting its offset to replay or reprocess history. The consumer tracks the current offset in memory and commits periodically to Kafka's internal `__consumer_offsets` topic for durability.
 
 ### Kafka
 Apache Kafka is a distributed, log-based broker where topics are partitioned and replicated across a cluster of broker nodes for durability and scale. Producers append records; consumers pull from partitions and track their own offsets, so the broker stays stateless about readers. Its design favors high-throughput, replayable event streams over low-latency per-message routing.
@@ -72,8 +75,17 @@ At-least-once means a message is delivered one or more times — the broker rese
 ### Delivery semantics: exactly-once
 Exactly-once means a message's effect is applied precisely one time, even across retries and crashes — usually achieved by combining idempotent writes with transactional offset/state commits, not by literally sending once. Kafka offers this via the transactional producer and the read-committed isolation level. It is the hardest guarantee and carries real throughput cost, so it is reserved for cases where duplicates are genuinely unacceptable.
 
+### TTL / message expiry
+RabbitMQ supports per-message TTL (time-to-live) natively — messages expire after a configured duration and are either dropped or routed to a dead-letter exchange. Kafka has no per-message TTL; instead it uses log retention policies (`log.retention.hours`, `log.retention.bytes`) that delete entire log segments once they age out. This means Kafka cannot expire individual messages, only ranges of the log based on time or size thresholds.
+
 ### Dead-letter queue
 A dead-letter queue (DLQ) is a separate queue where messages are moved after repeated delivery failures or expiry so they stop poisoning the main pipeline. RabbitMQ routes to it on reject/nack-with-requeue-false or TTL; Kafka needs an outbox or a separate topic since the log has no built-in reject path. The DLQ lets you inspect, fix, and replay poison messages without blocking healthy traffic.
+
+### Outbox pattern
+The outbox pattern solves the dual-write problem: instead of publishing an event to Kafka in the same transaction as a database write (which risks inconsistency if either fails), you write the event to an "outbox" table in the DB as part of the same transaction. A separate process — either CDC-based polling or a tool like Debezium — reads the outbox and publishes to Kafka. This guarantees at-least-once delivery without requiring a two-phase commit between the database and the broker.
+
+### Schema Registry
+A Schema Registry is a service that stores and enforces message schemas (Avro, Protobuf, JSON Schema) for a Kafka cluster. Producers register their schema before publishing, and consumers fetch the schema to deserialize messages, which prevents producers from sending structurally incompatible records. Confluent Schema Registry is the reference implementation and adds schema evolution rules (backward, forward, full compatibility) so producers can evolve message formats without breaking existing consumers.
 
 ### Idempotent consumer
 An idempotent consumer is one that produces the same result whether a message is handled once or five times, typically by keying its write on a unique message or event ID. This is what makes at-least-once delivery safe in practice. Common tricks are a dedupe table of seen IDs or an upsert keyed on the natural business key.

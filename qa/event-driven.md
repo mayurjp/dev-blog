@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "Event-Driven Architecture Interview Questions: 29 Real-World Q&A from Production Manifests"
-description: "29 interview-ready Event-Driven Architecture questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "Event-Driven Architecture Interview Questions: 35 Real-World Q&A from Production Manifests"
+description: "35 interview-ready Event-Driven Architecture questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/event-driven/
 ---
 
 Bite-sized, standalone interview questions and answers for Event-Driven Architecture. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">29</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">35</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -242,9 +242,55 @@ Emit events from a transactionally consistent outbox, make every consumer idempo
   </div>
 </div>
 
+## Topic: Correlation, versioning & production patterns (Order 5)
+{: .qa-topic }
+
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is a correlation ID and why do you need one? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+A correlation ID is a unique identifier attached to the original user request that propagates through every event in the chain (OrderPlaced → FulfillmentStarted → ItemShipped). When something fails in a multi-service event flow, the correlation ID lets you trace the entire chain across services, logs, and traces — without it, debugging is guesswork. A causation ID goes further: it identifies which specific event caused another, distinguishing "this happened after that" from "this happened because of that."
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What happens when an event consumer is slow or falls behind? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+The consumer accumulates consumer lag — the gap between the latest event in the partition and the consumer's committed offset. In Kafka, the consumer keeps processing from its last committed offset; other consumers in the group are not affected (each owns its own partitions). But if the lag grows too large, the consumer may hit log retention limits (older events are deleted before they're processed) or cause timeouts on dependent services. Solutions: scale up consumers (up to the partition count), optimize processing, or add backpressure.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Expert">
+  <h3>Q: [Expert] How do you handle out-of-order events in a distributed system? <span class="qa-badge qa-expert">[Expert]</span></h3>
+  <div class="qa-a" markdown="1">
+Kafka guarantees ordering within a partition, not across partitions or topics. If events for the same entity end up in different partitions (different keys), they can arrive out of order. Solutions: use a consistent partition key (e.g., order ID) so all events for one entity go to the same partition; design consumers to handle out-of-order events (e.g., apply events by timestamp or version number rather than assuming order); use event versioning so consumers can skip or reorder stale events.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is event versioning and how do you handle it? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+When you evolve an event schema (adding a field to OrderPlaced), old consumers must still read old versions. Strategies: include a `version` field in the event type so consumers can branch on it; use a Schema Registry that enforces backward compatibility (adding a field with a default is safe; removing or renaming is not); or use CloudEvents with a `type` that includes the version (e.g., `OrderPlaced.v2`). The key rule: old consumers must never break when a new event version is published.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3>Q: [Comparison] What is the inbox pattern and how does it differ from the outbox? <span class="qa-badge qa-beginner">[Beginner]</span></h3>
+  <div class="qa-a" markdown="1">
+The outbox is push-based: you write an event to an outbox table in the same transaction as your business data, then a relay (CDC/polling) publishes it to the broker. The inbox is pull-based: the consumer polls a "pending events" table in its own database, processes each event, and marks it as processed. The inbox is simpler (no CDC tooling needed) but adds polling latency; the outbox is more real-time but requires Debezium or a polling publisher. Both guarantee at-least-once delivery without two-phase commit.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is CDC (Change Data Capture) and how does it relate to event-driven architecture? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+CDC streams database row changes (INSERT/UPDATE/DELETE) as events by reading the database's WAL (Write-Ahead Log) or binlog. Tools like Debezium attach to the log and publish change events to Kafka in real time. CDC is the engine behind the outbox pattern (reading the outbox table as a change stream) and enables event-driven architectures without requiring applications to explicitly publish events — the database itself becomes the event source.
+  </div>
+</div>
+
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 29 across Event-Driven Architecture
+**Last updated:** July 2026 | **Total Q&A:** 35 across Event-Driven Architecture
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 

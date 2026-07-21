@@ -53,6 +53,8 @@ public class OrderRepository : IOrderRepository
 }
 ```
 
+(EF Core doesn't lazy-load by default — navigation properties are null unless explicitly included.)
+
 Two things this teaches that a definition can't:
 
 - **The interface is a domain concept; the implementation is an infrastructure detail.** Because `IOrderRepository` sits in `Ordering.Domain` and the EF Core code sits in `Ordering.Infrastructure`, the domain project has zero reference to the ORM. You can unit-test order logic with a fake repository and no database.
@@ -131,6 +133,8 @@ A pattern is justified when it removes a *real* recurring cost: duplicated loadi
 **How do I know when a pattern is overkill?** If you can't name the recurring cost it removes, it's overkill. One implementation and no test seam means the abstraction is tax. A pattern should make future change *cheaper*; if it only adds names, drop it.
 
 **Where do Dependency Injection and Strategy fit relative to Repository?** They're adjacent patterns solving neighboring problems: DI supplies the repository (or any dependency) from outside, so the consumer stays decoupled; Strategy swaps an algorithm behind one interface the same way Repository swaps a data source. They compose — eShop's repository is both injected and backed by a swappable implementation.
+
+The next posts in this series cover Strategy (swappable algorithms), Observer (event propagation), and Factory (object creation) — the three patterns most commonly tested in interviews alongside Repository and DI.
 
 ## Source
 

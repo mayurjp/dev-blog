@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "API Design Interview Questions: 30 Real-World Q&A from Production Manifests"
-description: "30 interview-ready API Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "API Design Interview Questions: 35 Real-World Q&A from Production Manifests"
+description: "35 interview-ready API Design questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/api-design/
 ---
 
 Bite-sized, standalone interview questions and answers for API Design. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">30</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">35</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -253,9 +253,48 @@ A webhook is a reverse API: instead of the client polling, the server pushes an 
   </div>
 </div>
 
+## Topic: Auth, errors & real-time (Order 6)
+{: .qa-topic }
+
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is the difference between PATCH and PUT? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+PUT replaces the entire resource — you must send every field, and missing optional fields become null. PATCH applies a partial update, typically a list of changes like `[{ "op": "replace", "path": "/email", "value": "new@example.com" }]`. PUT is idempotent (sending it twice has the same effect); PATCH is idempotent only if you design it that way (e.g., using `If-Match` to prevent lost updates). Interviewers test whether you know PATCH is not automatically idempotent by the HTTP spec.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] How do you handle real-time notifications in an API? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+Three common approaches: Webhooks (server pushes to a client URL — best for server-to-server), Server-Sent Events (one-way stream over HTTP — best for browser dashboards), and gRPC bidirectional streaming (full duplex — best for low-latency internal services). Webhooks require signature verification and retry handling; SSE requires a persistent HTTP connection but is simpler than WebSockets; gRPC streaming gives the lowest latency but needs HTTP/2. The right choice depends on who is consuming (browser vs server) and latency requirements.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] How does a circuit breaker protect an API from cascading failures? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+A circuit breaker wraps calls to a downstream dependency and tracks failure rates. When failures exceed a threshold, the circuit "opens" and immediately rejects requests (or returns a fallback) without calling the dependency, preventing timeout pile-ups. After a cooldown period, it enters a "half-open" state and lets a probe request through; if it succeeds, the circuit closes again. This prevents one slow dependency from exhausting the caller's thread pool and cascading to other dependencies.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3>Q: [Beginner] When would you choose cursor pagination over offset pagination? <span class="qa-badge qa-beginner">[Beginner]</span></h3>
+  <div class="qa-a" markdown="1">
+Offset pagination (`?page=3&size=20`) is simple and lets clients jump to arbitrary pages, but it becomes slow on large datasets because the database must scan and discard the first N rows. Cursor pagination (`?cursor=abc123&size=20`) uses a stable sort column (usually the primary key or timestamp) to resume from where the last page ended — O(1) regardless of depth. Choose cursor when you have large, frequently-updated datasets (feeds, timelines); choose offset when you need page-number jumping (admin dashboards, search results).
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Expert">
+  <h3>Q: [Expert] How do you handle versioning when you need to make a breaking change? <span class="qa-badge qa-expert">[Expert]</span></h3>
+  <div class="qa-a" markdown="1">
+Breaking changes (removing a field, changing a type) require a new API version. Strategies: URL versioning (`/v2/orders`) is the most explicit and cache-friendly; header versioning (`Accept: application/vnd.api.v2+json`) keeps URLs clean but is harder to test in a browser. Regardless of strategy, the old version must remain available for a deprecation window (typically 6-12 months), with a `Sunset` header and migration guide. Dark launches (routing a percentage of traffic to the new version before full release) help catch issues before they affect all clients.
+  </div>
+</div>
+
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 30 across API Design
+**Last updated:** July 2026 | **Total Q&A:** 35 across API Design
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 

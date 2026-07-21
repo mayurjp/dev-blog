@@ -1,13 +1,13 @@
 ---
 layout: page
-title: "Messaging & Integration Interview Questions: 30 Real-World Q&A from Production Manifests"
-description: "30 interview-ready Messaging & Integration questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
+title: "Messaging & Integration Interview Questions: 35 Real-World Q&A from Production Manifests"
+description: "35 interview-ready Messaging & Integration questions with senior-level, 2-4 sentence answers drawn from real production manifests and source code."
 permalink: /qa/messaging/
 ---
 
 Bite-sized, standalone interview questions and answers for Messaging & Integration. Read 5-10 per sitting. Each answer is 2-4 sentences max and stands on its own.
 
-<p class="qa-shown-line"><strong><span id="qa-shown">30</span></strong> questions shown. Filter by keyword or difficulty below.</p>
+<p class="qa-shown-line"><strong><span id="qa-shown">35</span></strong> questions shown. Filter by keyword or difficulty below.</p>
 
 <div class="qa-toolbar" id="qa-toolbar">
   <input type="text" id="qa-search" placeholder="Filter questions by keyword…" aria-label="Filter questions" />
@@ -257,9 +257,48 @@ They solve different problems: Kafka is for high-throughput, replayable event st
   </div>
 </div>
 
+## Topic: Exactly-once, outbox & schema evolution (Order 7)
+{: .qa-topic }
+
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is exactly-once delivery and why is it hard? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+Exactly-once means each message is processed exactly one time — no duplicates, no losses. In practice, no distributed system can guarantee this across the network (messages can be duplicated by the broker, the network, or the consumer). Kafka approximates it via idempotent producers (`enable.idempotence=true`) and transactional consumers (`read_committed` isolation), but this adds latency and limits throughput. Most systems settle for at-least-once delivery combined with idempotent consumers (deduplication on the consumer side) as a more practical tradeoff.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What happens when a consumer in a group crashes or is added? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+Kafka triggers a rebalance: partitions are redistributed among the remaining (or new) consumers in the group. During the rebalance, processing pauses briefly — no consumer processes the affected partitions. After rebalance, each consumer resumes from its last committed offset. If the consumer crashed mid-processing (before committing), the new owner re-processes those messages, causing duplicates. This is why at-least-once + idempotent consumers is the standard pattern.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Expert">
+  <h3>Q: [Expert] How does the outbox pattern solve the dual-write problem? <span class="qa-badge qa-expert">[Expert]</span></h3>
+  <div class="qa-a" markdown="1">
+The dual-write problem: you want to write to the database and publish an event to Kafka, but these are two separate operations that can't be atomic without two-phase commit. The outbox pattern writes the event to an "outbox" table in the same database transaction as the business data. A separate process (CDC via Debezium, or a polling publisher) reads the outbox table and publishes events to Kafka. This guarantees at-least-once delivery without distributed transactions, because the event and the data are in the same transactional boundary.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Intermediate">
+  <h3>Q: [Intermediate] What is a Schema Registry and why do you need one? <span class="qa-badge qa-intermediate">[Intermediate]</span></h3>
+  <div class="qa-a" markdown="1">
+A Schema Registry stores message schemas (Avro, Protobuf) and enforces compatibility rules when a producer registers a new version. It prevents a producer from publishing a message that breaks existing consumers — for example, removing a required field or changing a type. The producer fetches the schema ID, includes it in the message header, and the consumer uses it to deserialize. Without a registry, schema evolution is a manual coordination process between producer and consumer teams.
+  </div>
+</div>
+
+<div class="qa-item" data-diff="Beginner">
+  <h3>Q: [Scenario] What do you do with messages in a dead-letter queue? <span class="qa-badge qa-beginner">[Beginner]</span></h3>
+  <div class="qa-a" markdown="1">
+A DLQ accumulates messages that repeatedly failed processing (poison messages, malformed data, downstream dependency down). First, inspect the message to understand why it failed — check the original error, the message shape, and the consumer logs. If it's a bug, fix the consumer and replay the DLQ. If it's bad data, decide whether to fix the data, transform it, or discard it. Most systems need a DLQ replay mechanism (re-publish to the original topic after fixes) — without it, DLQ messages become permanently lost.
+  </div>
+</div>
+
 ---
 
-**Last updated:** July 2026 | **Total Q&A:** 30 across Messaging & Integration
+**Last updated:** July 2026 | **Total Q&A:** 35 across Messaging & Integration
 
 [Back to Q&A Index]({{ '/qa/' | relative_url }})
 

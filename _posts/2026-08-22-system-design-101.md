@@ -97,6 +97,8 @@ This is the section to internalize before you claim a design is "done."
 
 **Underestimating scale.** "10 QPS today" hides "10,000 QPS at launch." Capacity planning models *arrival rate* (requests per second), not just a server count — a design that picks a single primary because "it's small now" is the most common way to fall over on day one. Do the back-of-envelope math before choosing the store.
 
+For example: 10K requests/sec × 1 KB average payload = ~10 MB/s throughput, which a single Postgres primary can handle for writes. But 10M daily active users × 100 reads/day = 1B reads/day ≈ 11.5K reads/sec, which needs caching or read replicas.
+
 ## 6. What to care about when designing
 
 If you take one thing from this post: **read the prompt into numbers first, then let the read/write shape pick the primitives — never the other way around.**
