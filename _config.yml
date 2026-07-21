@@ -27,12 +27,17 @@ permalink: /:categories/:title/
 # The GitHub footer icon uses the plain top-level key below, which IS
 # supported by minima 2.5.1's _includes/social.html.
 github_username: mayurjp
+twitter_username: mayurjp
+linkedin_username: mayurjp
 logo: /assets/logo.svg
 
 # Explicit header nav whitelist -- without this, minima lists every page with
 # a `title:` (including the topic pages under topics/ and domain pages under qa/).
 header_pages:
   - qa.md
+  - learn/index.md
+  - challenges/index.md
+  - roadmap/index.md
   - about.md
   - archive.md
 
