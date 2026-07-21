@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "Why does pinning a GitHub Action to a commit SHA still need Dependabot?"
 date: 2026-02-27 09:00:00 +0530
 categories: cicd
 order: 12
 tags: [cicd, github-actions, security, supply-chain]
+excerpt: ""
 ---
 {% raw %}
 

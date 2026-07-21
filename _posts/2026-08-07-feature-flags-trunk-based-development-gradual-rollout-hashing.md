@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: "Feature Flags: How Deterministic Hashing Makes Gradual Rollout Percentages Sticky Per User"
 description: "Feature flags decouple deploying code from releasing it to users, but a gradual rollout percentage only means anything if the same user gets the same answer on every request — this lesson traces Unleash's actual murmurhash-based stickiness math that makes that true."
@@ -6,6 +6,7 @@ date: 2026-08-07 09:00:00 +0530
 categories: cicd
 order: 13
 tags: [cicd, feature-flags, trunk-based-development, unleash, progressive-delivery]
+excerpt: ""
 ---
 {% raw %}
 

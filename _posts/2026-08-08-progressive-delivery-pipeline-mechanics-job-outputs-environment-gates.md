@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: "Progressive Delivery Pipelines: How Job Outputs and Environment Gates Sequence a Multi-Stage Rollout"
 description: "A canary rollout isn't one deploy action call, it's a chain of pipeline jobs that must agree on which revision they're talking about and pause for a human between stages — this lesson traces the actual GitHub Actions mechanics (job outputs, environment protection rules) that make that chain hold together."
@@ -6,6 +6,7 @@ date: 2026-08-08 09:00:00 +0530
 categories: cicd
 order: 14
 tags: [cicd, progressive-delivery, github-actions, canary, deploy-cloudrun]
+excerpt: ""
 ---
 {% raw %}
 

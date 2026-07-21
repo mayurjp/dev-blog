@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions Triggers: Schedule vs workflow_dispatch"
 date: 2026-02-09 09:00:00 +0530
 categories: cicd
 order: 3
 tags: [cicd, github-actions, triggers, workflow-dispatch]
+excerpt: ""
 ---
 {% raw %}
 

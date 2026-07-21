@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions Artifacts: Sharing Files Between Jobs vs Job Outputs"
 date: 2026-02-15 09:00:00 +0530
 categories: cicd
 order: 6
 tags: [cicd, github-actions, artifacts, build-outputs]
+excerpt: ""
 ---
 {% raw %}
 

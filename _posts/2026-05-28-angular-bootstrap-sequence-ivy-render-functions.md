@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: "Angular Bootstrap: How bootstrapApplication() and Ivy Turn a Component Into a Running App"
 description: "How Angular actually turns a bootstrapApplication(RootComponent) call into a rendered page — the real root-injector/ApplicationRef bootstrap sequence and the Ivy compiler's instruction-based render functions (ɵɵdefineComponent, ɵɵelementStart, ɵɵadvance), from Angular's own framework source and its compiler compliance tests."
@@ -6,6 +6,7 @@ date: 2026-05-28 09:00:00 +0530
 categories: angular
 order: 0
 tags: [angular, bootstrap, ivy, dependency-injection, change-detection, compiler]
+excerpt: ""
 ---
 {% raw %}
 

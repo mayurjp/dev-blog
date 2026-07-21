@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "How does a canary deploy actually shift traffic, mechanically, from a GitHub Actions workflow?"
 date: 2026-02-23 09:00:00 +0530
 categories: cicd
 order: 10
 tags: [cicd, github-actions, continuous-deployment, canary, gcp]
+excerpt: ""
 ---
 {% raw %}
 

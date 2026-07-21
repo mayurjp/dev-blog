@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: "Angular Components: Why 'Standalone' Is the Default, Not a Flag"
 description: "A new Angular component doesn't need an NgModule to exist - standalone is the compiler's default, not something you opt into. And the host object's key syntax (plain key, [key], (key), [attr.key]) is what tells Angular which of three different binding types to compile for that entry. From Angular's real @Component decorator source and Angular Material's real MatButtonBase host bindings."
@@ -6,6 +6,7 @@ date: 2026-06-19 09:00:00 +0530
 categories: angular
 order: 1
 tags: [angular, components, templates, host-bindings, standalone]
+excerpt: ""
 ---
 {% raw %}
 

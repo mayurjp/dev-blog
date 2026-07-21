@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions Build Matrix: include and fail-fast"
 date: 2026-02-11 09:00:00 +0530
 categories: cicd
 order: 4
 tags: [cicd, github-actions, build-matrix, testing]
+excerpt: ""
 ---
 {% raw %}
 

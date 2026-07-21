@@ -79,3 +79,9 @@ exclude:
   - README.md
   - CLAUDE.md
   - vendor
+  - fix-excerpts.ps1
+  - fix-inline-liquid.py
+  - fix-liquid-codeblocks.py
+  - fix-qa-links.py
+  - lighthouserc.json
+  - scripts

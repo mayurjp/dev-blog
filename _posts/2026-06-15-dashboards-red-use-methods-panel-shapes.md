@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: "Observability Dashboards: Why RED and USE Are Different Panel Shapes"
 description: "RED and USE are both three-letter dashboard mnemonics, but they aren't the same three panels with relabeled titles - RED describes what a service is doing to its callers from request metrics, USE describes what a resource is doing to itself from capacity metrics. From kubernetes-monitoring/kubernetes-mixin's real Grafana dashboard-as-code source."
@@ -6,6 +6,7 @@ date: 2026-06-15 09:00:00 +0530
 categories: observability
 order: 9
 tags: [observability, dashboards, red-method, use-method, grafana, prometheus]
+excerpt: ""
 ---
 {% raw %}
 

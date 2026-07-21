@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions Environments: Secret Scoping Beyond Deployment Gates"
 date: 2026-02-17 09:00:00 +0530
 categories: cicd
 order: 7
 tags: [cicd, github-actions, secrets, environments]
+excerpt: ""
 ---
 {% raw %}
 

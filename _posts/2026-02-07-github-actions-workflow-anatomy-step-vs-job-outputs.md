@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions Workflow Anatomy: Step Outputs vs Job Outputs"
 date: 2026-02-07 09:00:00 +0530
 categories: cicd
 order: 2
 tags: [cicd, github-actions, workflow-anatomy]
+excerpt: ""
 ---
 {% raw %}
 

@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "GitHub Actions: Composite Actions vs Reusable Workflows"
 date: 2026-02-19 09:00:00 +0530
 categories: cicd
 order: 8
 tags: [cicd, github-actions, composite-actions, reusable-workflows]
+excerpt: ""
 ---
 {% raw %}
 

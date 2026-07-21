@@ -1,10 +1,11 @@
----
+﻿---
 layout: post
 title: "A 90-second error spike self-resolves — why doesn't it page anyone?"
 date: 2026-05-20 09:00:00 +0530
 categories: observability
 order: 8
 tags: [observability, alerting, on-call, prometheus, sre]
+excerpt: ""
 ---
 {% raw %}
 
