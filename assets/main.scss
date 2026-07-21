@@ -5,8 +5,14 @@
 
 @import "minima";
 
+/* === Site header === */
 .site-header {
   border-top: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: $background-color;
+  border-bottom: 1px solid $grey-color-light;
 }
 
 .site-logo {
@@ -16,6 +22,143 @@
   margin-right: 6px;
 }
 
+/* === Reading progress bar === */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: $brand-color;
+  z-index: 200;
+  transition: width 0.1s linear;
+}
+
+/* === Hero section === */
+.hero {
+  text-align: center;
+  padding: 48px 20px 32px;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: $text-color;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: $grey-color;
+  max-width: 600px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+.hero-search {
+  display: flex;
+  max-width: 480px;
+  margin: 0 auto;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+  input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: none;
+    outline: none;
+    background: $background-color;
+    color: $text-color;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    background: $brand-color;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.9; }
+  }
+}
+
+/* === Section headings === */
+.section-heading {
+  font-size: 22px;
+  margin: 40px 0 16px;
+  color: $text-color;
+}
+
+/* === Learning paths === */
+.learning-paths {
+  margin-bottom: 40px;
+}
+
+.path-card {
+  padding: 20px 24px;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: $brand-color;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.path-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+
+    a {
+      color: $text-color;
+      text-decoration: none;
+      &:hover { color: $brand-color; }
+    }
+  }
+}
+
+.path-count {
+  font-size: 13px;
+  color: $grey-color;
+  white-space: nowrap;
+}
+
+.path-desc {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: $grey-color;
+  line-height: 1.5;
+}
+
+.path-progress {
+  height: 4px;
+  background: $grey-color-light;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.path-progress-bar {
+  height: 100%;
+  background: $brand-color;
+  border-radius: 2px;
+}
+
+/* === Topic grid === */
 .topic-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -59,6 +202,7 @@
   letter-spacing: 0.03em;
 }
 
+/* === Q&A section (homepage) === */
 .qa-section {
   background: linear-gradient(135deg, rgba(71, 138, 201, 0.05) 0%, rgba(134, 78, 165, 0.05) 100%);
   border: 1px solid $grey-color-light;
@@ -74,10 +218,7 @@
     a {
       color: $brand-color;
       text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
+      &:hover { text-decoration: underline; }
     }
   }
 
@@ -85,10 +226,7 @@
     margin: 0 0 12px;
     line-height: 1.6;
     color: $text-color;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+    &:last-child { margin-bottom: 0; }
   }
 }
 
@@ -98,10 +236,7 @@
 
 .topic-back {
   margin-bottom: 10px;
-
-  a {
-    font-size: 14px;
-  }
+  a { font-size: 14px; }
 }
 
 .topic-glossary {
@@ -116,13 +251,11 @@
     font-weight: 600;
     color: $brand-color;
     text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
+    &:hover { text-decoration: underline; }
   }
 }
 
+/* === Mermaid === */
 .mermaid {
   display: flex;
   justify-content: center;
@@ -150,7 +283,193 @@
   border-radius: 4px;
 }
 
-/* Q&A bank pages */
+/* === Post layout: TOC === */
+.post-toc-wrapper {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.post-toc {
+  position: sticky;
+  top: 80px;
+  width: 220px;
+  min-width: 180px;
+  flex-shrink: 0;
+  font-size: 13px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  a {
+    color: $grey-color;
+    text-decoration: none;
+    display: block;
+    padding: 3px 0 3px 12px;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover, &.active {
+      color: $brand-color;
+      border-left-color: $brand-color;
+    }
+  }
+
+  .toc-h3 a {
+    padding-left: 24px;
+    font-size: 12px;
+  }
+}
+
+.post-content {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .post-toc-wrapper {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .post-toc {
+    position: static;
+    width: 100%;
+    min-width: 100%;
+    max-height: none;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    border: 1px solid $grey-color-light;
+
+    ul { columns: 2; column-gap: 16px; }
+  }
+}
+
+/* === Post layout: Copy button === */
+.highlight, pre[class*="language-"] {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid $grey-color-light;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  color: $grey-color;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 5;
+
+  &:hover {
+    background: $brand-color;
+    color: #fff;
+    border-color: $brand-color;
+  }
+
+  &.copied {
+    background: #1a7f37;
+    color: #fff;
+    border-color: #1a7f37;
+  }
+}
+
+.highlight:hover .copy-btn,
+pre[class*="language-"]:hover .copy-btn {
+  opacity: 1;
+}
+
+/* === Post layout: Code tabs === */
+.code-tabs {
+  margin: 20px 0;
+  border: 1px solid $grey-color-light;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-tab-buttons {
+  display: flex;
+  border-bottom: 1px solid $grey-color-light;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.code-tab-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: $grey-color;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: $text-color; }
+  &.active {
+    color: $brand-color;
+    border-bottom-color: $brand-color;
+  }
+}
+
+.code-tab-panel {
+  display: none;
+  &.active { display: block; }
+
+  .highlight, pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+}
+
+/* === Callout components === */
+.callout {
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 14px;
+  line-height: 1.6;
+
+  strong { display: block; margin-bottom: 4px; }
+}
+
+.callout-red {
+  background: rgba(180, 35, 24, 0.06);
+  border-color: #b42318;
+  color: #7a1a10;
+}
+
+.callout-yellow {
+  background: rgba(154, 103, 0, 0.06);
+  border-color: #9a6700;
+  color: #6b4800;
+}
+
+.callout-blue {
+  background: rgba(71, 138, 201, 0.06);
+  border-color: #478ac9;
+  color: #2c5f8a;
+}
+
+/* === Q&A bank pages === */
 .qa-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -173,6 +492,23 @@
   border-radius: 6px;
   background: $background-color;
   color: $text-color;
+}
+
+.qa-expand-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid $grey-color-light;
+  border-radius: 6px;
+  background: $background-color;
+  color: $text-color;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: $brand-color;
+    background: rgba(71, 138, 201, 0.04);
+  }
 }
 
 .qa-diff-buttons {
@@ -214,33 +550,65 @@
   font-size: 20px;
 }
 
+/* Q&A accordion cards */
 .qa-item {
-  margin: 0 0 20px;
-  padding: 16px 18px;
+  margin: 0 0 12px;
   border: 1px solid $grey-color-light;
   border-radius: 8px;
   background: $background-color;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
 }
 
-.qa-item h3 {
-  margin-top: 0;
-  margin-bottom: 8px;
-  font-size: 16px;
-  line-height: 1.4;
+.qa-item:hover {
+  border-color: darken($grey-color-light, 8%);
+}
+
+.qa-q {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 15px;
+  line-height: 1.45;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  &:hover { background: rgba(0, 0, 0, 0.015); }
+}
+
+.qa-toggle {
+  margin-left: auto;
+  font-size: 12px;
+  color: $grey-color;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.qa-item.open .qa-toggle {
+  transform: rotate(90deg);
 }
 
 .qa-a {
-  margin: 0 0 10px;
+  display: none;
+  padding: 0 18px 16px;
   line-height: 1.65;
   color: $text-color;
+  border-top: 1px solid $grey-color-light;
+}
+
+.qa-item.open .qa-a {
+  display: block;
 }
 
 .qa-a p {
-  margin: 0 0 8px;
+  margin: 10px 0 0;
+  &:first-child { margin-top: 14px; }
 }
 
 .qa-link {
-  margin: 0;
+  margin: 8px 0 0;
   font-size: 14px;
 }
 
@@ -251,7 +619,6 @@
 
 .qa-badge {
   display: inline-block;
-  margin-left: 6px;
   padding: 1px 8px;
   font-size: 11px;
   font-weight: 600;
