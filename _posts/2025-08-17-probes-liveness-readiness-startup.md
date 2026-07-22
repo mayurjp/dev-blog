@@ -275,6 +275,7 @@ resource "kubernetes_deployment_v1" "metrics_server" {
 
 **Today you would use:**
 
+{% raw %}
 ```go
 // go.mod: k8s.io/client-go v0.30.0
 // main.go
@@ -321,6 +322,7 @@ func main() {
     corev1.NewPod("default").Create(context.TODO(), pod, metav1.CreateOptions{})
 }
 ```
+{% endraw %}
 
 **Bash alternative:**
 ```bash

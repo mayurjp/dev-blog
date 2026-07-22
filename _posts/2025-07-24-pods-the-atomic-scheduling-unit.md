@@ -219,6 +219,7 @@ resource "kubernetes_pod" "report" {
 
 **If you write Go (client-go) to create Pod today:**
 
+{% raw %}
 ```go
 // go.mod: k8s.io/client-go v0.30.0
 package main
@@ -250,6 +251,7 @@ pod := &v1.Pod{
 }
 // kubectl apply -f pod.yaml does same
 ```
+{% endraw %}
 
 **If you use kubectl (most teams):**
 ```bash
