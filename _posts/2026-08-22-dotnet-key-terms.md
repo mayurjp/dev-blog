@@ -10,8 +10,6 @@ tags: [dotnet, glossary, clr, aspnetcore]
 
 **TL;DR:** This is the vocabulary reference for every .NET post on this blog — read it once, then skip back here whenever a term like *JIT*, *Scoped*, or *Generic Host* shows up. The terms are grouped by theme and each stands alone, so you can land on any post in the series without first reading the others.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Runtime
 
 ### CLR (Common Language Runtime)

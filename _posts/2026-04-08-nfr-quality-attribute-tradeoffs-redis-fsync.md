@@ -6,8 +6,6 @@ categories: architecture
 order: 10
 tags: [architecture, non-functional-requirements, quality-attributes, redis]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: "fast" and "durable" are in direct tension, and different applications need genuinely different answers
 

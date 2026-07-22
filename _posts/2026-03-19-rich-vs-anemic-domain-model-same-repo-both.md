@@ -6,8 +6,6 @@ categories: ddd
 order: 11
 tags: [ddd, rich-domain-model, anemic-domain-model, csharp]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: having a behavior method doesn't guarantee it's the *only* way to reach that state
 

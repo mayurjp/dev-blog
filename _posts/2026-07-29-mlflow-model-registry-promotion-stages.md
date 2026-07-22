@@ -7,8 +7,6 @@ categories: mlops
 order: 5
 tags: [mlops, model-registry, mlflow, versioning, model-lifecycle]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

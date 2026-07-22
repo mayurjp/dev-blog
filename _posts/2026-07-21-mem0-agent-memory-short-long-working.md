@@ -10,8 +10,6 @@ tags: [genai, mem0, agent-memory, vector-search, memory-management, hybrid-retri
 
 **TL;DR:** A single `Memory` class in mem0 silently manages three fundamentally different memory types — long-term semantic facts (vector DB + embeddings), short-term working context (SQLite message history), and procedural execution summaries (LLM-generated trajectory logs) — each requiring a different storage backend, retrieval strategy, and lifecycle policy. Mixing them into one store breaks because long-term facts need semantic search and deduplication, working memory needs fast sequential reads of the last *k* messages, and procedural memory needs verbatim trajectory preservation that resists summarization.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ---
 
 ## 1. The Engineering Problem

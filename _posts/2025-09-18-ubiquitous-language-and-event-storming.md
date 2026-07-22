@@ -9,8 +9,6 @@ tags: [ddd, domain-driven-design, ubiquitous-language, event-storming, dotnet]
 
 **TL;DR:** Why does this codebase call it `SetShippedStatus()` instead of `UpdateStatus(5)`? Because ubiquitous language requires the exact vocabulary domain experts use — surfaced through Event Storming as past-tense business facts like "Order Shipped" — to appear unchanged in code, so a method named after the business action (not the field it mutates) becomes the one place a business rule about that action can actually be enforced.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: developers and domain experts default to different languages

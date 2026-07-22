@@ -9,8 +9,6 @@ tags: [microservices, saga, outbox, data-consistency]
 
 **TL;DR:** How do you update your database AND notify other services without ever losing one? The transactional outbox pattern writes the event to an outbox table in the same local database transaction as the business data, then a separate relay reads unpublished rows and publishes them afterward, so the write and the notification are never split across two uncoordinated systems.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers)
 
 ## 1. The Engineering Problem: a DB write and a message publish can't be made atomic the naive way

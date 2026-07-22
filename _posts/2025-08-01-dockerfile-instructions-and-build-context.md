@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** What actually happens between `docker build` and a runnable image? The Docker CLI sends the Dockerfile and build context to BuildKit (the default builder since Docker Engine 23.0), which parses the Dockerfile into a dependency graph, executes instructions — running independent ones in parallel — and writes the resulting layers into containerd's content store as a taggable image.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: turning "how I set this up" into something repeatable

@@ -10,8 +10,6 @@ tags: [genai, context-window, tokenization, anthropic, claude, prompt-caching]
 
 **TL;DR:** You cannot use tiktoken to count Claude's tokens -- tiktoken implements OpenAI's BPE tokenizer, which produces different token boundaries than Claude's. A character count divided by four is a rough English heuristic that breaks on code, multilingual text, and structured JSON. The only reliable source of token counts for Claude is the `Usage` object returned in every API response, which includes `input_tokens`, `output_tokens`, and -- if you use prompt caching -- `cache_creation_input_tokens` and `cache_read_input_tokens`. The Anthropic SDK accumulates these counts incrementally during streaming so you can monitor context window consumption in real time.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 When building applications on top of Claude, context window management is not optional -- it is an architectural constraint. Every model has a fixed token budget (200k for Claude Sonnet, for example), and every request consumes a portion of that budget. Exceed the limit and the API rejects your call. But to stay within the limit, you first need to *measure* consumption accurately.

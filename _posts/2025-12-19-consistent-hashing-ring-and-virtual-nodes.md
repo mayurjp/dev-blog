@@ -9,8 +9,6 @@ tags: [system-design, consistent-hashing, sharding, groupcache]
 
 **TL;DR:** Why does adding a 4th server only remap a quarter of your keys, not all of them? Because consistent hashing places servers on a ring and routes each key to the next point clockwise, so adding a server only reassigns the keys in the small arc near its new position instead of remapping the whole keyspace the way `hash(key) % num_servers` does; virtual nodes (multiple ring points per server) then smooth out otherwise-uneven load distribution.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`golang/groupcache`](https://github.com/golang/groupcache)
 
 ## 1. The Engineering Problem: modulo sharding falls apart the moment the server count changes

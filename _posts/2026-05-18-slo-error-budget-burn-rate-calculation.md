@@ -6,8 +6,6 @@ categories: observability
 order: 7
 tags: [observability, slo, sli, error-budget, prometheus, go]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: an error budget is only useful if you know how fast it's being spent, not just whether it's gone
 

@@ -10,8 +10,6 @@ tags: [azure, glossary, cloud, fundamentals]
 
 **TL;DR:** This is the vocabulary reference for every Azure post on this blog — read it once, then skip back here whenever a term like *ARM*, *NSG*, or *Availability Zone* shows up.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Organization
 
 ### Region

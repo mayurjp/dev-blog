@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** How do you start twenty dependent containers in the right order, reliably? `docker compose` reads a declarative YAML spec, resolves each service's `depends_on` graph, and — when a `condition: service_healthy` is declared — waits for a dependency's healthcheck to actually pass, not merely for its process to start, before bringing up whatever depends on it.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted)
 
 ## 1. The Engineering Problem: one service is easy, a system of services is not

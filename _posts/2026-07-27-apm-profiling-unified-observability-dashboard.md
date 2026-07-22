@@ -10,8 +10,6 @@ tags: [observability, apm, profiling, aspire, opentelemetry]
 
 **TL;DR:** Can a single dashboard truly correlate your traces, metrics, and logs without forcing engineers to copy trace IDs between three different UIs and re-derive context each time? Yes — if all three signals are ingested through one OTLP endpoint, stored in a single `TelemetryRepository`, and linked by shared `TraceId`/`SpanId` keys that the viewer can navigate across tabs.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 When a microservice starts returning 503s, the on-call engineer's instinct is to check metrics first — latency p99 is spiking, error rate is climbing. But *which* endpoint? The metric dashboard shows a graph; you click the spike and get... a number. To find out *why*, you leave the metrics tool, open your log aggregator, filter by the service name and a rough time window, and scroll through thousands of structured log entries hoping the error message is there. Then you find a suspicious entry, extract its `TraceId`, switch to your tracing tool (Jaeger, Zipkin, etc.), paste the `TraceId`, and finally see the waterfall — a downstream database call taking 4 seconds.

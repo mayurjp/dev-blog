@@ -10,8 +10,6 @@ tags: [kubernetes, scheduling, topology-spread, affinity, descheduler]
 
 **TL;DR:** `topologySpreadConstraints` and pod affinity/anti-affinity both influence where a Pod is *initially placed*, but neither is a standing guarantee — the default scheduler evaluates them once, at admission time, and nothing in the base cluster re-checks compliance afterward. A node failure, a scale-up, or a rolling update can leave a Deployment's Pods skewed across zones or co-located with a Pod they were supposed to avoid, and it will stay that way indefinitely unless something actively rebalances it. `kubernetes-sigs/descheduler`'s real `RemovePodsViolatingTopologySpreadConstraint` and `RemovePodsViolatingInterPodAntiAffinity` plugins exist specifically to close that gap.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A `Deployment` with `replicas: 6` spread across 3 availability zones looks safe on day one — the scheduler's `topologySpreadConstraints` logic placed 2 Pods per zone. But Kubernetes scheduling decisions are not re-evaluated after the fact: if zone `us-east-1a` loses a node and 2 Pods are evicted and rescheduled into the remaining zones, the Deployment is now skewed 3/3/0 — every replica behind a single zone failure — and nothing in the default control plane notices or fixes it. The same gap applies to `podAntiAffinity`: a rule saying "don't co-locate two replicas of this Deployment on the same node" is enforced only when a Pod is *scheduled*; if a node is cordoned and Pods are manually rescheduled, or a `preferredDuringSchedulingIgnoredDuringExecution` (soft) rule was violated because no compliant node existed at the time, the violation simply persists.

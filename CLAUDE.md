@@ -62,6 +62,20 @@ link) — that file is the source of truth, this is a pointer, not a copy.
 `categories:` must be exactly one of the slugs in `_data/topics.yml` (below) — that's
 what drives which topic page and homepage card the post shows up under.
 
+**Two post types (second one added 2026-07-22).** Alongside `repo-lesson` there is
+`scenario-debug` (`../blog-pipeline/.claude/skills/scenario-debug/SKILL.md`), for
+symptom-first troubleshooting walkthroughs — the 2026-08-23 → 2026-09-09 posts in
+`_posts/`. Two front-matter conventions differ for those posts and are deliberate, not
+mistakes to "fix":
+
+- **`title:` is a question** (`"Databases: Why Does the App Time Out Acquiring a
+  Connection While the Database Is Idle?"`). This is the one documented exception to the
+  keyword-first title rule above — troubleshooting posts are found by people typing a
+  question, so the question is the keyword. The domain prefix keeps it keyword-led.
+- **`order:` is 90–98**, not a curriculum position, so scenario posts form a block on the
+  topic page between the curriculum and the `99` glossary: foundations (`0`) → curriculum
+  (`1..N`) → scenarios (`90..98`) → glossary (`99`).
+
 `order:` (added 2026-07-19) must match that topic's row number in
 `../blog-pipeline/content-tracker.md`'s per-domain table — it's what
 `_layouts/category.html` sorts by (see "Site structure" below), so a topic page reads

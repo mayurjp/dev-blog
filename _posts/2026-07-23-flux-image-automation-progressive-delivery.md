@@ -10,8 +10,6 @@ tags: [gitops, flux, progressive-delivery, image-automation, kubernetes, gitops-
 
 **TL;DR:** When a new container image tag appears in your registry, who updates the Deployment manifest? If the answer is "a developer runs `kubectl set image`" or "a CI pipeline opens a PR," you have a manual step in the middle of your GitOps loop — the cluster's desired state is no longer derived purely from Git. Flux's `ImageUpdateAutomation` closes this gap: it watches `ImagePolicy` objects for the latest image matching a filter, rewrites the YAML manifests in a Git repository, and pushes the commit. The reconciliation loop then picks up the change like any other Git commit. No `kubectl`, no CI step, no human in the loop.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ---
 
 ## 1. The Engineering Problem

@@ -9,8 +9,6 @@ tags: [system-design, sharding, vitess, partitioning]
 
 **TL;DR:** Which shard does a specific row actually land on, and why? Vitess deterministically hashes a primary key into a keyspace ID via a reversible Vindex, then routes to whichever shard's byte-range interval contains that keyspace ID — a pure comparison against range boundaries, not a lookup table or a modulo that would break on resharding.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`vitessio/vitess`](https://github.com/vitessio/vitess)
 
 ## 1. The Engineering Problem: "split the data across many databases" hides a real routing question

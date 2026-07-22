@@ -10,8 +10,6 @@ tags: [git, glossary, version-control]
 
 **TL;DR:** This is the vocabulary behind every Git post on this blog — what a commit actually *is* (a content-addressed object), what a branch actually *is* (a movable ref), and the machinery of DAGs, refs, rebase, and remotes. Each term stands alone; jump to whichever one you hit in another post.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Object model
 
 ### commit

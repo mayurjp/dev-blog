@@ -10,8 +10,6 @@ tags: [event-driven, glossary, cqrs, event-sourcing]
 
 **TL;DR:** This is a reference glossary for the event-driven-architecture series — every term below is defined standalone so you can jump in from any post and know what "projection," "outbox," or "choreography" concretely means at the mechanism level.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Core concepts
 
 ### Event

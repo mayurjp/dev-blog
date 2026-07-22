@@ -7,8 +7,6 @@ categories: microservices
 order: 90
 tags: [microservices, troubleshooting, debugging, distributed-tracing, opentelemetry, dotnet]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The symptom
 

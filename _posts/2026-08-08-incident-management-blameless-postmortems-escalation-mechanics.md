@@ -10,8 +10,6 @@ tags: [observability, incident-management, postmortems, pagerduty, on-call]
 
 **TL;DR:** Does "blameless postmortem" just mean being polite about outages, and does "incident management" just mean having a pager? No — both are concrete mechanisms: an escalation policy is a data structure that defines *who gets notified, in what order, with what delay, and what happens if nobody acknowledges*, and a blameless postmortem is a specific document structure (Timeline, Root Causes, Action Items, "where we got lucky") that forces the same rigor a code review does, minus assigning individual blame.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 An alert fires. Someone needs to see it, acknowledge it, and start responding — within minutes, not whenever someone happens to check Slack. "Page the on-call engineer" sounds simple until you ask the follow-up questions: what if they don't respond in five minutes? What if they're already handling a different incident? What if the service has three teams that could plausibly own the failure? A flat "send an SMS to one person" model has no answer to any of these, and during a real outage, "no answer" means the incident sits un-acknowledged while the clock runs.

@@ -7,8 +7,6 @@ categories: azure
 order: 91
 tags: [azure, troubleshooting, debugging, sql, performance, dtu]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The symptom
 

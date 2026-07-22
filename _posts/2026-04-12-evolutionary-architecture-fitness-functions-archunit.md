@@ -6,8 +6,6 @@ categories: architecture
 order: 12
 tags: [architecture, evolutionary-architecture, fitness-functions, archunit, java]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: an architecture rule enforced only by human vigilance decays the moment vigilance lapses once
 

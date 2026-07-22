@@ -7,8 +7,6 @@ categories: aspnet-webapi
 order: 3
 tags: [aspnet-webapi, system-design, architecture, event-driven, messaging]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The problem
 

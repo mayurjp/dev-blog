@@ -10,8 +10,6 @@ tags: [databases, postgres, storage-engine, b-tree, heap-pages, page-layout]
 
 **TL;DR:** What physically IS a "row" and an "index entry" once you're below the SQL layer, and how does a database find one row out of a billion without scanning them all? In Postgres, every table and every B-tree index is built from the exact same fixed-size 8KB **slotted page** — a small header plus an array of indirection pointers ("line pointers") to the actual tuple bytes — and it's that one shared page format, plus a tree of those pages linked by sibling pointers, that both heap storage and index search are built on top of.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 
 ## 1. The Engineering Problem: something has to hold a row on disk, in place, and findable

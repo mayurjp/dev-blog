@@ -7,8 +7,6 @@ categories: aspnet-webapi
 order: 4
 tags: [aspnet-webapi, system-design, api-design, multi-tenant, saas]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The problem
 

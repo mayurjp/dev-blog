@@ -10,8 +10,6 @@ tags: [gitops, helm, kubernetes, rollback, release-management]
 
 **TL;DR:** Does `helm rollback myapp 3` restore "the last known good state," or something more specific? It restores the exact manifest, chart, and config from revision 3 and nothing else — Helm's release history is an append-only ledger where every upgrade, rollback, and failed attempt gets its own numbered entry, and the CLI reads that entry by version number, not by a heuristic about what succeeded.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A Helm-managed release accumulates changes over time — `helm upgrade` bumps the chart, merges new values, re-renders templates, and applies the diff to the cluster. After several upgrades, something breaks: a bad values merge, a chart regression, a template misrender. The natural reaction is "roll it back," but what does that actually mean?

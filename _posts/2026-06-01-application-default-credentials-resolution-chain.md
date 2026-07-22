@@ -10,8 +10,6 @@ tags: [gcp, adc, application-default-credentials, authentication, service-accoun
 
 **TL;DR:** When a `gcloud` command, a Terraform run, or a freshly constructed `StorageClient` authenticates to Google Cloud, who told it *which* identity to use — when nothing in the code names one? **Application Default Credentials (ADC)** is a fixed, ordered fallback chain that runs before any API call or IAM check: an environment variable, then a well-known file on disk, then the GCE/GKE/Cloud Run metadata server at `169.254.169.254`. It's resolved once per process, cached, and it's the thing every other GCP auth topic — IAM, Workload Identity Federation — silently assumes already happened.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`googleapis/google-api-dotnet-client`](https://github.com/googleapis/google-api-dotnet-client), [`googleapis/google-cloud-dotnet`](https://github.com/googleapis/google-cloud-dotnet), [`google-github-actions/auth`](https://github.com/google-github-actions/auth)
 
 ## 1. The Engineering Problem: the same code has to authenticate differently in every environment, without being told which one it's in

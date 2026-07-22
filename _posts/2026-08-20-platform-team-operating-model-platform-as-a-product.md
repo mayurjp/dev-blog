@@ -10,8 +10,6 @@ tags: [platform-engineering, platform-as-a-product, operating-model, inner-sourc
 
 **TL;DR:** *How should a platform team be organized so it accelerates developers instead of becoming the new bottleneck?* Run the platform as a product — with users, a roadmap, and inner-source contribution — not as an ops ticket queue.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [humanitec-architecture/reference-architecture-aws](https://github.com/humanitec-architecture/reference-architecture-aws)
 
 ## 1. The Engineering Problem

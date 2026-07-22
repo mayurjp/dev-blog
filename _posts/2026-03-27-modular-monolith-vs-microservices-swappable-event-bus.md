@@ -9,8 +9,6 @@ tags: [architecture, modular-monolith, microservices, csharp]
 
 **TL;DR:** What would actually have to change to split this modular monolith into real microservices? Only the concrete class wired to `IEventsBus` — modules already communicate solely through published integration-event contracts and an event-bus interface, so swapping `InMemoryEventBusClient` for a real network client (RabbitMQ, Kafka) is a composition-root-only change, with no module's business logic touched.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kgrzybek/modular-monolith-with-ddd`](https://github.com/kgrzybek/modular-monolith-with-ddd)
 
 ## 1. The Engineering Problem: splitting into microservices too early pays a real distributed-systems tax for a boundary problem that doesn't need one yet

@@ -10,8 +10,6 @@ tags: [mlops, airflow, dag-execution, retries, metadata-db, task-instance]
 
 **TL;DR:** In a multi-process DAG executor, why can't retry state live in the worker that failed? Because when a worker process crashes or is killed, every in-memory variable it held -- including which attempt just failed, when the next retry should fire, and what exponential-backoff calculation was in progress -- vanishes instantly; the scheduler, which runs in a completely separate process (or even on a different machine), must independently know that a task failed, which attempt it was, and when to re-queue it, and the only place that survives a process crash is a row in the metadata database that the scheduler polls on its next heartbeat loop.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`apache/airflow`](https://github.com/apache/airflow)
 
 ## 1. The Engineering Problem: a crashed worker takes its retry bookkeeping with it

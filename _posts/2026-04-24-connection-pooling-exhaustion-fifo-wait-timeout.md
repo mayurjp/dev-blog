@@ -9,8 +9,6 @@ tags: [databases, connection-pooling, npgsql, postgresql, csharp]
 
 **TL;DR:** The connection pool is full — does the next request fail immediately, or wait? Npgsql makes it wait: once the pool is at its configured maximum, a new request blocks on a FIFO-fair queue until either another caller returns a connection or the configured timeout elapses, and only the timeout elapsing actually produces a failure.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`npgsql/npgsql`](https://github.com/npgsql/npgsql)
 
 ## 1. The Engineering Problem: a pool solves the cost of opening connections, but is still a finite resource with a real failure mode

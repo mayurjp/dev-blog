@@ -6,8 +6,6 @@ categories: architecture
 order: 9
 tags: [architecture, adr, documentation]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: current code shows *what* was decided, never *why*, and design docs drift or get silently rewritten
 

@@ -10,8 +10,6 @@ tags: [api-design, rest, hateoas, openapi, strapi]
 
 **TL;DR:** How do you know how "RESTful" an API really is? Most production APIs top out at Richardson Level 2 — resource-oriented URLs plus HTTP verbs — and only reach Level 3 (HATEOAS) when the server tells the client which actions are legal next.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [strapi/strapi](https://github.com/strapi/strapi) — its `packages/core/openapi` package assembles an OpenAPI 3.1 document by walking the registered route table and emitting path/operation objects.
 
 ## 1. The Engineering Problem

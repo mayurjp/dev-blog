@@ -10,8 +10,6 @@ tags: [api-design, glossary, rest, grpc, openapi]
 
 **TL;DR:** This is the shared vocabulary for every API-design post on this blog — read it once, then skip back here whenever a term like *idempotency*, *cursor pagination*, or *contract testing* shows up. Each entry is a standalone, mechanism-level definition you can read in any order.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## REST fundamentals
 
 ### REST

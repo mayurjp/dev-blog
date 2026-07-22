@@ -10,8 +10,6 @@ tags: [genai, guardrails, prompt-injection, llm-safety, colang]
 
 **TL;DR:** Can a single regex stop a prompt injection attack? No — the attacker simply rephrases across multiple turns, or injects mid-conversation after trust has been established. Input/output filtering treats each message independently, with no memory of prior turns or flow state. NVIDIA's NeMo Guardrails solves this by modeling safety rails as a **state machine**: Colang flows track execution position, fork into parallel branches, and carry context across turns — turning "did this message match a bad pattern?" into "is this conversation in a valid state for the bot to respond?"
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`NVIDIA-NeMo/Guardrails`](https://github.com/NVIDIA-NeMo/Guardrails)
 
 ---

@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** How does one container find another when IPs change on every restart? Every user-defined bridge network runs an embedded DNS server that resolves each container's name to its current IP on every lookup, so containers address each other by a stable service name instead of a hardcoded IP that goes stale the instant a container restarts.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`traefik/traefik`](https://github.com/traefik/traefik)
 
 ## 1. The Engineering Problem: the address book is out of date the moment you write it

@@ -12,8 +12,6 @@ excerpt: ""
 
 **TL;DR:** How does a feature flag SDK decide, without a database lookup on every request, that the *same* user always lands on the *same* side of a 10% gradual rollout  instead of flipping randomly each time they refresh?
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem: long-lived branches trade one kind of risk for a worse one
 
 Trunk-based development asks every engineer to merge to `main` at least daily, which sounds reckless until the alternative is compared honestly: a feature branch that lives for weeks accumulates a merge conflict surface that grows daily, and the eventual merge back into `main` is a single high-risk event bundling weeks of unreviewed interaction between that branch and everyone else's changes. The problem trunk-based development actually has to solve isn't "how do we merge often"  it's "how do we merge *unfinished* work into `main` daily without unfinished work reaching users." A `git merge` and a production release are conventionally the same event; trunk-based development only works if they're split into two.

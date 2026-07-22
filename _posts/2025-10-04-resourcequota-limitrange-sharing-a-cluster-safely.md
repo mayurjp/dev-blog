@@ -9,8 +9,6 @@ tags: [kubernetes, resourcequota, limitrange, admission-control]
 
 **TL;DR:** What stops one namespace from starving every other team of cluster capacity? A `ResourceQuota` caps the namespace's total resource consumption and object counts against a hard ceiling, while a `LimitRange` fills in missing per-Pod defaults — before `ResourceQuota` ever evaluates them.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kubernetes/website`](https://github.com/kubernetes/website)
 
 ## 1. The Engineering Problem: per-Pod limits don't protect the cluster from the namespace as a whole

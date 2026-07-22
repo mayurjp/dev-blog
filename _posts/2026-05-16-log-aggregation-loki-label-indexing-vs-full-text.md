@@ -6,8 +6,6 @@ categories: observability
 order: 6
 tags: [observability, log-aggregation, loki, full-text-search, go]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: indexing every word of every log line is expensive, for queries that usually don't need it
 

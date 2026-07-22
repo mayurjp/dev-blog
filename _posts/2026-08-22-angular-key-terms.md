@@ -10,8 +10,6 @@ tags: [angular, glossary, signals, frontend]
 
 **TL;DR:** This is the vocabulary reference for every Angular post on this blog. Each term below is written to stand alone — bookmark it and jump back whenever a later post uses a word you don't have pinned down.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Reactivity
 
 ### Component

@@ -10,8 +10,6 @@ tags: [databases, troubleshooting, debugging, postgresql, explain-analyze, autov
 
 **TL;DR:** The production query is not slow because production has more data — it is slow because the planner's row estimate is 53,000x too high, so it correctly prices a sequential scan as cheaper than the index. The estimate is wrong because `autovacuum_analyze_scale_factor` is a *percentage* of table size, and on a 204-million-row table that percentage has not been crossed in six weeks.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## The symptom
 
 > "Same query. Same schema. Same index — I checked `\d orders` on both. 8ms on my laptop against a restored dump, 4.1 seconds in production. And it's not a cold cache: I ran it ten times in a row and it's 4 seconds every time. `EXPLAIN` in prod shows a Seq Scan on a table that definitely has the index the query needs."

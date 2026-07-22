@@ -10,8 +10,6 @@ tags: [genai, vector-database, hnsw, qdrant, embeddings]
 
 **TL;DR:** When your vector collection grows beyond ~10k points, brute-force cosine search becomes linearly slower with every new embedding — HNSW solves this by organizing vectors into a layered navigable graph that achieves logarithmic-time approximate nearest neighbor search with sub-millisecond latency.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ---
 
 ## The Engineering Problem

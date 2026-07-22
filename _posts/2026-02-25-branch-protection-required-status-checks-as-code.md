@@ -6,8 +6,6 @@ categories: cicd
 order: 11
 tags: [cicd, github-actions, branch-protection, terraform]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: a CI result is just information unless something enforces it
 

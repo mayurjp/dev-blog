@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** Why shouldn't changing a timeout require rebuilding the service? Because externalized configuration moves settings out of the build entirely — a dedicated config server serves configuration from git (or another store) keyed by application name and profile, and services fetch it over the network at startup instead of shipping it inside the artifact.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem

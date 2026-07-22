@@ -10,8 +10,6 @@ tags: [platform-engineering, idp, kubernetes, backstage, cnoe]
 
 **TL;DR:** *How do you give 200 developers safe access to Kubernetes without turning each of them into a cluster operator?* You build an Internal Developer Platform — a product-managed abstraction over infrastructure — instead of handing everyone `kubectl`.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [cnoe-io/idpbuilder](https://github.com/cnoe-io/idpbuilder)
 
 ## 1. The Engineering Problem

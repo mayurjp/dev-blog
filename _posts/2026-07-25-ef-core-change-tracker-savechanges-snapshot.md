@@ -7,8 +7,6 @@ categories: dotnet
 order: 7
 tags: [dotnet, ef-core, change-tracking, orm]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 How does EF Core know which SQL to generate when you call SaveChanges — an INSERT, an UPDATE, or a DELETE — without you ever writing a WHERE clause or a state flag? It snapshots every property value when an entity is first tracked, diffs the snapshot against the live object at save time, and routes each entity to the right command based on the gap between the two.
 

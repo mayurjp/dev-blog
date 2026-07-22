@@ -10,8 +10,6 @@ tags: [architecture, micro-frontends, module-federation, single-spa, webpack, fr
 
 **TL;DR:** Splitting a backend into microservices means each service gets its own process, its own memory, its own dependency versions — isolation is free. Splitting a frontend the same way runs into a wall backends never hit: every "micro-frontend" still has to share one browser tab, one DOM, and usually one React/Vue instance, or a user pays for five copies of the same framework in their bundle. Webpack Module Federation solves this by making dependency sharing and version negotiation a runtime concern instead of a build-time one; single-spa solves the adjacent problem — which of several independently-built apps is even supposed to be active right now — with an explicit lifecycle state machine driven by the URL.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repos:** [`module-federation/core`](https://github.com/module-federation/core), [`single-spa/single-spa`](https://github.com/single-spa/single-spa)
 
 ## 1. The Engineering Problem: independently deployed frontends still share one runtime

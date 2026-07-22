@@ -10,8 +10,6 @@ tags: [kubernetes, control-plane, kubelet, static-pods, kubeadm, cluster-archite
 
 **TL;DR:** Why does a Kubernetes cluster need a "control plane" at all, and how does it even start if the thing that schedules Pods doesn't exist yet? Because something has to hold and reconcile the cluster's desired state — and it bootstraps through a kubelet mechanism called **static pods**, which starts the control plane's own components directly from local files, with no scheduler and no API server required to get them running.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kubernetes/kubernetes`](https://github.com/kubernetes/kubernetes)
 
 ## 1. The Engineering Problem: someone has to hold desired state, and that someone has to start before anything else can

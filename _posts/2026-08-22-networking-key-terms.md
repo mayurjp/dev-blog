@@ -10,8 +10,6 @@ tags: [networking, glossary, tcp-ip, dns, tls]
 
 **TL;DR:** This is the reference page for the networking vocabulary used throughout this blog's protocol, infrastructure, and performance posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 The posts in this domain assume you already know what a TCP handshake or a DNS resolver is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Transport & addressing

@@ -8,8 +8,6 @@ order: 13
 source_repo: dotnet/runtime
 tags: [dotnet, native-aot, trimming, serialization, source-generation]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

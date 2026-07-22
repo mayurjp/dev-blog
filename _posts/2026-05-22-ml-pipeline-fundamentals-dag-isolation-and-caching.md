@@ -9,8 +9,6 @@ tags: [mlops, ml-pipelines, kubeflow, dag, caching, python, go]
 
 **TL;DR:** A notebook trains a great model once — why does scheduling it as a nightly job fall apart, and what actually replaces it? A notebook's correctness depends on leftover kernel state, ad hoc installed packages, and click-order execution that a scheduler can't reproduce, and it has no way to skip re-running a step whose inputs didn't change; a real ML pipeline tool instead compiles the notebook into a DAG of independently containerized, content-addressed steps, so each step gets its own isolated image and dependencies, and a per-step fingerprint hash lets unchanged steps be skipped and reused from cache.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kubeflow/pipelines`](https://github.com/kubeflow/pipelines)
 
 ## 1. The Engineering Problem: a notebook's correctness depends on things a production job can't guarantee

@@ -10,8 +10,6 @@ tags: [angular, http, interceptors, functional-interceptors, dependency-injectio
 
 **TL;DR:** Does Angular's HTTP interceptor have to be a class that implements `HttpInterceptor` and gets registered under a multi-provider `InjectionToken`? No — `HttpInterceptorFn` is a plain function that receives `HttpRequest` and `HttpHandlerFn` directly, runs inside `runInInjectionContext` so `inject()` just works, and gets registered via `withInterceptors()` in a `provideHttpClient()` call instead of class-based `HTTP_INTERCEPTORS` providers. The class-based approach still works through a compatibility adapter in the source, but the functional path is the default going forward because it eliminates boilerplate, makes the chain composable without wrapping, and plays cleanly with Angular's tree-shakable DI.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 Class-based HTTP interceptors work, but they carry real ergonomic and architectural weight. Every interceptor must be a separately declared `@Injectable({providedIn: 'root'})` class, implementing an `HttpInterceptor` interface, registered in the DI system under the `HTTP_INTERCEPTORS` multi-provider token. That's three separate artifacts — class, interface, token — for what is fundamentally a single transformation function.

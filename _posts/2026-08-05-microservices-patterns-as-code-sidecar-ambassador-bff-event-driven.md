@@ -10,8 +10,6 @@ tags: [design-patterns, microservices, sidecar, ambassador, bff, event-driven]
 
 **TL;DR:** What do "sidecar," "ambassador," "BFF," and "event-driven" actually look like once you stop drawing boxes and arrows and read the code? A sidecar/ambassador is a small companion process the application dials over `localhost` instead of the real remote endpoint; a BFF is one dedicated controller that fans out to several backend calls and hands the client back a single shaped response; and event-driven is a narrow interface — one `Consume` method — that a broker's dispatcher invokes by convention, not a direct method call the producer makes.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 Four separate pains, each solved by treating a diagram-level "pattern" as a concrete piece of code rather than a deployment topology alone.

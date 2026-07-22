@@ -7,8 +7,6 @@ categories: aspnet-webapi
 order: 90
 tags: [aspnet-webapi, troubleshooting, debugging, async, threading, performance]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The symptom
 

@@ -10,8 +10,6 @@ tags: [gitops, argocd, applicationset, multi-cluster, flux, promotion, scale]
 
 **TL;DR:** How do you run GitOps across dozens of clusters and environments? Generate per-cluster `Application` objects with an ApplicationSet cluster generator (Argo CD) or per-tenant Kustomize/Helm overlays (Flux) — and accept that promotion and cross-cluster coordination are organizational problems, not tooling ones.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [argoproj/argo-cd](https://github.com/argoproj/argo-cd) (ApplicationSet cluster generator) and [fluxcd/flux2](https://github.com/fluxcd/flux2).
 
 ## 1. The Engineering Problem

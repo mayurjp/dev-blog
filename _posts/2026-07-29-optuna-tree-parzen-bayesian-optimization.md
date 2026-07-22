@@ -10,8 +10,6 @@ tags: [mlops, hyperparameter-optimization, bayesian-optimization, optuna]
 
 **TL;DR:** Why does TPE (Tree-structured Parzen Estimator) find good hyperparameters in 50 trials where grid search needs thousands? TPE splits completed trials into "good" and "bad" sets, fits a separate Gaussian Mixture Model to each, then samples the point that maximizes the ratio `l(x)/g(x)` — the likelihood of being good relative to being bad. This is Bayesian optimization without a surrogate model, and Optuna's `TPESampler` implements it with multivariate correlations, constant-liar handling for parallel workers, and constrained search space support.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`optuna/optuna`](https://github.com/optuna/optuna)
 
 ## 1. The Engineering Problem: grid search wastes budget by treating every region of the space equally

@@ -11,8 +11,6 @@ excerpt: ""
 
 **TL;DR:** Why does one failed OS in a build matrix sometimes cancel every other OS's tests? GitHub's default `fail-fast: true` behavior cancels every other in-progress matrix leg the moment any single one fails, trading complete cross-platform information for saved compute; setting `fail-fast: false` explicitly gives up that savings so every platform finishes and you see the full picture.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 
 ## 1. The Engineering Problem: hand-duplicated per-OS jobs drift out of sync

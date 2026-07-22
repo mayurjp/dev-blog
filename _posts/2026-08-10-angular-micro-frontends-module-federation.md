@@ -7,8 +7,6 @@ categories: angular
 order: 15
 tags: [angular, micro-frontends, module-federation]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

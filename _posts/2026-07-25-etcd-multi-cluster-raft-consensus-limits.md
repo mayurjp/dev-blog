@@ -10,8 +10,6 @@ tags: [multicloud, etcd, raft, consensus, disaster-recovery, kubernetes]
 
 **TL;DR:** Can you run a single etcd cluster stretched across two cloud providers for unified multi-cloud state? No — Raft's correctness guarantee is that a majority of nodes must acknowledge every committed write, and cross-cloud network partitions turn that majority into a availability-killer: a 5-node cluster split 3/2 across clouds will keep the majority side running but completely stall writes from the minority side, while etcd's lessor (lease manager) elects exactly one primary for the entire cluster, meaning one cloud's nodes are fully demoted during normal operation, not active-active.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A natural instinct when building multi-cloud infrastructure is "let's just stretch our state store across both clouds" — run one etcd or Consul cluster with members in both AWS and GCP, get unified state, and avoid the complexity of syncing between two independent clusters. The pitch sounds clean: one cluster, one API endpoint, one source of truth.

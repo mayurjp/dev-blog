@@ -7,8 +7,6 @@ categories: [angular]
 order: 6
 tags: [angular, routing, lazy-loading, code-splitting, bundle-size, webpack, performance]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

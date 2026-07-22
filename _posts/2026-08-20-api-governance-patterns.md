@@ -10,8 +10,6 @@ tags: [api-design, api-governance, pagination, idempotency, error-format]
 
 **TL;DR:** How do you make a fleet of APIs feel like one? Govern three cross-cutting contracts — a uniform error envelope, consistent pagination, and idempotency keys for safe retries.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [strapi/strapi](https://github.com/strapi/strapi) — its OpenAPI assembler standardizes parameter shapes (including `pagination[page]` style query params) across every generated route, the kind of convention governance enforces fleet-wide.
 
 ## 1. The Engineering Problem

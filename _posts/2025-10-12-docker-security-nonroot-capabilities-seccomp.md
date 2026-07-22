@@ -9,8 +9,6 @@ tags: [docker, security, seccomp, capabilities, rootless]
 
 **TL;DR:** Why doesn't `USER 1000` in a Dockerfile actually make your container secure? Container hardening is four independent, stacked kernel-enforced layers — UID/GID, Linux capabilities, seccomp syscall filtering, and AppArmor/SELinux mandatory access control — and setting a non-root UID only closes one of those doors, since Docker's default capability set and default seccomp allow-list apply regardless of which UID the process runs as.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`grafana/grafana`](https://github.com/grafana/grafana), [`moby/moby`](https://github.com/moby/moby)
 
 ## 1. The Engineering Problem: container hardening is four independent layers, and fixing one doesn't fix the others

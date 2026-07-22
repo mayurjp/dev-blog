@@ -7,8 +7,6 @@ categories: aws
 order: 90
 tags: [aws, troubleshooting, debugging, iam, s3, security]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The symptom
 

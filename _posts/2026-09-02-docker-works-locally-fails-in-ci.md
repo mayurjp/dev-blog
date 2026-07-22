@@ -10,8 +10,6 @@ tags: [docker, troubleshooting, debugging, buildx, multi-arch, oci]
 
 **TL;DR:** The image is not broken — it is `linux/arm64`. A plain `docker build` on an Apple Silicon Mac builds only for the builder's own platform, the classic image store can't store a manifest list, so what lands in the registry is one arm64 manifest with no platform choice in it. The amd64 CI runner pulls it anyway and the kernel refuses to `execve()` an aarch64 ELF binary.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## The symptom
 
 > "I build and push from my MacBook, then the deploy job in CI pulls the exact same tag and the container is dead before it logs anything: `exec /app/server: exec format error`. The image is fine — I run it locally every day. The digest CI reports is byte-for-byte the digest I pushed. It's a static Go binary, so there's no shell and no shebang to get wrong, and `/app/server` definitely exists because the build stage `COPY`d it."

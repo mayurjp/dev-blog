@@ -10,8 +10,6 @@ tags: [multicloud, crossplane, kubernetes, infrastructure, cloud-agnostic]
 
 **TL;DR:** Does writing a Kubernetes YAML file actually create an RDS instance on AWS? In Crossplane it does — but the claim you `kubectl apply` doesn't map 1:1 to the cloud resource; it passes through a Composition (a template that selects which cloud resources to create and how to wire them together), which produces one or more Managed Resources (provider-specific objects that talk to the cloud API), all orchestrated by a controller engine that dynamically starts watches and runs a gRPC function pipeline — and understanding that chain is what separates "Crossplane works in a demo" from "Crossplane works in production."
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 Multi-cloud infrastructure has a portability problem that the previous lesson in this domain made concrete at the Terraform level: AWS RDS and GCP Cloud SQL model "highly available" and "backup retention" as structurally different schema shapes, so swapping providers isn't a provider-name rename — it's rewriting the resource definition. Terraform abstracts the *tooling* difference (same CLI, same state file, same plan/apply flow) but not the *resource schema* difference.

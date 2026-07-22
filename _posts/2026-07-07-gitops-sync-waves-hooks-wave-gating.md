@@ -10,8 +10,6 @@ tags: [gitops, argo-cd, sync-waves, hooks, resource-ordering]
 
 **TL;DR:** Is `argocd.argoproj.io/sync-wave: "5"` just a documentation hint, or does it actually gate when a resource gets applied? It genuinely gates execution — the wave number feeds directly into the strict sort order the sync engine applies resources in, and Argo CD's reconcile loop won't touch any resource in a later wave while anything in the current wave is still running. Ordering isn't a suggestion here; it's enforced by the loop's own control flow on every tick.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A plain `kubectl apply -f manifests/` sends every resource in a directory to the API server in roughly whatever order the client happens to process files — Kubernetes itself doesn't understand or enforce any dependency ordering between them. Most of the time that's fine, because Kubernetes' own reconciliation (a Pod retrying a missing ConfigMap mount, for instance) eventually converges even if resources arrived "in the wrong order."

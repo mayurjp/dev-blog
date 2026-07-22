@@ -10,8 +10,6 @@ tags: [aspnet-webapi, fundamentals, api, dotnet]
 
 **TL;DR:** ASP.NET Core WebAPI pushes every HTTP request through a middleware pipeline, then routing selects an endpoint (minimal API or controller), model binding maps request data to method parameters, and filters run before/after the handler. The framework source lives in `dotnet/aspnetcore` — the same repo as Kestrel, middleware, and the Generic Host. The bugs that bite beginners are almost never business logic; they are middleware ordering, filter lifetime capture, and incorrect model binding attributes.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. What ASP.NET WebAPI is
 
 ASP.NET WebAPI is the HTTP API layer of ASP.NET Core. It provides two endpoint models — **minimal APIs** (`app.MapGet()`) and **controllers** (`[ApiController]` classes) — both built on the same middleware pipeline, routing engine, and DI container that the rest of ASP.NET Core uses. The code lives in [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore).

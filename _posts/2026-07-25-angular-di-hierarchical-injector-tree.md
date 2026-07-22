@@ -7,8 +7,6 @@ categories: angular
 order: 4
 tags: [angular, dependency-injection, injector-tree, providedIn, di]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

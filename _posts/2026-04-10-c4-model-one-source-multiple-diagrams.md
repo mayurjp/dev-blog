@@ -6,8 +6,6 @@ categories: architecture
 order: 11
 tags: [architecture, c4-model, diagramming, structurizr]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: hand-drawn diagrams at different zoom levels inevitably drift apart
 

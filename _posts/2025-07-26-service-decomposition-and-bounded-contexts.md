@@ -9,8 +9,6 @@ tags: [microservices, ddd, bounded-context, architecture]
 
 **TL;DR:** How do you split a monolith without building a distributed one? Decompose along bounded contexts — explicit boundaries where each context exclusively owns its data and talks to others only through explicit contracts (APIs or events), never a shared database.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem

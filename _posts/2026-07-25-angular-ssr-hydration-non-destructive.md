@@ -7,8 +7,6 @@ categories: angular
 order: 10
 tags: [angular, ssr, hydration, universal, ivy]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

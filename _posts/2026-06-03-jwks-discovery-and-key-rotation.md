@@ -10,8 +10,6 @@ tags: [security, jwks, key-rotation, oidc, jwt, oauth2, ory-hydra]
 
 **TL;DR:** Every previous post in this series verifies a credential against a key that's simply assumed to already be correct — where does a verifier that has never talked to the issuer before actually get that key, and what happens to a million already-issued tokens the instant the issuer rotates it? A verifier fetches the issuer's public keys as a JSON Web Key Set (JWKS) from a well-known HTTP endpoint, matches each token to a key by its `kid`, and rotation works by *adding* a new key rather than replacing the old one — the old key's public half stays published until every token it signed has had time to expire.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 
 ## 1. The Engineering Problem: every signature-verifying scheme in this domain assumes the key is already right

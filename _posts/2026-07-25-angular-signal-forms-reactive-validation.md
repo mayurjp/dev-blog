@@ -11,8 +11,6 @@ source_files:
   - packages/forms/src/validators.ts
   - packages/forms/src/directives/reactive_directives/form_control_directive.ts
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

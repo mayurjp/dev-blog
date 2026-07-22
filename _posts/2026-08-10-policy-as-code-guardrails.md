@@ -10,8 +10,6 @@ tags: [gitops, policy-as-code, opa, gatekeeper, kyverno, admission-control, comp
 
 **TL;DR:** How do you prevent a non-compliant manifest from ever being applied in a GitOps flow? Put a policy engine in the admission path so the cluster itself rejects bad objects — GitOps sync only ever pushes manifests that pass.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [open-policy-agent/gatekeeper](https://github.com/open-policy-agent/gatekeeper) and [kyverno/kyverno](https://github.com/kyverno/kyverno)
 
 ## 1. The Engineering Problem

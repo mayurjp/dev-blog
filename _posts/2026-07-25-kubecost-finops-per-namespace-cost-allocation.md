@@ -9,8 +9,6 @@ tags: [multicloud, finops, kubernetes, prometheus, kubecost, opencost]
 
 **TL;DR:** AWS Cost Explorer tells you how much you spent on EC2 last month, but it cannot tell you which Kubernetes namespace in that cluster consumed 400 CPU-core-hours of that spend. Kubecost's allocation engine solves this by querying real-time Prometheus metrics -- pod CPU requests, node pricing, PVC attachment -- and computing per-namespace, per-pod, per-container cost breakdowns that no cloud-billing API can provide alone.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repos:** [`opencost/opencost`](https://github.com/opencost/opencost) (OpenCost -- the open-source core of Kubecost) and [`kubecost/kubecost`](https://github.com/kubecost/kubecost) (the Kubecost Helm chart)
 
 ## 1. The Engineering Problem: cloud billing APIs know what you paid, not who used it

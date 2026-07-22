@@ -10,8 +10,6 @@ tags: [multicloud, istio, service-mesh, multi-cluster, envoy, east-west-gateway]
 
 **TL;DR:** Can two Kubernetes clusters on different clouds share a single Istio service mesh when their pod CIDRs are entirely unreachable from each other? Istio's answer is the **east-west (E/W) gateway** — a dedicated Envoy deployed at the edge of each cluster that accepts cross-network traffic and tunnels it into the destination cluster. The control plane (Pilot) doesn't expose every remote pod IP as a direct endpoint. Instead, the `EndpointsByNetworkFilter` in the endpoint builder *replaces* remote-network pod IPs with the E/W gateway's own address, weighted across multiple gateways for load spreading. The filter is not optional decoration — without it, the mesh silently generates EDS entries pointing at unreachable private IPs.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem: pod IPs across cloud VPCs are unreachable from each other
 
 A single Kubernetes cluster has a flat pod network — any pod can reach any other pod by IP. The moment you split a workload across two clusters in different VPCs (say, GKE in `us-central1` and EKS in `eu-west-1`), that flat network assumption collapses. Pod CIDRs don't overlap, can't be peered simply, and cloud firewall rules don't cross account boundaries without explicit peering or VPN tunnels.

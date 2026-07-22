@@ -10,8 +10,6 @@ tags: [mlops, distributed-training, pytorch, ddp, allreduce, gradient-bucketing]
 
 **TL;DR:** Without bucketing, every parameter's gradient must finish computing before any cross-GPU communication starts — the backward pass is fully serialised against AllReduce. DDP partitions parameters into buckets (default 25 MiB each), and the moment the last parameter gradient in a bucket finishes computing, the AllReduce for that bucket fires immediately while the backward pass continues computing gradients for parameters in earlier buckets. This overlap hides AllReduce latency behind gradient computation, and the key code that makes it happen lives in PyTorch's C++ Reducer and `_BucketCapacityConfig`.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`pytorch/pytorch`](https://github.com/pytorch/pytorch)
 
 ---

@@ -6,8 +6,6 @@ categories: ddd
 order: 10
 tags: [ddd, event-sourcing, csharp]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: keeping only "current state" throws away the history a lot of real questions need
 

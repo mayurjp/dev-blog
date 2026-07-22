@@ -10,8 +10,6 @@ tags: [system-design, fundamentals, scalability]
 
 **TL;DR:** System design is the act of turning a fuzzy prompt ("build me a chat app") into a set of components and the tradeoffs between them. The method is always the same: read the requirements (read/write ratio, scale, latency, consistency), draw one data-flow diagram, then reach for the standard building blocks — load balancer, stateless app tier, cache, database, queue. Matrix's real **Synapse** homeserver is a concrete example of all five in production: a load balancer fronts stateless app workers, Redis caches hot state, PostgreSQL is the event store, and a message queue/background workers carry async fan-out.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. What "system design" actually asks you to do
 
 A coding question has a right answer you can run. A system design question has no single right answer — it has a set of *reasonable* answers, each with a cost. Your job is to pick components and justify the tradeoffs under the stated constraints.

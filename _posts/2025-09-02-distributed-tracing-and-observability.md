@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** If checkout is slow, which of six downstream calls is actually to blame? Distributed tracing assigns a trace ID at the edge and propagates it through every hop so a collector can reassemble all the spans into one call graph with per-span timing, showing exactly which downstream call is the bottleneck.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo), [`istio/istio`](https://github.com/istio/istio)
 
 ## 1. The Engineering Problem

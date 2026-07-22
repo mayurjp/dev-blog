@@ -10,8 +10,6 @@ tags: [networking, tcp, flow-control, congestion-control]
 
 **TL;DR:** How does TCP give you a reliable, ordered byte stream over an unreliable IP network? A 3-way handshake establishes the connection, sliding-window flow control stops a fast sender drowning a slow receiver, and congestion control (slow start + AIMD) stops the network itself from melting.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [nginx/nginx](https://github.com/nginx/nginx) — its event-driven connection handling shows how a server accepts and tracks those established TCP connections at scale.
 
 ## 1. The Engineering Problem

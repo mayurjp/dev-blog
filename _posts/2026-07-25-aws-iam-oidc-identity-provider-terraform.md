@@ -6,8 +6,6 @@ domain: multicloud
 source_repo: hashicorp/terraform-provider-aws
 tags: [aws, terraform, oidc, github-actions, identity-federation, iam, no-secrets]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

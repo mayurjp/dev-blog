@@ -10,8 +10,6 @@ tags: [databases, time-series, timescaledb, hypertable, chunking, postgresql]
 
 **TL;DR:** A single giant table with a B-tree index on `time` looks fine until the index itself gets too large to keep hot in cache and every insert starts paying random-I/O costs against months of history — TimescaleDB's answer is to physically partition a "hypertable" into per-interval **chunks**, computed by integer-dividing a timestamp by a fixed interval length, so recent writes only ever touch the newest, smallest, cache-resident chunk instead of the whole table's index.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`timescale/timescaledb`](https://github.com/timescale/timescaledb)
 
 ## 1. The Engineering Problem: time-series data is append-heavy, recency-biased, and index growth is unbounded

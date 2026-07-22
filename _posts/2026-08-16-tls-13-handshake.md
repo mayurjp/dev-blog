@@ -10,8 +10,6 @@ tags: [networking, tls, tls13, handshake, 0rtt, forward-secrecy]
 
 **TL;DR:** How does a client and server agree on keys and prove identity without a man-in-the-middle? TLS 1.3 does an ECDHE key exchange in **1 round trip** (vs 2 in 1.2), verifies the server cert chain, and can send early data in **0-RTT** on a resumed session.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [curl/curl](https://github.com/curl/curl) — its TLS layer enforces `CURL_SSLVERSION` defaults and ALPN, and its connection-reuse logic requires matching SSL parameters, the same checks a TLS 1.3 handshake outcome must satisfy.
 
 ## 1. The Engineering Problem

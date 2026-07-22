@@ -10,8 +10,6 @@ tags: [angular, angular-cli, builders, webpack, esbuild, build-pipeline, archite
 
 **TL;DR:** When you run `ng build`, you never touch webpack or esbuild directly — the Angular CLI maps your command to a builder registered in `angular.json`, which normalizes your raw options into a fully resolved build configuration, sets up bundler contexts for TypeScript compilation and global stylesheets, and orchestrates the entire pipeline through a chain of internal functions you never see. The builder is the invisible contract between your CLI command and the actual bundler.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 Every Angular application needs a build step. Your TypeScript, HTML templates, component styles, global stylesheets, polyfills, and assets all need to be compiled, bundled, tree-shaken, and emitted as a set of optimized JavaScript, CSS, and HTML files ready for deployment. This is a non-trivial pipeline with dozens of configurable knobs: AOT vs JIT compilation, source maps, output hashing, bundle budgets, SSR entry points, i18n translation inlining, service worker generation, and more.

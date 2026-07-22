@@ -9,8 +9,6 @@ tags: [security, sso, saml, keycloak]
 
 **TL;DR:** Why is verifying a SAML assertion harder than verifying a JWT? A SAML verifier has to independently check that the signature covers the specific signed assertion element (not just that a signature exists somewhere in the XML) and that the assertion is still inside its validity window, because unlike a JWT's single compact signed string, XML signatures can be misdirected via signature-wrapping attacks.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`keycloak/keycloak`](https://github.com/keycloak/keycloak)
 
 ## 1. The Engineering Problem: SSO needs a signed vouching statement, and XML signatures have a sharper edge than a JWT's

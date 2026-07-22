@@ -10,8 +10,6 @@ tags: [genai, glossary, llm, rag, agents]
 
 **TL;DR:** This is the vocabulary reference for every GenAI post on this blog — read it once, then skip back here whenever a term like *embedding*, *RAG*, or *MCP* shows up. Each entry is a 2-4 sentence, mechanism-level definition, grouped by theme.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Foundations
 
 ### LLM (Large Language Model)

@@ -6,8 +6,6 @@ categories: cicd
 order: 9
 tags: [cicd, github-actions, self-hosted-runners, kubernetes]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: "self-hosted" says nothing about whether state carries between jobs
 

@@ -9,8 +9,6 @@ tags: [docker, buildx, multi-arch, qemu]
 
 **TL;DR:** Why does your multi-arch Docker build take 10x longer than the single-arch one? Building each non-native platform inside the Dockerfile forces BuildKit to run compilation steps under slow QEMU emulation, but for languages with real cross-compilation support (like Go), cross-compiling the binaries natively outside the Dockerfile and having buildx just `COPY` and package them per platform avoids emulated compilation entirely.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`traefik/traefik`](https://github.com/traefik/traefik)
 
 ## 1. The Engineering Problem: `--platform linux/amd64,linux/arm64` is correct and also a trap

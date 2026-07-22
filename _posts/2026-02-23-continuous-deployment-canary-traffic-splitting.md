@@ -7,7 +7,6 @@ order: 10
 tags: [cicd, github-actions, continuous-deployment, canary, gcp]
 excerpt: ""
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
 
 {% raw %}
 

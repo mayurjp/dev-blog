@@ -9,8 +9,6 @@ tags: [architecture, hexagonal-architecture, ports-and-adapters, csharp]
 
 **TL;DR:** What actually stops someone from importing EF Core into the domain layer? Not a naming convention or code-review habit — the domain project's own `.csproj` has zero package or project reference to EF Core or the infrastructure project at all, so the import fails to compile rather than merely looking wrong in review.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "the domain shouldn't depend on infrastructure" is easy to say and easy to violate by accident

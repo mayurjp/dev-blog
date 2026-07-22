@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** Why does your production image ship a full Go toolchain to run one binary? Multi-stage builds let a single Dockerfile declare multiple `FROM` stages, each with its own isolated filesystem, so only the final stage — typically just the compiled binary pulled in via `COPY --from=<stage>` — actually ships, leaving the compiler, headers, and source tree behind in an earlier, discarded stage.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`grafana/grafana`](https://github.com/grafana/grafana)
 
 ## 1. The Engineering Problem: the build toolchain becomes part of the artifact

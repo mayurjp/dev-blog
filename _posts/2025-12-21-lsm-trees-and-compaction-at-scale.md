@@ -9,8 +9,6 @@ tags: [system-design, indexing, lsm-tree, cockroachdb]
 
 **TL;DR:** Why do high-write databases avoid updating data in place? Because in-place B-tree updates mean random disk writes that don't scale under high throughput; an LSM-tree instead only appends sequential writes to an in-memory buffer that's flushed to immutable sorted files, then periodically compacts those files to bound growing read cost and reclaim space from overwritten or deleted keys.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`cockroachdb/pebble`](https://github.com/cockroachdb/pebble)
 
 ## 1. The Engineering Problem: in-place updates mean random disk writes, and random writes don't scale

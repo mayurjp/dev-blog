@@ -7,8 +7,6 @@ categories: angular
 order: 8
 tags: [angular, control-flow, template-compiler, viewcontainerref, ivy]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

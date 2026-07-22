@@ -7,8 +7,6 @@ categories: genai
 order: 18
 tags: [genai, mcp, ai-tools, llm, protocol]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 **Why can't an LLM just call a function on a remote server and get an answer back?**
 

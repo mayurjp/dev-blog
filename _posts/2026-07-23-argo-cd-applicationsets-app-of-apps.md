@@ -8,8 +8,6 @@ order: 5
 source: argoproj/argo-cd
 source_url: "https://github.com/argoproj/argo-cd"
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

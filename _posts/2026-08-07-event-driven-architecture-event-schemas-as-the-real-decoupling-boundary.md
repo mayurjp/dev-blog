@@ -10,8 +10,6 @@ tags: [architecture, event-driven-architecture, kafka, schema-registry, cloudeve
 
 **TL;DR:** Everyone says a message broker "decouples" producers from consumers — but decouples them from what, exactly, if a producer can still break every consumer by silently changing a field's type? The broker only decouples the network path (who's listening, when). The actual coupling that breaks production systems is in the *payload's shape* — and that's fixed by treating the event schema itself as a versioned, registry-enforced contract (Confluent's Schema Registry wire format), and by choosing whether an event carries just an ID (event notification) or the full state a consumer needs (event-carried state transfer, as CloudEvents' envelope makes concrete).
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repos:** [`confluentinc/confluent-kafka-go`](https://github.com/confluentinc/confluent-kafka-go), [`cloudevents/spec`](https://github.com/cloudevents/spec)
 
 ## 1. The Engineering Problem: the broker decouples the wire, not the contract

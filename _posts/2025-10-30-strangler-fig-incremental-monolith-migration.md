@@ -9,8 +9,6 @@ tags: [microservices, strangler-fig, yarp, migration]
 
 **TL;DR:** How do you replace a legacy system without a big-bang cutover? The Strangler Fig pattern puts a routing facade in front of the whole system and migrates one capability at a time by repointing a single route from the legacy implementation to the new one, keeping the system fully working — and each step independently revertible — at every stage.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: a big-bang rewrite is a bet you can't take back

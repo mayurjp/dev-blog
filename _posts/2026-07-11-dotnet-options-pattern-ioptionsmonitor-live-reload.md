@@ -10,8 +10,6 @@ tags: [dotnet, configuration, options-pattern, ioptionsmonitor, live-reload]
 
 **TL;DR:** Does `IOptionsMonitor<T>` poll `appsettings.json` on a timer to notice when a value changes? No — it never polls anything itself. It subscribes once to `IConfiguration`'s own reload token, a push-based primitive that a specific provider (the JSON file provider's own file-system watcher, for instance) fires when it actually detects a change. When that token fires, the monitor invalidates its cached options and re-binds on the next read — no restart, no polling loop, and no reload logic duplicated inside `IOptionsMonitor` itself.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 The most naive way to read configuration is to parse `appsettings.json` once at startup into a static object and never look at it again. That's fine for values that genuinely can't change during a running process — but it's the wrong answer for a value operations needs to tune live (a feature flag, a rate limit, a log verbosity threshold) without a full redeploy and restart. The opposite naive approach — re-reading the file on every single access — wastes work on every read and risks reading a file mid-write, producing a torn, invalid parse.

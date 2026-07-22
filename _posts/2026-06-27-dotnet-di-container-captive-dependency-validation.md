@@ -10,8 +10,6 @@ tags: [dotnet, dependency-injection, aspnetcore, captive-dependency, service-lif
 
 **TL;DR:** Does the built-in `Microsoft.Extensions.DependencyInjection` container just resolve constructor parameters and trust the developer got service lifetimes right? No — when scope validation is enabled, it walks the actual dependency graph (its internal "call site tree") for every service, remembers whether a scoped service appears anywhere inside it, and throws a real, specific exception the moment that tree shows a scoped service trapped inside a singleton — a bug class known as a **captive dependency**, one of the most common and hardest-to-spot lifetime mistakes in real .NET applications.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A **captive dependency** happens when a singleton service takes a scoped service as a constructor dependency. The container resolves that scoped instance once — the first time the singleton itself gets constructed — and the singleton then holds onto that *same* scoped instance for its entire lifetime, because a singleton is only ever constructed once. Every later request or scope that would normally get a fresh scoped instance instead silently reuses the one instance the singleton captured on day one.

@@ -10,8 +10,6 @@ tags: [dotnet, aspnetcore, background-service, ihostedservice, hosted-lifetime, 
 
 **TL;DR:** Does `BackgroundService.StartAsync` block until your `ExecuteAsync` method finishes? No — it wraps your `ExecuteAsync` in a `Task.Run`, stores the task, and immediately returns `Task.CompletedTask`. The host considers the service "started" before your background loop has done a single iteration, moves on to start the next service, and only monitors `ExecuteAsync`'s task as a fire-and-forget watchdog that can stop the host if it faults.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 When you register a `BackgroundService` in ASP.NET Core, you expect it to "run in the background." The reality is more nuanced — and the nuance has real consequences for startup ordering, exception handling, and shutdown behavior.

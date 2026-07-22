@@ -10,8 +10,6 @@ tags: [gitops, kustomize, kubernetes, helm, config-management]
 
 **TL;DR:** Why do Kustomize overlays produce cleaner environment diffs than Helm template conditionals? Because Kustomize treats the base manifest as immutable YAML and applies strategic merge patches on top — no Go template syntax, no `{% raw %}{{ if .Values.env }}{% endraw %}` sprawl — so the diff between `dev` and `prod` is a small patch file instead of a whole re-rendered manifest.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kubernetes-sigs/kustomize`](https://github.com/kubernetes-sigs/kustomize)
 
 ## 1. The Engineering Problem: templating an entire manifest tree to change three values

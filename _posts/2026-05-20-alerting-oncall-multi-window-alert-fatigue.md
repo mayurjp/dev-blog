@@ -7,7 +7,6 @@ order: 8
 tags: [observability, alerting, on-call, prometheus, sre]
 excerpt: ""
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
 
 {% raw %}
 

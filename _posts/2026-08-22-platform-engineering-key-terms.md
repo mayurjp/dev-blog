@@ -10,8 +10,6 @@ tags: [platform-engineering, glossary, developer-experience, internal-developer-
 
 **TL;DR:** This is the reference page for the platform engineering vocabulary used throughout this blog's developer experience, infrastructure abstraction, and platform posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 The posts in this domain assume you already know what an IDP or a golden path is. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 
 ## Platform concepts

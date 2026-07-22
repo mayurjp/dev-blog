@@ -10,8 +10,6 @@ tags: [aspnet-webapi, glossary, api, dotnet]
 
 **TL;DR:** This is the vocabulary reference for every ASP.NET WebAPI post on this blog — read it once, then skip back here whenever a term like *RouteEndpoint*, *FluentValidation*, or *OpenAPI* shows up.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Endpoint Pipeline
 
 ### RouteEndpoint

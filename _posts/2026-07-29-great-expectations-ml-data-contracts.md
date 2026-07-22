@@ -6,8 +6,6 @@ domain: mlops
 order: 12
 source_repo: great-expectations/great_expectations
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

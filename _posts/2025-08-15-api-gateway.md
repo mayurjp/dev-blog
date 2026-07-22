@@ -10,8 +10,6 @@ published: false
 
 **TL;DR:** Should a mobile client know that catalog and ordering are different services? No — an API gateway (or a backend-for-frontend scoped to one client type) sits at the edge and owns routing, path rewriting, and cross-cutting policy, so clients see one stable surface instead of the internal service topology.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem

@@ -10,8 +10,6 @@ tags: [platform-engineering, backstage, developer-portal, techdocs, catalog]
 
 **TL;DR:** *Where does a developer go to find out what services exist, how to run them, and how to create a new one correctly?* A developer portal — Backstage stitches those three answers (catalog, docs, scaffolding) into one place.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [backstage/backstage](https://github.com/backstage/backstage)
 
 ## 1. The Engineering Problem

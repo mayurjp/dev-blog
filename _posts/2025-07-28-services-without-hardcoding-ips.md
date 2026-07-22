@@ -27,8 +27,6 @@ system_design:
 
 **TL;DR:** How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtual IP and DNS name — in front of the volatile pods, tracking which pods are currently alive and Ready via a label selector so clients never need a pod's real IP.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: the volatile IP address

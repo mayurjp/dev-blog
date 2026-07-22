@@ -9,8 +9,6 @@ tags: [kubernetes, probes, kubelet, health-checks]
 
 **TL;DR:** How does Kubernetes know a running container is actually broken? The kubelet runs liveness, readiness, and startup probes directly on each node — a failed liveness probe restarts the container in place, a failed readiness probe pulls the Pod from Service traffic without restarting it, and a startupProbe holds both off until a slow-booting app finishes starting.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`kubernetes-sigs/metrics-server`](https://github.com/kubernetes-sigs/metrics-server)
 
 ## 1. The Engineering Problem: "running" is not the same as "working"

@@ -12,8 +12,6 @@ excerpt: ""
 
 **TL;DR:** A canary rollout is described as "10%, then 50%, then 100%"  but mechanically, that's three or four separate pipeline jobs, possibly separated by hours, possibly run by different people clicking approve. What actually carries "which revision are we even talking about" from the first job to the last one?
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem: a single deploy step can shift traffic, but it can't pause for a human
 
 An earlier lesson in this series covered `google-github-actions/deploy-cloudrun`'s traffic-splitting primitive: `no_traffic: true` deploys a revision without exposing it, and a separate `update-traffic` call moves a percentage onto it. That solves the *platform* mechanics  Cloud Run genuinely supports splitting traffic between revisions. But a real progressive rollout isn't one job calling that action twice back to back; it's "deploy the canary, wait, check error rates, get a human's go-ahead, shift more traffic, wait again, ship the rest"  stretched over minutes or hours, not one workflow run. That means the *pipeline itself* has a state-tracking problem the platform doesn't solve for it: the job that shifts traffic to 50% has to be run separately from  possibly by a different trigger than  the job that deployed the canary in the first place, and it needs to know exactly which revision that was, because a second deploy in between (a hotfix, a different PR) would create a second, different revision entirely. Get that identity wrong and "shift 50% of traffic" silently targets the wrong version.

@@ -6,8 +6,6 @@ categories: ddd
 order: 12
 tags: [ddd, validation, invariants, csharp, mediatr]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: "is this input well-formed" and "does this preserve the domain's rules" are different questions, checked at different moments
 

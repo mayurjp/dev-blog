@@ -9,8 +9,6 @@ tags: [security, api-keys, hashing]
 
 **TL;DR:** Why do API keys get shown to you exactly once, and never again? The server hashes the key immediately with a fast hash (safe here because the key is machine-generated with full entropy) and never persists the plaintext, so there's no way to redisplay it later — only revoke and reissue.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`unkeyed/unkey`](https://github.com/unkeyed/unkey)
 
 ## 1. The Engineering Problem: a bearer credential that's checked on every request is a high-value, high-frequency target

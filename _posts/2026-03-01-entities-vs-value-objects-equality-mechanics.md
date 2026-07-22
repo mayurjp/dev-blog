@@ -9,8 +9,6 @@ tags: [ddd, entities, value-objects, csharp]
 
 **TL;DR:** Why does one field on `Order` (its `Address`) get its own class with no ID, while everything else doesn't? Because `Address` is a Value Object — equal only if every one of its fields matches, with no identity concept at all — while `Order` is an Entity, equal only by its `Id` regardless of what its other fields say, so each needs a different equality rule implemented as a different base class.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: "are these two the same thing?" has two different correct answers in one domain model

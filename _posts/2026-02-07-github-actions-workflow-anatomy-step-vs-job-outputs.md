@@ -11,8 +11,6 @@ excerpt: ""
 
 **TL;DR:** Why does one workflow need two different ways to pass a value between steps  one for steps, another for jobs? Steps in the same job share a runner, so a later step reads an earlier step's output directly (`steps.<id>.outputs.<name>`); jobs run on separate runners, so a job must explicitly re-declare a step's output in its own `outputs:` block before another job  which must also declare `needs: <job-name>`  can reference it as `needs.<job-name>.outputs.<name>`.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 
 ## 1. The Engineering Problem: steps and jobs run at genuinely different isolation levels

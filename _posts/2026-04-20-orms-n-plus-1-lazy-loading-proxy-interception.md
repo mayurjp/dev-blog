@@ -9,8 +9,6 @@ tags: [databases, orm, n-plus-1, entity-framework-core, csharp]
 
 **TL;DR:** `order.Buyer` looks like a field access — why does it silently run a database query? EF Core's lazy-loading proxies wrap entities in a dynamically generated subclass that intercepts every property getter, and when a getter's compiler-generated name (`get_Buyer`) matches a known navigation property, the interceptor loads it from the database before the getter returns — invisible at the call site and repeated once per entity in a loop.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/efcore`](https://github.com/dotnet/efcore)
 
 ## 1. The Engineering Problem: a query hidden inside what looks like ordinary property access is invisible at the call site

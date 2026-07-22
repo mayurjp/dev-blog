@@ -9,8 +9,6 @@ tags: [databases, sql, nosql, mongodb, sharding, data-modeling]
 
 **TL;DR:** What does declaring a shard key actually do, once you hit save? It's the input to a real function that computes which key-range "chunk" a document falls into, and every chunk is explicitly assigned to exactly one physical shard — a background balancer can later migrate a chunk's ownership to a different shard without ever touching the documents' shard key values themselves.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`mongodb/mongo`](https://github.com/mongodb/mongo)
 
 ## 1. The Engineering Problem: "NoSQL" isn't a syntax choice, it's a physical-distribution choice

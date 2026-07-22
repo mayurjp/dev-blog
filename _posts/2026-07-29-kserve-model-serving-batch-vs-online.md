@@ -7,8 +7,6 @@ categories: mlops
 order: 6
 tags: [mlops, model-serving, kserve, inference, batch-processing, online-inference]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

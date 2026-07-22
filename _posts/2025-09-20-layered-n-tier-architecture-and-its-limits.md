@@ -9,8 +9,6 @@ tags: [software-architecture, layered-architecture, n-tier, dotnet, dependency-i
 
 **TL;DR:** If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because the fix isn't strict downward dependencies — Domain defines the interface it needs (like `IOrderRepository`) and Infrastructure implements it, so the compile-time reference points inward toward Domain even though the runtime call still flows outward to persistence.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: strict downward dependencies eventually can't hold

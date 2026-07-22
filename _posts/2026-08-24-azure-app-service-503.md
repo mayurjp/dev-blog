@@ -7,8 +7,6 @@ categories: azure
 order: 90
 tags: [azure, troubleshooting, debugging, app-service, performance, dotnet]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## The symptom
 

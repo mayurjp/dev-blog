@@ -10,8 +10,6 @@ tags: [mlops, canary, traffic-shifting, argo-rollouts, ml-ops]
 
 **TL;DR:** Deploying a new ML model version behind a Kubernetes Service looks identical to deploying any other container — but the failure mode is different: latency creep, accuracy drift, and silent regression all hide behind a green health check. Argo Rollouts gives you canary traffic shifting (percentage-based, enforced by a real mesh or ingress) combined with `AnalysisRun` gates so a model only gets promoted when inference metrics like p99 latency and accuracy pass configurable thresholds.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`argoproj/argo-rollouts`](https://github.com/argoproj/argo-rollouts)
 
 ---

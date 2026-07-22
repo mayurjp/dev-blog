@@ -6,8 +6,6 @@ categories: ddd
 order: 9
 tags: [ddd, context-mapping, strategic-ddd, integration-events]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## 1. The Engineering Problem: once two bounded contexts need to talk, *whose* model governs the shape of what crosses the boundary?
 

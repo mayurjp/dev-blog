@@ -6,8 +6,6 @@ date: 2026-07-25 09:00:00 +0530
 categories: multicloud
 order: 8
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

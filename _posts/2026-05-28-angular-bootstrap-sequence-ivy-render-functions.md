@@ -12,8 +12,6 @@ excerpt: ""
 
 **TL;DR:** When you call `bootstrapApplication(AppComponent)`, what actually turns that one function call into a rendered page? Angular builds a root `EnvironmentInjector` and an `ApplicationRef` first  with no `NgModule` anywhere in the path  then calls `ApplicationRef.bootstrap()`, which creates the root component's view by invoking its Ivy-compiled template function: a plain JavaScript function full of `??elementStart`/`??advance`/`??property` instruction calls, not a virtual-DOM diff.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem: a component class and a template string aren't runnable code
 
 Before you call `bootstrapApplication`, all you actually have is a TypeScript class decorated with `@Component({selector, template})`  a description, not a running program. Two separate problems have to be solved before a single real DOM node exists on the page.

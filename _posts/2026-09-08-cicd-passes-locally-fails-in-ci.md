@@ -10,8 +10,6 @@ tags: [cicd, troubleshooting, debugging, github-actions, git, runner-images]
 
 **TL;DR:** The Linux runner's filesystem is case-sensitive and every developer's macOS or Windows filesystem is not, so an import whose casing does not match the file on disk resolves locally and fails on the runner — and Git's `core.ignoreCase`, which `git clone` sets to `true` on those filesystems, is why "I renamed it and `git status` says clean" is a lie.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## The symptom
 
 > "CI has been red for four hours on `Module not found: Error: Can't resolve './services/UserService' in '/home/runner/work/payments-api/payments-api/src'`. That file exists. I can open it. Every one of the six people on this team runs `npm test` locally and it passes — three on macOS, two on Windows, one on WSL. It fails on `ubuntu-latest` on every single run, same error, same line. I renamed the file to match the import, committed, pushed. Still failing. `git status` is clean on my machine."

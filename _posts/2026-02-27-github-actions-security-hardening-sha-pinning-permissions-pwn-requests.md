@@ -7,7 +7,6 @@ order: 12
 tags: [cicd, github-actions, security, supply-chain]
 excerpt: ""
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
 
 {% raw %}
 

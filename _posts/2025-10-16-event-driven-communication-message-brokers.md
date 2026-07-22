@@ -9,8 +9,6 @@ tags: [microservices, rabbitmq, event-driven, messaging]
 
 **TL;DR:** How does a microservice react to something that happened elsewhere without calling it directly? A message broker sits between publisher and consumers — the publisher sends an event to an exchange, and the broker fans it out to durable, per-service queues so each consumer reacts independently, isolated from the publisher's own availability.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers)
 
 ## 1. The Engineering Problem: synchronous calls couple every interested service to the publisher

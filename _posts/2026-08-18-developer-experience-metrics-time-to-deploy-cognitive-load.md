@@ -10,8 +10,6 @@ tags: [platform-engineering, developer-experience, dx-metrics, dora, aspire]
 
 **TL;DR:** *How do you know if your platform is actually making developers faster, or just adding another layer?* Measure DX: time-to-first-deploy, inner-loop latency, and cognitive load — not just DORA's four keys.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [microsoft/aspire](https://github.com/microsoft/aspire)
 
 ## 1. The Engineering Problem

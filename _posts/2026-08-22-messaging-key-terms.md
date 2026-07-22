@@ -10,8 +10,6 @@ tags: [messaging, glossary, kafka, rabbitmq, grpc]
 
 **TL;DR:** This is the shared vocabulary for every messaging post on this blog — brokers, topics, partitions, consumer groups, delivery semantics, and the RabbitMQ/Kafka/gRPC pieces — each term defined in isolation so you can jump in from any later article.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Brokers & models
 
 ### Message broker

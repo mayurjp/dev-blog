@@ -10,8 +10,6 @@ tags: [aws, glossary, cloud, fundamentals]
 
 **TL;DR:** This is the vocabulary reference for every AWS post on this blog — read it once, then skip back here whenever a term like *ARN*, *IAM Policy*, or *Security Group* shows up.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## Organization
 
 ### Region

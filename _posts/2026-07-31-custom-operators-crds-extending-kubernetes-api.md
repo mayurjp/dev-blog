@@ -10,8 +10,6 @@ tags: [kubernetes, operators, crd, controller-runtime, kubebuilder]
 
 **TL;DR:** Kubernetes' control loops only know how to reconcile the object kinds baked into the API server — `Deployment`, `Service`, `Pod` — so how do you get the same self-healing behavior for your own domain object, like "a Memcached cluster" or "a Postgres replica set"? A `CustomResourceDefinition` (CRD) registers the new kind with the API server, and a `controller-runtime`-based Operator runs its own `Reconcile` loop against it — the exact same pattern `kube-controller-manager` uses internally for `Deployment`/`ReplicaSet`, just running as your own binary. From `operator-framework/operator-sdk`'s real Kubebuilder-scaffolded controller source.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 A team running memcached (or Postgres, or Kafka, or any stateful app with operational rules) on Kubernetes eventually hits the same wall: a `Deployment` alone doesn't know the domain-specific rules for that app. "If the memcached cluster's replica count drops below what's declared, recreate the missing Deployment" is trivial to express in YAML, but "before failing over, verify the replica set has caught up on replication, and only then promote a new primary" is not a `Deployment` concept — it's application-specific operational knowledge that Kubernetes has no built-in object for.

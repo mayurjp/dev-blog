@@ -10,8 +10,6 @@ tags: [mlops, responsible-ai, fairness, bias-detection, model-cards, fairlearn]
 
 **TL;DR:** Why can't a single accuracy score catch discriminatory model behavior, and what does it actually take to detect and mitigate bias in a production model? Because accuracy is an average across the entire dataset, and averages hide subgroup harm by construction -- a model can be 96% accurate overall while being wrong twice as often for one group as another; catching that requires computing every metric *per sensitive-feature group* first, then explicitly comparing those groups, which is exactly what a fairness-metrics library like Fairlearn's `MetricFrame` is built to do, and what a bias-mitigation technique like `ThresholdOptimizer` uses those per-group numbers to fix.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 **Real repo:** [`fairlearn/fairlearn`](https://github.com/fairlearn/fairlearn)
 
 ## 1. The Engineering Problem: an aggregate metric can't see what it never disaggregates

@@ -7,8 +7,6 @@ categories: angular
 order: 14
 tags: [angular, defer, lazy-loading, chunks, performance, change-detection, onpush]
 ---
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 
 ## TL;DR
 

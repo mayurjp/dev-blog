@@ -10,8 +10,6 @@ tags: [multicloud, terraform, aws, gcp, infrastructure-as-code]
 
 **TL;DR:** Is running the same managed-database concept on both AWS and GCP just a matter of writing the Terraform twice with a different provider block — same shape, different names? No: AWS RDS and GCP Cloud SQL model "highly available" and "backup retention" as structurally different kinds of fields (a flat boolean vs. a nested configuration block with its own enum), so multi-cloud isn't portability you get for free from Terraform's shared HCL syntax — it's real, ongoing dual-maintenance engineering work, which is exactly why it should be adopted for a specific driver (redundancy/DR, data residency, avoiding single-vendor leverage), not as a default "just in case" hedge.
 
-> **In plain English (30 sec):** Code you already write — Map, function, API call, just bigger.
-
 ## 1. The Engineering Problem
 
 Multi-cloud is often pitched as low-cost insurance: "we use Terraform, so if we ever need to move off a provider, we just point the same config at a different one." That framing quietly assumes two clouds' resources for the same concept — "a managed, highly-available Postgres database" — are shaped the same way underneath one shared IaC syntax, and only the provider name changes.
