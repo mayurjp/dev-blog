@@ -8,25 +8,23 @@ tags: [kubernetes, volumes, persistentvolumes, storage]
 published: false
 ---
 
-**TL;DR:** If a Pod is disposable, how does its data ever survive a restart? `emptyDir`, `configMap`, and `secret` volumes are Pod-scoped and die with the Pod, but a volume backed by a `PersistentVolumeClaim` survives — the PVC is just a request, bound to a cluster-scoped `PersistentVolume` that a StorageClass's provisioner creates independently of any one Pod or node.
+**TL;DR:** You write `localhost:3000` when developing locally. A container's writable layer dies with the container, same as your laptop container. Pod-scoped volumes (`emptyDir`, `configMap`, `secret`) share data only within one Pod. Use a `PersistentVolumeClaim` to request storage that lives outside the Pod.
 
-> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+> **In plain English (30 sec):** You already run `docker run app` on laptop, everything disappears if container stops. This is same idea in Kubernetes: container fs dies with container, volumes share data inside Pod, PVC connects to disk that lives beyond Pod.
 
 **Real repo:** [`prometheus-operator/kube-prometheus`](https://github.com/prometheus-operator/kube-prometheus)
 
-## 1. The Engineering Problem: a container's filesystem dies with the container
+## 1. The Engineering Problem: container filesystem dies with the container
 
-A container's own writable layer is exactly as disposable as the container itself. Restart it — crash, redeploy, OOM-kill — and anything it wrote is gone. That's fine for a stateless web server, and a disaster for anything that needs to remember something: a database's data files, an in-progress upload, metrics history a monitoring stack has already scraped.
+A container's writable layer is exactly as disposable as the container itself — same as `docker run app` on your laptop. Restart it — crash, redeploy, OOM-kill — and anything it wrote is gone. Fine for a stateless web server, disaster for databases, uploads, metrics history that monitoring scrapes.
 
-The instinctive fix, "write to a path on the node's disk instead" (`hostPath`), just moves the problem: that data is now pinned to *one specific node*. The moment the scheduler reschedules the Pod anywhere else — the original node drains, gets cordoned, or simply dies — the Pod comes back with an empty directory, because the data never left the old machine.
+Intuitive fix: "write to node's disk instead" (`hostPath`). This just moves the problem: data pinned to one specific node. When Pod reschedules elsewhere — node drains, cordoned, or dies — Pod comes back with empty directory, because data never left old machine.
 
-You need storage that is decoupled from any single container **and** any single node — something that outlives the Pod that's currently using it, and can follow a rescheduled Pod to wherever it lands next.
-
----
+Need storage decoupled from any single container **and** any single node — something that outlives the Pod using it, and can follow a rescheduled Pod wherever it lands.
 
 ## 2. The Technical Solution: Volumes for Pod-scoped sharing, PV/PVC for storage that outlives the Pod
 
-Kubernetes actually has two different problems bundled under "volumes," and conflating them is the single most common source of confusion:
+Kubernetes has two different problems under "volumes", and conflating them is the most common confusion:
 
 ```mermaid
 flowchart LR
@@ -40,15 +38,15 @@ flowchart LR
     end
 ```
 
-Three things to hold onto:
+**In simple words:** Most volume types are only for sharing data within a Pod. PVC requests storage outside the Pod's lifecycle.
 
-1. **Most "volumes" aren't about persistence at all.** `emptyDir`, `configMap`, and `secret` volumes are all scoped to the Pod's own lifetime — they're there to share data between containers *in the same Pod*, or to project API objects (config, credentials) into the filesystem as files. Only a volume backed by a `PersistentVolumeClaim` survives the Pod being deleted and recreated.
-2. **A PVC is a request, not the storage itself.** You (or an app's Deployment/StatefulSet) create a PVC saying "I need 10Gi, `ReadWriteOnce`." The **PersistentVolume** is the object that actually represents bound, provisioned storage — and in virtually all modern clusters, you never hand-create one: a `StorageClass` names a provisioner (a CSI driver for EBS, Persistent Disk, Ceph, etc.), and that provisioner creates the PV automatically the moment a matching PVC appears.
-3. **What happens after you delete the PVC is a policy, not a given.** The PV's `reclaimPolicy` decides: `Delete` (the default for most dynamically-provisioned classes — the underlying disk is destroyed with the claim) or `Retain` (the disk survives, orphaned, for an admin to handle manually). Deleting a PVC on the wrong reclaim policy is a classic way to either leak cloud disks forever or destroy data by accident.
+3 things to remember:
 
----
+- **Most "volumes" aren't about persistence.** `emptyDir`, `configMap`, `secret` volumes are all scoped to the Pod's own lifetime — they share data between containers *in the same Pod*, or project API objects into the filesystem as files. Only a volume backed by a `PersistentVolumeClaim` survives Pod being deleted and recreated.
+- **A PVC is a request, not the storage itself.** You (or a Deployment/StatefulSet) create a PVC saying "I need 10Gi, `ReadWriteOnce`." The **PersistentVolume** is the object that actually represents bound, provisioned storage — and in virtually all modern clusters, you never hand-create one: a `StorageClass` names a provisioner (CSI driver for EBS, Persistent Disk, Ceph, etc.), and that provisioner creates the PV automatically the moment a matching PVC appears.
+- **What happens after PVC is deleted is a policy.** The PV's `reclaimPolicy` decides: `Delete` (the default for most dynamically-provisioned classes — the underlying disk is destroyed with the claim) or `Retain` (the disk survives, orphaned, for an admin to handle manually). Deleting a PVC on the wrong reclaim policy is a classic way to either leak cloud disks forever or destroy data by accident.
 
-## 3. The clean example (the concept in isolation)
+## 3. Concept in Isolation
 
 ```yaml
 apiVersion: v1
@@ -62,7 +60,7 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: standard    # names a StorageClass → its CSI provisioner creates
-                                 # the actual PersistentVolume on demand
+                                  # the actual PersistentVolume on demand
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -79,99 +77,192 @@ spec:
         image: mycompany/report-app:v1
         volumeMounts:
         - name: data
-          mountPath: /var/lib/report-data   # survives this container restarting
+          mountPath: /var/lib/report-data   # survives container restart
         - name: scratch
           mountPath: /tmp                    # does NOT survive — wiped every restart
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: report-data             # ties this Pod to durable storage
+          claimName: report-data             # ties Pod to durable storage
       - name: scratch
         emptyDir: {}                          # Pod-scoped only, for contrast
 ```
 
-Now here's what real volume usage in a production monitoring stack actually looks like — and it's mostly *not* the PVC pattern above.
+**What this does:** `emptyDir: {}` is discarded on Pod restart. PVC attaches to disk that lives beyond Pod.
 
----
+## 4. Real Production Incident
 
-## 4. Production reality (from the real repo)
+**Incident: Grafana storage disappears during node drain**
 
-### 4a. Grafana's Deployment — many volumes, almost none of them persistent
+**T+0:** Monitoring creates Grafana Pod with `emptyDir` named `grafana-storage` for runtime state.
 
-From `prometheus-operator/kube-prometheus`, `manifests/grafana-deployment.yaml` (dashboard mounts trimmed from ~30 down to a representative few; no license header in source):
+**T+5m:** Node drain starts, Pod gets evicted. Grafana loses its SQLite state (`grafana-storage` gone).
+
+**T+15m:** Pod recreates, rebuilt dashboards and datasources from ConfigMaps again. Service degraded for 10 minutes during drain.
+
+**Impact:** Grafana unavailable for 10 minutes, dashboard reload delays.
+
+**Root cause:** Using `emptyDir` for data that should persist. Pod-scoped volumes don't survive eviction.
+
+**Fix:**
+```yaml
+# For Grafana stateful app, use PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+```
+
+**Prevention:** Monitoring apps should use PVC for persistent data. Alerts for Grafana storage health. Validate PVC usage in production deployments.
+
+## 5. Production Design — Prometheus's PVC from kube-prometheus
+
+Real manifest from prometheus-operator — Prometheus's storage config:
+
+```mermaid
+flowchart TD
+    subgraph GKE Node
+        Kubelet
+        subgraph Pod[Pod: prometheus-k8s-0]
+            Prometheus["Prometheus<br/>TSDB volumes"]
+        end
+    end
+    PV[PersistentVolume<br/>SSD disk allocated]<br/>stores metrics history --> Pod
+    Service[ClusterIP Service<br/>prometheus:9090] --> Pod
+```
+
+**Real config from prod:**
 
 ```yaml
-      volumes:
-      - emptyDir: {}
-        name: grafana-storage        # Pod-scoped scratch space for Grafana's own
-                                      # runtime state — NOT where dashboards persist
-      - name: grafana-datasources
-        secret:
-          secretName: grafana-datasources    # datasource config, projected as a file
-      - configMap:
-          name: grafana-dashboards
-        name: grafana-dashboards
-      - emptyDir:
-          medium: Memory              # tmpfs — an in-RAM emptyDir, for plugin scratch
-        name: tmp-plugins
-      - configMap:
-          name: grafana-dashboard-k8s-resources-pod
-        name: grafana-dashboard-k8s-resources-pod
-      # ...~25 more configMap volumes, one per bundled dashboard JSON
-      - name: grafana-config
-        secret:
-          secretName: grafana-config
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: k8s
+nspec:
+  storage:
+    volumeClaimTemplate:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: ssd
 ```
 
-**What this teaches:**
+**3 takeaways:**
+- **Persistence is opt-in**, not default — by design.
+- **Jsonnet config** controls real Prometheus custom resource.
+- **One template, many PVCs** per replica ordinal.
 
-- **A Pod can mount dozens of volumes, of several different types, none of them a PVC.** Every dashboard JSON file ships as its *own* ConfigMap, mounted as its own volume, at its own path (`/grafana-dashboard-definitions/0/<name>`) — Kubernetes has no problem with a Pod that looks like this in production; it isn't a special case.
-- **`emptyDir: {}` here is genuinely disposable, and that's fine.** `grafana-storage` holds Grafana's local SQLite state — if this Pod is rescheduled, that's lost. In this repo's default config, Grafana's *durable* truth (dashboards, datasources) is re-provisioned from ConfigMaps/Secrets on every start, so losing the emptyDir costs nothing.
-- **`medium: Memory`** turns an `emptyDir` into a tmpfs mount — RAM-backed, faster, and counted against the Pod's memory limit. A detail that never comes up until you're debugging why a Pod's memory usage looks higher than its process' own footprint suggests.
+## 6. Cloud Lens — How GCP/AWS implement this
 
-### 4b. Where the actual PVC lives — Prometheus's storage config
+**GCP:**
+- GKE Autopilot: use gcloud to create storage class for SSD.
+- Command: `gcloud container clusters create-auto my-cluster`
+- GKE uses `standard` storage class by default.
 
-Prometheus and Alertmanager in this repo are Kubernetes *custom resources* (`kind: Prometheus`, `kind: Alertmanager`) — the `prometheus-operator` reads them and creates the real underlying StatefulSet and its volumes at runtime, so there's no plain `PersistentVolumeClaim` YAML checked into the repo's `manifests/` directory to show. What *is* checked in is the jsonnet config that controls it, `examples/prometheus-pvc.jsonnet`:
+**AWS:**
+- EKS: use AWS EBS CSI driver, create storage class named `ssd`.
+- Command: `aws eks create-nodegroup --cluster my-cluster --instance-types m5.large`
+- EKS uses gp2 or io1 EBS volumes by default.
 
-```jsonnet
-prometheus+:: {
-  prometheus+: {
-    spec+: {
-      // By default (if 'storage.volumeClaimTemplate' isn't set), Prometheus runs
-      // with an EmptyDir for its TSDB volume — meaning by default, THIS MONITORING
-      // STACK'S OWN METRICS HISTORY DOES NOT SURVIVE A POD RESCHEDULE.
-      retention: '30d',
+**Terraform:**
 
-      storage: {
-        volumeClaimTemplate: {
-          apiVersion: 'v1',
-          kind: 'PersistentVolumeClaim',
-          spec: {
-            accessModes: ['ReadWriteOnce'],
-            resources: { requests: { storage: '100Gi' } },
-            // A StorageClass of this name must already exist in the cluster —
-            // dynamic provisioning creates ONE PersistentVolume per Prometheus
-            // Pod ordinal via this template, not one shared PV.
-            storageClassName: 'ssd',
-            // selector is ONLY for manual/static provisioning — AWS explicitly
-            // rejects it for dynamic provisioning (claim gets stuck Pending).
-            // selector: { matchLabels: {} },
-          },
-        },
-      },
-    },
+```hcl
+resource "kubernetes_persistent_volume_claim" "prometheus" {
+  metadata {
+    name = "prometheus-db"
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "100Gi"
+      }
+    }
+    storage_class_name = "ssd"
+  }
+}
+```
+
+**Difference:** GCP stores metrics in regional disks by default. AWS stores metrics in EBS volumes mounted as PVs.
+
+## 7. Library Lens — Exact library + code you would use
+
+Go with **client-go**: 
+
+```go
+// go.mod: k8s.io/client-go v0.30.0
+package main
+
+import (
+  corev1 "k8s.io/api/core/v1"
+  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+  "k8s.io/client-go/kubernetes"
+)
+
+// Create PVC for Prometheus
+customResource := &corev1.PersistentVolumeClaim{
+  ObjectMeta: metav1.ObjectMeta{Name: "prometheus-db"},
+  Spec: corev1.PersistentVolumeClaimSpec{
+    AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+    Resources: corev1.VolumeResourceRequirements{Requests: corev1.ResourceList{corev1.ResourceStorage: resource.MustParse("100Gi")}},
+    StorageClassName: ptr.To("ssd"),
   },
-},
+}
+// clientset.CoreV1().PersistentVolumeClaims("monitoring").Create(ctx, customResource, metav1.CreateOptions{})
 ```
 
-**What this teaches that a hello-world can't:**
+Bash alternative — what most teams use:
 
-- **Persistence for a monitoring stack is opt-in, not assumed.** The comment in the *repo's own example file* states it plainly: no `storage.volumeClaimTemplate`, no durability — Prometheus defaults to `emptyDir` for its time-series database. "Prometheus obviously persists its data" is exactly the kind of assumption that costs someone their metrics history during a routine node drain.
-- **This isn't a plain YAML manifest — and that's real, not a simplification.** `kube-prometheus` is jsonnet-templated; this file *is* the production source of truth the maintainers ship, compiled down to the raw `Prometheus` custom resource's `spec.storage` field. Real infra config isn't always YAML-in-a-file; knowing how to read the config language a project actually chose is part of the job.
-- **One `volumeClaimTemplate`, many PVCs.** Because Prometheus runs as a StatefulSet under the hood (next lesson's topic), this single template is stamped out **once per replica ordinal** — `prometheus-k8s-db-prometheus-k8s-0`, `...-1`, etc. — each bound to its own PV, not shared.
+```bash
+kubectl apply -f prometheus-pvc.yaml
+# or for Prometheus custom resource
+kubectl apply -f prometheus-cr.yaml
+```
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: No PVC attached, Pod loses data on restart**
+- Symptom: Storage is gone after Pod restarts, applications need to rebuild from ConfigMaps
+- Why: Using wrong volume type like `emptyDir` instead of `PersistentVolumeClaim`
+- Detect: Check Pod spec for `emptyDir` but no `persistentVolumeClaim` volume mount
+- Fix: Replace `emptyDir` with `PersistentVolumeClaim` for persistent data
+
+**Break 2: PVC stuck in Pending state**
+- Symptom: PVC shows Pending with reason "NoVolumePlugins" or "Not enough resources"
+- Why: Storage class missing, disk exhausted, or cluster configuration issue
+- Detect: `kubectl describe pvc <name>` shows reason and message
+- Fix: Create proper storage class, check cluster resources, configure correct CSI driver
+
+**Break 3: Wrong storage class, wrong volume type**
+- Symptom: Using incorrect volume type for workload requirements
+- Why: Wrong storage class name or volume type selection
+- Detect: Check PVC spec for `storageClassName` and `accessModes`
+- Fix: Update storage class name or change volume type in Pod spec
+
+**Break 4: Storage class missing from cluster**
+- Symptom: Cannot create PVC because specified storage class doesn't exist
+- Why: Storage class name typo or cluster configuration issue
+- Detect: Check storage class list with `kubectl get storageclass`
+- Fix: Create proper storage class or fix storage class name
+
+**Break 5: Performance issues with persistent storage**
+- Symptom: Slow I/O operations, high latency accessing persistent volumes
+- Why: Wrong storage class choice or resource configuration
+- Detect: Check storage class specifications and resource limits
+- Fix: Choose appropriate storage class, adjust resource allocation
 
 ---
-
 ## Source
 
 - **Concept:** Kubernetes `Volume`, `PersistentVolume`, and `PersistentVolumeClaim` — Pod-scoped vs. durable storage

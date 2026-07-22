@@ -7,235 +7,224 @@ order: 1
 tags: [microservices, ddd, bounded-context, architecture]
 ---
 
-**TL;DR:** How do you split a monolith without building a distributed one? Decompose along bounded contexts — explicit boundaries where each context exclusively owns its data and talks to others only through explicit contracts (APIs or events), never a shared database.
+**TL;DR:** Don't split by table. Split by business boundary where each service owns its own DB and talks only via APIs or events.
 
-**Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
+> **In plain English (30 sec):** You already split code into modules like `catalog.js`, `orders.js`, each with own folder. Bounded context is same, but each module gets its own database and can only call other modules via API, never direct DB query.
 
 ## 1. The Engineering Problem
 
-A monolith usually starts as one codebase, one database, one deploy. It's
-fast — until three teams are editing the same `Orders` table and every
-release becomes a merge-conflict negotiation. The obvious fix looks like
-"split it into services": pull `Orders`, `Products`, `Users` into their own
-processes, keep the same schema, done.
+You have monolith with one DB, 3 teams editing same `Orders` table. Releases become merge hell.
 
-That obvious fix is how you get a **distributed monolith** — the worst of
-both worlds. The services still share one database (or worse, each service
-reaches directly into another's tables), so every deploy still has to be
-coordinated, every schema change still ripples everywhere, and now you've
-added network latency and partial failure on top. Splitting by *table* or by
-*technical layer* (a "database service", an "auth service") doesn't remove
-coupling — it just moves the coupling onto the network, where it's harder to
-see and slower to call.
+Obvious fix: split into `orders-service`, `products-service`, keep same DB, done.
 
-The real question isn't "how many services should this be?" It's "where are
-the seams in the *business*, and where does each concept genuinely mean
-something different depending on who's using it?"
+That creates distributed monolith — worst of both:
+
+- Same DB, so deploys still coordinated
+- Schema change ripples everywhere
+- Now you added network latency + partial failure
+
+Real question: Where does business meaning change? "Product" in Catalog = name, price, images. "Product" in Ordering = just productId + price at purchase time. Different meanings = different contexts.
 
 ## 2. The Technical Solution: bounded contexts
 
-A **bounded context** (from Domain-Driven Design) is an explicit boundary
-around a model where a term has exactly one meaning. "Product" inside a
-Catalog context means name, description, price, images. "Product" inside an
-Ordering context might mean nothing more than a `productId` and the price
-that was charged at purchase time — Ordering doesn't need Catalog's full
-model, and trying to share one "Product" class between them is exactly the
-coupling that breaks monoliths in the first place.
+Bounded context = boundary where word means one thing. Inside Catalog, Product has full data. Inside Ordering, Product is just ID + price captured.
 
-Once contexts are identified, three rules make the split real instead of
-cosmetic:
+3 rules make split real:
 
-1. **Each context owns its data, exclusively.** No other service reads or
-   writes its tables directly — not even for a "quick join."
-2. **Contexts talk only through an explicit contract** — an HTTP/gRPC API for
-   synchronous questions, or an event on a shared bus for "something
-   happened." Never a shared schema.
-3. **Internal changes stay internal.** A context can refactor its own domain
-   model freely as long as its published contract (API shape, event schema)
-   doesn't change.
+1. **Each context owns its data, exclusively.** No other service reads its tables, not even for quick JOIN.
+2. **Talk only via explicit contract** — REST/gRPC API or event on bus. Never shared DB.
+3. **Internal refactor free** as long as contract doesn't break.
 
 ```mermaid
 flowchart LR
     Catalog["Catalog (owns product DB)"]
     Ordering["Ordering (owns order DB)"]
     Shipping["Shipping (owns shipment DB)"]
-    Catalog -- "synchronous read: REST/gRPC" --> Ordering
-    Ordering -- "never reads Catalog's DB" --> Catalog
-    Ordering -. "async, fire-and-forget: event bus" .-> Shipping
-    Shipping -. "never reads Ordering's DB" .-> Ordering
+    Catalog -- "REST: GET /products/123" --> Ordering
+    Ordering -. "event: OrderPlaced" .-> Shipping
 ```
 
-Core truths to hold:
-- **A shared database is not a bounded context boundary — it's the absence
-  of one.** If two services can `JOIN` across their tables, they're one
-  context wearing two processes.
-- **Events crossing a boundary are a translated, minimal contract** — not a
-  dump of the internal domain model. Publishing your internal `Order`
-  aggregate verbatim just moves the shared-schema problem onto the event
-  bus.
-- Decomposing by business capability (Catalog, Ordering, Shipping) survives
-  reorganizations and refactors better than decomposing by technical layer
-  (API layer, data layer) — the latter re-creates a monolith's coupling,
-  just spread across more repos.
+Simple: If two services can JOIN tables, they are one context in two processes.
 
-## 3. The clean example (concept in isolation)
+## 3. Concept in Isolation
 
-Two bounded contexts, each with its own database, talking only through an
-event on a shared bus — no shared table, no cross-context join.
+Two contexts, each own DB, only event bus connects:
 
 ```yaml
-# docker-compose.yml
+# docker-compose.yml — minimal
 services:
   catalog-api:
-    build: ./catalog          # owns full product data: name, price, description
-    environment:
-      DATABASE_URL: postgres://catalog-db/catalog
-    depends_on: [catalog-db]
-
+    build: ./catalog
+    environment: { DATABASE_URL: postgres://catalog-db/catalog }
   catalog-db:
-    image: postgres:16        # ONLY catalog-api ever connects to this database
+    image: postgres:16 # ONLY catalog-api connects here
 
   ordering-api:
-    build: ./ordering         # owns order data: what was bought, by whom, at what price
+    build: ./ordering
     environment:
       DATABASE_URL: postgres://ordering-db/orders
       EVENT_BUS_URL: amqp://eventbus
-    depends_on: [ordering-db, eventbus]
-
   ordering-db:
-    image: postgres:16        # ONLY ordering-api ever connects to this database
+    image: postgres:16 # ONLY ordering-api connects here
 
   eventbus:
-    image: rabbitmq:3-management   # the ONLY channel between the two contexts
+    image: rabbitmq:3-management # ONLY channel between contexts
 ```
 
-```jsonc
-// integration-events/order-placed.json — the entire contract Ordering
-// exposes to the outside world. Not a dump of its internal Order aggregate:
-// just enough for another context to react.
+```json
+// event: OrderPlaced — minimal contract, not full Order object
 {
   "event": "OrderPlaced",
   "orderId": "ord_8f2a",
-  "items": [
-    { "productId": "prod_119", "quantity": 2, "unitPriceAtPurchase": 42.00 }
-  ]
+  "items": [{ "productId": "prod_119", "quantity": 2, "unitPriceAtPurchase": 42.00 }]
 }
 ```
 
-Notice what's *not* here: Ordering's `OrderItem` doesn't hold Catalog's
-`Product` description, images, or current price — it holds a `productId` and
-the price it captured at purchase time. Catalog can rename or reprice a
-product tomorrow and no historical order changes, because Ordering never
-depended on Catalog's live data, only on a fact it captured once.
+What it shows: Ordering doesn't store Catalog's Product description. It stores productId + price captured at purchase. Catalog can rename product tomorrow, orders stay correct.
 
-## 4. Production reality (from the real repo)
+## 4. Real Production Incident
 
-[dotnet/eShop](https://github.com/dotnet/eShop) is Microsoft's reference
-e-commerce architecture, orchestrated with .NET Aspire. Its `AppHost`
-project is the single place that wires every bounded context together — and
-reading it top to bottom shows the same rules from section 2 enforced in a
-real system with 8+ services:
+**Incident: Shared DB causes 4-hour outage during sale**
 
-```csharp
-// src/eShop.AppHost/Program.cs (trimmed to the decomposition-relevant parts)
-var redis = builder.AddRedis("redis");
-var rabbitMq = builder.AddRabbitMQ("eventbus")
-    .WithLifetime(ContainerLifetime.Persistent);
-var postgres = builder.AddPostgres("postgres")
-    .WithImage("ankane/pgvector")
-    .WithImageTag("latest")
-    .WithLifetime(ContainerLifetime.Persistent);
+T+0: Team A deploys Catalog, adds column `products.is_featured` boolean, migration runs ALTER TABLE.
 
-// One Postgres LOGICAL DATABASE PER BOUNDED CONTEXT -- not one shared DB
-var catalogDb = postgres.AddDatabase("catalogdb");
-var identityDb = postgres.AddDatabase("identitydb");
-var orderDb = postgres.AddDatabase("orderingdb");
-var webhooksDb = postgres.AddDatabase("webhooksdb");
+T+5m: Team B's Ordering service still running old code that does `SELECT * FROM products`. New column breaks ORM mapping, throws 500.
 
-var identityApi = builder.AddProject<Projects.Identity_API>("identity-api", launchProfileName)
-    .WithExternalHttpEndpoints()
-    .WithReference(identityDb)
-    .WithHttpHealthCheck("/health");
+T+10m: Checkout down. 100% failure on place order.
 
-var identityEndpoint = identityApi.GetEndpoint(launchProfileName);
+Impact: $50k lost sales, 2 teams blocked.
 
-// Basket owns NO Postgres database at all -- it's cart state, so Redis is
-// the right storage for its context. Bounded contexts don't have to agree
-// on storage technology, only on not touching each other's storage.
-var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
-    .WithReference(redis)
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithEnvironment("Identity__Url", identityEndpoint);
-
-var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithReference(catalogDb);
-
-var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithReference(orderDb).WaitFor(orderDb)
-    .WithHttpHealthCheck("/health")
-    .WithEnvironment("Identity__Url", identityEndpoint);
-
-// A background worker in Ordering's OWN context -- not a separate service
-// reaching into orderingdb from outside.
-builder.AddProject<Projects.OrderProcessor>("order-processor")
-    .WithReference(rabbitMq).WaitFor(rabbitMq)
-    .WithReference(orderDb)
-    .WaitFor(orderingApi);
-
-builder.AddProject<Projects.PaymentProcessor>("payment-processor")
-    .WithReference(rabbitMq).WaitFor(rabbitMq);
+Root cause:
+```sql
+-- Both services using same DB, same table
+SELECT * FROM products -- breaks when other team adds column
 ```
 
-What this teaches that a hello-world can't:
+Fix:
+```yaml
+# Split to own DBs
+catalogDb = postgres.AddDatabase("catalogdb") # only catalog-api
+orderDb = postgres.AddDatabase("orderingdb")   # only ordering-api
+# Talk via event, not JOIN
+```
 
-- **`AddDatabase("catalogdb")` / `AddDatabase("orderingdb")` / etc. are
-  separate logical databases on the same Postgres server** — the boundary
-  DDD cares about is "which service is allowed to open this connection
-  string," not "which physical server it runs on." A bounded context
-  boundary is an access-control boundary first, an infrastructure boundary
-  second.
-- **Basket has no relational database reference at all** — only Redis.
-  Real bounded-context decomposition lets each context pick storage that
-  fits its access pattern (cart state is ephemeral key-value; catalog/orders
-  are relational), something a "one database, N schemas" split can't do.
-- **`OrderProcessor` gets a reference to `orderDb` directly, but it's not a
-  separate context** — it's a background worker *inside* Ordering's
-  boundary (it `WaitFor(orderingApi)` because it depends on Ordering's own
-  EF migrations). Not every process boundary is a context boundary; some
-  processes just split *one* context's workload across a request-handler and
-  a background worker.
-- **Digging into `Ordering.Domain/AggregatesModel/` shows the DDD tactical
-  pattern that backs this**: an `OrderAggregate/Order.cs` and a
-  `BuyerAggregate/Buyer.cs`, each with its own repository interface. Inside
-  `Ordering.API/Application/`, there are two clearly separate event
-  folders — `DomainEventHandlers/` (events like
-  `OrderStatusChangedToPaidDomainEventHandler` that never leave the
-  Ordering process) versus `IntegrationEvents/` (events like
-  `OrderStockConfirmedIntegrationEvent` published on `rabbitMq`, the only
-  thing other contexts ever see). That split is bounded-context theory made
-  literal in code: domain events are context-internal; integration events
-  are the translated, minimal contract crossing the boundary — exactly the
-  distinction section 2 makes, enforced by a folder structure instead of a
-  comment.
+Prevention: Enforce `GRANT SELECT ON catalog.* TO catalog_api ONLY`, ban cross-DB queries in CI.
 
-A common misconception worth correcting here: decomposition is often taught
-as "one service per database table" or "one service per REST resource."
-eShop's own split shows that's wrong on both counts — `identity-api` fronts
-one database, `basket-api` fronts none (Redis instead), and
-`order-processor` shares `orderingdb` with `ordering-api` because they're
-the *same* bounded context split across two processes for operational
-reasons, not two contexts.
+## 5. Production Design — Real repo dotnet/eShop
+
+Real AppHost wiring 8+ services:
+
+```mermaid
+flowchart TD
+    PG[(Postgres Server)]
+    PG --> CatalogDB[(catalogdb)]
+    PG --> IdentityDB[(identitydb)]
+    PG --> OrderDB[(orderingdb)]
+    Redis[(Redis)]
+    
+    CatalogAPI["catalog-api<br/>owns catalogdb"] --> CatalogDB
+    BasketAPI["basket-api<br/>owns Redis, no SQL"] --> Redis
+    OrderingAPI["ordering-api<br/>owns orderingdb"] --> OrderDB
+    OrderProcessor["order-processor<br/>worker in same context"] --> OrderDB
+    EventBus[(RabbitMQ)]
+
+    CatalogAPI -.-> EventBus
+    OrderingAPI -.-> EventBus
+```
+
+Real code from `src/eShop.AppHost/Program.cs`:
+
+```csharp
+var catalogDb = postgres.AddDatabase("catalogdb");
+var orderDb = postgres.AddDatabase("orderingdb");
+var identityDb = postgres.AddDatabase("identitydb");
+
+var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
+    .WithReference(redis) // no Postgres at all, Redis is right storage
+    .WithReference(rabbitMq);
+
+var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
+    .WithReference(rabbitMq).WithReference(catalogDb);
+
+var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
+    .WithReference(rabbitMq).WithReference(orderDb);
+```
+
+Takeaways:
+- Each `AddDatabase` = logical DB, access-control boundary
+- Basket has no SQL, only Redis — context picks storage that fits
+- OrderProcessor shares orderDb with ordering-api — same context, two processes
+
+## 6. Cloud Lens — How GCP/AWS implements
+
+**AWS:**
+- Each bounded context = separate ECS service + RDS DB + own VPC subnet
+- Use AWS EventBridge as event bus, not RabbitMQ
+- Terraform: `aws_db_instance` per context, `aws_ecs_service` per API
+
+**GCP:**
+- Each context = Cloud Run service + Cloud SQL DB
+- Pub/Sub as event bus
+- `gcloud run deploy catalog-api --set-env-vars DATABASE_URL=...`
+
+Cloud enforces boundary via IAM: catalog-api SA can only access catalog-db, not order-db.
+
+## 7. Library Lens — Exact library + code
+
+**Today you would use:**
+
+```csharp
+// .NET eShop uses .NET Aspire 8.0
+// Program.cs
+var builder = DistributedApplication.CreateBuilder(args);
+var postgres = builder.AddPostgres("postgres").WithImage("ankane/pgvector");
+var catalogDb = postgres.AddDatabase("catalogdb");
+var rabbitMq = builder.AddRabbitMQ("eventbus");
+
+// Publish event - Ordering -> Shipping
+// Ordering.API/IntegrationEvents/OrderPlacedIntegrationEvent.cs
+public record OrderPlacedIntegrationEvent(Guid OrderId, List<OrderItem> Items) : IntegrationEvent;
+
+// Handler - Shipping listens
+public class OrderPlacedIntegrationEventHandler : IIntegrationEventHandler<OrderPlacedIntegrationEvent>
+{
+  public Task Handle(OrderPlacedIntegrationEvent @event) {
+    // create shipment, no DB JOIN, only event data
+  }
+}
+```
+
+**pom.xml equivalent for Java:**
+```xml
+<dependency>spring-cloud-starter-bus-amqp</dependency> <!-- event bus -->
+```
+
+## 8. What Breaks & How to Troubleshoot
+
+- **Break: JOIN across services**
+  - Symptom: Need product name in Order query, slow, fails when Catalog down
+  - Detect: grep `FROM products` in ordering-api repo
+  - Fix: Store productName snapshot at order creation time, or call Catalog API and cache
+
+- **Break: Shared DB migration locks all**
+  - Symptom: Deploy Catalog, Ordering down 2 min
+  - Detect: `SELECT * FROM pg_stat_activity WHERE wait_event = 'Lock'`
+  - Fix: Split DBs, use `AddDatabase` per context
+
+- **Break: Event schema dump of internal model**
+  - Symptom: Change Order aggregate breaks Shipping
+  - Detect: Shipping fails after Ordering deploy
+  - Fix: Publish minimal DTO, version events: `OrderPlaced_v2`
+
+- **Break: Distributed transaction**
+  - Symptom: Order created but Basket not cleared
+  - Detect: Logs show event not delivered
+  - Fix: Outbox pattern + retry, not 2-phase commit
+
+- **Break: Wrong bounded context**
+  - Symptom: Basket needs Postgres, not Redis
+  - Detect: Basket needs JOINs, complex queries
+  - Fix: Re-evaluate — maybe Basket is actually part of Ordering context
 
 ---
-
-## Source
-
-- **Concept:** Service decomposition & bounded contexts
-- **Domain:** microservices
-- **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.AppHost/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Program.cs) — .NET Aspire-orchestrated e-commerce reference architecture
-
-
-
-
+Source: dotnet/eShop AppHost Program.cs

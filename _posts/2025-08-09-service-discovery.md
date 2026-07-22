@@ -8,39 +8,36 @@ tags: [microservices, service-discovery, eureka, spring-cloud, kubernetes]
 published: false
 ---
 
-**TL;DR:** How does a caller find a service instance whose IP changes every restart? A service registry turns discovery into a heartbeat protocol — instances register and keep re-announcing themselves on an interval, and callers query the registry for the current instance list instead of reading a static config file.
+**TL;DR:** Instances get new IPs on every restart. A registry tracks who is alive right now, and callers ask it instead of reading a config file.
 
-> **In plain English (30 sec):** Like DNS for services — ask 'where is payment-service?'
+> **In plain English (30 sec):** Like a shared `Map<String, List<Address>>` that updates itself. Each service PUTs its own address on startup and refreshes it every 30s. Callers GET the list. Nothing hardcodes an IP.
 
 **Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
 
-A config file with `customers-service: 10.0.4.12:8081` works exactly until
-that instance restarts, crashes, or gets replaced by autoscaling — at which
-point it comes back with a different IP, or a different port, or three
-copies of itself spread across three hosts. Hardcoded addresses (or a
-manually-updated DNS entry) go stale the moment anything about deployment
-becomes dynamic, and at real scale, deploys happen dozens of times a day.
+You already hardcode addresses on your laptop:
 
-The pain is sharper than "IPs change." Some real systems don't even try to
-hold a fixed port per instance — Spring PetClinic's microservices are
-configured with `server.port: 0`, which asks the OS for a random free port
-on every boot, specifically so multiple instances of the same service can
-run on one host without a port collision. That's a deliberate design choice
-that makes hardcoding an address not just fragile, but structurally
-impossible: there is no fixed address to write down in the first place.
+```yaml
+# application.yml — works fine... today
+customers-service: http://localhost:8081
+```
 
-So the real question isn't "how do we keep the config file updated" — it's
-"who is tracking which instances of a service are alive, right now, and how
-does a caller ask that question at request time instead of deploy time?"
+Breaks the moment anything moves:
+
+- **Restart = new address.** The instance comes back on a new IP or port. Your config file is now wrong.
+- **Random port by design.** PetClinic sets `server.port: 0` — the OS picks a free port every boot. There is no fixed address to write down at all.
+- **Three copies, which one?** Autoscaling adds two more instances. One hardcoded address can't spread load.
+
+The real question: who tracks which instances are alive *right now*, and how does a caller ask at request time, not deploy time?
+
+---
 
 ## 2. The Technical Solution: a live registry, not a static list
 
-A **service registry** turns discovery into a heartbeat protocol: every
-instance registers itself on startup and keeps re-announcing "I'm still
-here" on an interval; callers ask the registry for the current instance
-list instead of reading it from a config file.
+A **service registry** is a heartbeat protocol. Every instance registers on startup and re-announces "I'm still here" on an interval. Callers ask the registry for the current instance list. Stop heartbeating, and the registry evicts you.
+
+Here's what happens:
 
 ```mermaid
 sequenceDiagram
@@ -57,38 +54,24 @@ sequenceDiagram
     DS-->>GW: current instance list
 ```
 
-Core truths to hold:
+**In simple words:** Services phone home every 30 seconds. Callers ask the registry, not a config file.
 
-- **Registration is a heartbeat contract, not a one-time event.** If an
-  instance stops heartbeating, the registry evicts it after a timeout —
-  discovery is a liveness protocol, not a lookup table someone edits.
-- **Client-side vs platform-side is an architectural fork.** Client-side
-  discovery (Eureka + a load-balancing client) puts the instance list and
-  the balancing decision in the *caller's* process. Platform-native
-  discovery (Kubernetes Services + DNS) puts both in the platform, and the
-  caller just resolves a stable name.
-- **The registry is itself just another service** — it needs its own
-  address findable at a fixed, well-known location, because it's the one
-  thing that can't discover itself via discovery.
+3 things to remember:
 
-**Correcting a stale fact:** Netflix Eureka is the component every
-microservices tutorial reaches for, and it's still maintained (Netflix
-shipped a v2.0.6 release as recently as this year) — but if your target
-platform is Kubernetes, you typically don't need a self-hosted registry at
-all. A Kubernetes `Service` plus CoreDNS already provides registration
-(kubelet reports pod readiness) and discovery (a stable DNS name resolving
-to healthy pods) for free. Eureka-style registries earn their cost mainly
-when you're *not* on a platform that already does this — bare VMs, or a
-PaaS without built-in discovery — or when you specifically want the
-balancing decision made client-side.
+- **Registration is a lease, not a one-time event.** Miss enough heartbeats and you're evicted — discovery is a liveness protocol, not a lookup table someone edits.
+- **Client-side vs platform-side is a fork.** Eureka puts the instance list inside the *caller's* process (client-side balancing). Kubernetes Services + DNS put it in the platform — the caller just resolves one stable name.
+- **The registry can't discover itself.** It's the one component that needs a fixed, well-known address (`discovery-server:8761`) — everything else finds *it*.
 
-## 3. The clean example (concept in isolation)
+**Stale fact worth correcting:** every tutorial reaches for Netflix Eureka, and it's still maintained — but on Kubernetes you usually don't run a registry at all. A `Service` plus CoreDNS gives you registration (kubelet reports readiness) and discovery (a stable DNS name) for free. Eureka earns its cost on bare VMs, or when you specifically want the balancing decision client-side.
 
-The two pieces stripped to their essentials: a registry, and a client that
-registers with it.
+---
+
+## 3. Concept in Isolation (the mechanism, no prod wiring)
+
+Two pieces: one app declares itself the registry, every other app points at it and announces its own name.
 
 ```yaml
-# discovery-server application.yml — the registry itself
+# discovery-server application.yml — the registry itself, on Eureka's port
 spring:
   application:
     name: discovery-server
@@ -97,7 +80,7 @@ server:
 ```
 
 ```java
-// DiscoveryServerApplication.java — one annotation turns a Spring Boot app into a registry
+// DiscoveryServerApplication.java — one annotation turns a Boot app into a registry
 @SpringBootApplication
 @EnableEurekaServer
 public class DiscoveryServerApplication {
@@ -118,115 +101,220 @@ eureka:
       defaultZone: http://discovery-server:8761/eureka/
 ```
 
-That's the whole mechanism in isolation: one app declares itself a
-registry, every other app points at it and announces its own name.
+**What this does:** `any-service` boots, POSTs its name + address to the registry, renews every 30s. Callers fetch `any-service`'s current address list from the same URL.
 
-## 4. Production reality (from the real repo)
+---
 
-[spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)
-runs a dedicated `spring-petclinic-discovery-server` module, and its entire
-application logic is this:
+## 4. Real Production Incident
 
-```java
-// spring-petclinic-discovery-server/src/main/java/.../DiscoveryServerApplication.java
-@SpringBootApplication
-@EnableEurekaServer
-public class DiscoveryServerApplication {
+**Incident: gateway routes to dead instances for 12 minutes — 33% of requests 503**
 
-	public static void main(String[] args) {
-		SpringApplication.run(DiscoveryServerApplication.class, args);
-	}
-}
-```
+**T+0:** A spot-node reclaim hard-kills 2 of 3 `customers-service` pods. No SIGTERM, no deregistration.
 
-```yaml
-# spring-petclinic-discovery-server/src/main/resources/application.yml
-spring:
-  application:
-    name: discovery-server
-  config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+**T+2m:** Eureka still lists all 3 instances. Leases expire only after ~90s, and self-preservation mode (renewals dipped below threshold) has stopped evictions entirely.
 
-# Avoid some debugging logs at startup
-logging:
-  level:
-    org:
-      springframework:
-        boot: INFO
-        web: INFO
-```
+**T+5m:** api-gateway's client-side balancer round-robins across the stale list. Every third request goes to a dead IP.
 
-The eureka client settings for every *other* service don't live in that
-service's own module at all — they're pulled at runtime from a separate
-git repo,
-[spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config),
-via Spring Cloud Config:
+**T+12m:** Replacement pods register, gateway's cache refreshes, errors drain.
+
+**Impact:** 33% of `/customers/**` requests returned 503 for ~12 minutes.
+
+**Root cause** — defaults that assume graceful shutdowns:
 
 ```yaml
-# spring-petclinic-microservices-config/application.yml — settings SHARED by every service
+eureka:
+  server:
+    enableSelfPreservation: true      # stops ALL eviction when renewals dip — dead entries stay
+  instance:
+    leaseRenewalIntervalInSeconds: 30 # dead instance discoverable for up to ~90s
+```
+
+**Fix** — deregister on shutdown, expire faster, check real health:
+
+```yaml
 server:
-  port: 0            # random free port — the reason a fixed address can't be hardcoded
+  shutdown: graceful                  # SIGTERM now triggers a DELETE from the registry
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    health-check-url-path: /actuator/health
+  client:
+    healthcheck:
+      enabled: true                   # registry reflects /actuator/health, not just process-alive
+```
+
+**Prevention:** alert when registry instance count ≠ actual pod count (`kubectl get pods -l app=customers-service` vs Eureka's list), and turn on gateway retries so one dead hop moves to the next instance instead of failing.
+
+---
+
+## 5. Production Design — spring-petclinic-microservices
+
+Real wiring from `spring-petclinic/spring-petclinic-microservices` — every service boots through the config server, then registers:
+
+```mermaid
+flowchart TD
+    CFG["config-server:8888<br/>serves yml from spring-petclinic-microservices-config repo"]
+    DS["discovery-server:8761<br/>the registry"]
+    GW["api-gateway:8080<br/>client-side load balancing"]
+    CUST["customers-service<br/>server.port: 0 — random port"]
+    VETS["vets-service<br/>server.port: 0"]
+    VIS["visits-service<br/>server.port: 0"]
+    CUST -->|"fetch config at boot"| CFG
+    CUST -->|"register + heartbeat"| DS
+    VETS -->|"register + heartbeat"| DS
+    VIS -->|"register + heartbeat"| DS
+    GW -->|"query instances"| DS
+    GW -->|"http://customers-service/owners"| CUST
+```
+
+**Real config from prod** (from the config repo, shared by every service):
+
+```yaml
+# spring-petclinic-microservices-config/application.yml — applies to ALL services
+server:
+  port: 0            # random free port — why a fixed address can't be hardcoded
   shutdown: graceful
 
 eureka:
   instance:
-    # Register IP address instead of hostname to avoid resolution failures on Windows
-    prefer-ip-address: true
+    prefer-ip-address: true  # register IP, not hostname — hostname resolution breaks on Docker/Windows
 ```
 
 ```yaml
-# spring-petclinic-microservices-config/customers-service.yml
-spring:
-  config:
-    activate:
-      on-profile: default
+# customers-service.yml — docker profile
 eureka:
   instance:
-    # enable to register multiple app instances with a random server port
-    instance-id: ${spring.application.name}:${random.uuid}
-
----
-spring:
-  config:
-    activate:
-      on-profile: docker
-server:
-  port: 8081
-eureka:
-  client:
+    instance-id: ${spring.application.name}:${random.uuid}  # unique ID per instance, so
+  client:                                                   # N copies on random ports coexist
     serviceUrl:
       defaultZone: http://discovery-server:8761/eureka/
+server:
+  port: 8081         # fixed port only inside the docker profile
 ```
 
-What this teaches that a hello-world can't:
+**3 takeaways:**
 
-- **`@EnableEurekaServer` really is almost the whole app.** The actual
-  registry state machine — the heartbeat map, eviction timers, lease
-  renewal — lives entirely inside the `spring-cloud-starter-netflix-eureka-server`
-  dependency; PetClinic's own code contributes nothing but the annotation
-  and a `main()`.
-- **`server.port: 0` and `instance-id: ${spring.application.name}:${random.uuid}`
-  work together deliberately.** Eureka doesn't require unique ports across
-  instances, only unique instance IDs — that's *how* multiple copies of
-  `customers-service` can share a host, each on an OS-assigned random port,
-  while still being individually addressable in the registry.
-- **`eureka.instance.prefer-ip-address: true` exists because of a specific,
-  named failure mode** — the comment says so directly: hostname resolution
-  breaks in Docker/Windows dev setups, so this config overrides Eureka's
-  default (register-by-hostname) with register-by-IP. It's a real
-  production correction to a documented default, not a stylistic choice.
-- **None of this configuration lives in `customers-service`'s own resources
-  folder.** It's fetched at boot from a separate repo. Discovery
-  configuration is itself externalized — which registry to talk to, and
-  under what profile, can change without rebuilding the service that
-  depends on it. (This mechanism — Spring Cloud Config itself — is the
-  next lesson in this series.)
-- **The registry URL differs by Spring profile** (`docker` activates a
-  container-network hostname, `defaultZone: http://discovery-server:8761/eureka/`)
-  while the *default* profile only randomizes the instance ID and says
-  nothing about where the registry lives — because outside the `docker`
-  profile, PetClinic expects `localhost:8761`, Eureka's conventional
-  default port.
+- **`@EnableEurekaServer` is almost the whole app.** The heartbeat map, eviction timers, and lease renewal all live inside the `spring-cloud-starter-netflix-eureka-server` dependency — PetClinic's own code is one annotation and a `main()`.
+- **`server.port: 0` + `instance-id: ...:${random.uuid}` work as a pair.** Eureka needs unique instance IDs, not unique ports — that's how 3 copies of customers-service share a host on random ports and stay individually addressable.
+- **Discovery config is itself externalized.** The registry URL lives in a separate git repo served by the config server — you can repoint every service to a new registry without rebuilding any of them.
+
+---
+
+## 6. Cloud Lens — How GCP/AWS actually implements this
+
+On Kubernetes (GKE/EKS/AKS) you delete Eureka entirely. A `Service` object + cluster DNS is the registry: kubelet reports readiness (registration), CoreDNS resolves a stable name to healthy Pod IPs (discovery). The difference that matters: Eureka is **client-side** — the caller picks an instance. Kubernetes is **platform-side** — the caller dials one virtual IP and the platform picks the Pod.
+
+```bash
+# GKE — registration + discovery for free, no Eureka to run
+gcloud container clusters get-credentials petclinic --zone us-central1-a
+kubectl get svc customers-service        # one stable ClusterIP + DNS name
+kubectl get endpoints customers-service  # the live instance list — Eureka's job, built in
+
+# AWS without Kubernetes — Cloud Map is the managed registry
+aws servicediscovery discover-instances --namespace-name internal --service-name customers-service
+```
+
+Terraform — Cloud Map as the registry for ECS services:
+
+```hcl
+resource "aws_service_discovery_private_dns_namespace" "internal" {
+  name = "internal"
+  vpc  = module.vpc.vpc_id
+}
+
+resource "aws_service_discovery_service" "customers" {
+  name = "customers-service"
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.internal.id
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+    routing_policy = "MULTIVALUE"
+  }
+}
+```
+
+**Difference:** Eureka's 90-second stale-instance problem (section 4) mostly disappears on Kubernetes — a Pod is removed from endpoints the moment its readiness fails, not when a lease expires. You trade a registry you operate for a platform feature you configure.
+
+---
+
+## 7. Library Lens — Exact library + code you would use
+
+Spring Cloud Eureka client, current release line:
+
+```xml
+<!-- pom.xml — Spring Cloud 2023.0.x -->
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+  <version>4.1.0</version>
+</dependency>
+```
+
+```java
+// Caller side — @LoadBalanced makes "http://customers-service" resolve through the registry
+@Configuration
+class RestConfig {
+    @Bean
+    @LoadBalanced
+    RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.build();
+    }
+}
+
+@Service
+class OwnerClient {
+    private final RestTemplate rest;
+    OwnerClient(RestTemplate rest) { this.rest = rest; }
+
+    OwnerDto getOwner(long id) {
+        // no IP, no port — the registry resolves the name, the balancer picks an instance
+        return rest.getForObject("http://customers-service/owners/" + id, OwnerDto.class);
+    }
+}
+```
+
+Bash alternative — inspect the registry directly:
+
+```bash
+curl http://localhost:8761/eureka/apps/customers-service   # live instance list (XML)
+curl -s http://discovery-server:8761/eureka/apps -H 'Accept: application/json' | jq
+```
+
+---
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Service registers with a hostname nobody can resolve**
+- Symptom: callers get `UnknownHostException` or connection timeouts to a Docker container name
+- Why: Eureka's default registers the hostname; hostname resolution breaks in Docker/Windows setups
+- Detect: `curl http://localhost:8761/eureka/apps/customers-service` → `hostName` is a container ID, `ipAddr` unused
+- Fix: `eureka.instance.prefer-ip-address: true` — PetClinic carries this exact fix with a comment naming the failure
+
+**Break 2: Dead instance keeps receiving traffic after a hard kill**
+- Symptom: 503s for ~90s after a node dies or a pod is `kill -9`'d
+- Why: the registry only evicts after missed lease renewals; hard kills skip deregistration
+- Detect: registry lists the instance while `curl http://<ip>:<port>/actuator/health` fails
+- Fix: `server.shutdown: graceful`, shorter `leaseRenewalIntervalInSeconds`, gateway retries
+
+**Break 3: "Connection refused: discovery-server" at boot**
+- Symptom: every service crashes on startup with connection refused to `discovery-server:8761`
+- Why: services booted before the registry was up, or the Config Server (which holds `defaultZone`) is down
+- Detect: service logs show `Cannot execute request on any known server`
+- Fix: start config-server → discovery-server → everything else; add retry/backoff (`eureka.client.register-with-eureka` retries by default)
+
+**Break 4: Two instances, one registry entry**
+- Symptom: you run 2 copies of customers-service, the registry shows 1
+- Why: identical `instance-id` — the second registration overwrites the first
+- Detect: `kubectl get pods` says 2, `/eureka/apps/customers-service` says 1
+- Fix: `instance-id: ${spring.application.name}:${random.uuid}` — PetClinic's exact pattern
+
+**Break 5: Self-preservation freezes the whole registry**
+- Symptom: dashboard warns `EMERGENCY! EUREKA MAY BE INCORRECTLY CLAIMING INSTANCES ARE UP WHEN THEY'RE NOT` — no instance is ever evicted
+- Why: a network blip dropped renewals below 85%, so the server stopped evicting to protect possibly-alive instances
+- Detect: the banner on `http://discovery-server:8761`, and instance counts that never shrink
+- Fix: alert on registry-count vs pod-count drift; on small clusters consider `enableSelfPreservation: false` and shorter leases
 
 ---
 
@@ -235,7 +323,3 @@ What this teaches that a hello-world can't:
 - **Concept:** Service discovery
 - **Domain:** microservices
 - **Repo:** [spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices) → [`spring-petclinic-discovery-server/src/main/java/org/springframework/samples/petclinic/discovery/DiscoveryServerApplication.java`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-discovery-server/src/main/java/org/springframework/samples/petclinic/discovery/DiscoveryServerApplication.java) and [spring-petclinic/spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config) → [`application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/application.yml), [`customers-service.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/customers-service.yml) — Spring Cloud reference microservices architecture
-
-
-
-

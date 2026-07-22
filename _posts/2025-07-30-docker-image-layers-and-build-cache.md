@@ -7,35 +7,52 @@ order: 1
 tags: [docker, images, layers, buildkit, overlay2, caching]
 ---
 
-**TL;DR:** Why do some Docker rebuilds take 10 seconds and others take 10 minutes? Docker images are stacks of cached, content-addressed layers — an unchanged instruction with unchanged inputs reuses its cached layer, but the moment one layer's cache misses, every layer after it must rebuild too, so ordering instructions (dependencies before source code) determines whether a rebuild stays fast or rebuilds from scratch.
+**TL;DR:** Every Dockerfile line makes a cached layer. Change one line, and every layer after it rebuilds. Instruction order decides fast builds vs slow ones.
 
-> **In plain English (30 sec):** Like Git commits for filesystem — each Dockerfile line is cached layer.
+> **In plain English (30 sec):** Layers are like git commits for a filesystem. Each instruction is one commit. Change an early commit and everything after it is rebuilt — so put slow stuff (`pip install`) early and changing stuff (your code) late.
 
 **Real repo:** [`docker/awesome-compose`](https://github.com/docker/awesome-compose)
 
 ## 1. The Engineering Problem: rebuilding everything to change one line
 
-You fix a one-line bug in `app.py`, run `docker build` again, and grab a coffee — because the build reinstalls every OS package and every dependency from scratch, exactly like it did the first time.
+You already do this on your laptop:
 
-In the pre-container era this was just how it worked: a deployment artifact was a full VM image or a manually provisioned machine. Any change — one line of app code or a base OS patch — meant re-provisioning the *whole thing*, because there was no concept of reusing only the parts that hadn't changed.
+```bash
+pip install -r requirements.txt   # once, 4 minutes
+python app.py                     # edit app.py, rerun — instant, deps already there
+```
 
-Multiply that by every commit, every service, every CI run, and it stops being an annoyance and starts being your bottleneck. You need a way to rebuild **only what actually changed**, and reuse everything else — both on disk and across the network when images get pushed and pulled.
+A naive Dockerfile throws that away:
+
+```dockerfile
+FROM python:3.11-slim
+COPY . .                                # any code edit lands here...
+RUN pip install -r requirements.txt     # ...so THIS re-runs every single build
+```
+
+Works, but you pay for it everywhere:
+
+- **Coffee-break builds.** One-line fix, full dependency reinstall. Every time.
+- **CI pays it per commit.** 40 builds a day × 8 wasted minutes = your pipeline is the bottleneck.
+- **Network pays it too.** Push/pull re-sends megabytes that didn't change.
+
+You need a build that reuses what didn't change — on disk, and over the network.
 
 ---
 
-## 2. The Docker Solution: image layers
+## 2. The Technical Solution: image layers
 
-A Docker image isn't one big filesystem blob. It's a **stack of read-only layers**, and Docker uses a **union filesystem** (`overlay2` is the default storage driver on Linux) to merge them into a single filesystem view at runtime.
+An image is not one blob. It's a **stack of read-only layers**, merged into one filesystem view by a union filesystem (`overlay2` on Linux). Every instruction that touches the filesystem — `RUN`, `COPY`, `ADD` — adds exactly one layer: an immutable diff, addressed by its content hash. Metadata instructions (`ENV`, `CMD`, `LABEL`, `EXPOSE`) add no layer at all.
 
-Every Dockerfile instruction that touches the filesystem — `RUN`, `COPY`, `ADD` — produces exactly one new layer: an immutable, content-addressed diff of what that instruction changed. Instructions that only touch image *metadata* (`ENV`, `CMD`, `LABEL`, `EXPOSE`) don't add a filesystem layer at all.
+Here's what happens:
 
 ```mermaid
 flowchart TD
     subgraph Image["Image (read-only layers, stacked bottom-up)"]
         direction TD
-        L1["Layer 1: FROM python:3.11-slim<br/>base image, pulled once, reused by every image built on it"]
-        L2["Layer 2: COPY requirements.txt<br/>cache HIT only if requirements.txt content is unchanged"]
-        L3["Layer 3: RUN pip install -r ...<br/>cache HIT only if Layer 2's input is unchanged"]
+        L1["Layer 1: FROM python:3.11-slim<br/>pulled once, reused by every image built on it"]
+        L2["Layer 2: COPY requirements.txt<br/>cache HIT only if file content unchanged"]
+        L3["Layer 3: RUN pip install -r ...<br/>cache HIT only if Layer 2 unchanged"]
         L4["Layer 4: COPY . /app<br/>invalidated on ANY source file change"]
         L1 --> L2 --> L3 --> L4
     end
@@ -47,38 +64,96 @@ flowchart TD
     end
 ```
 
-`dockerd` doesn't manage layers itself — it delegates to **containerd**, which owns the *content store* (the actual layer blobs, each addressed by a SHA-256 digest) and the *snapshotter* that mounts those layers into a live `overlay2` filesystem. When a container actually starts, containerd hands off to **runc**, the low-level OCI runtime that creates the Linux namespaces/cgroups and execs the process inside them. By the time `runc` runs, it doesn't know or care about layers — it just sees one merged root filesystem. Layers are purely a build-and-storage concern, handled below that.
+**In simple words:** Unchanged instruction + unchanged input = reuse the cached layer. One miss rebuilds everything below it.
 
-Three things to hold onto:
+Under the hood, `dockerd` doesn't manage layers itself — **containerd** owns the content store (the layer blobs, each a SHA-256 digest) and the snapshotter that mounts them as `overlay2`. At container start, containerd hands off to **runc**, which creates the namespaces/cgroups and execs your process. By then, layers are invisible — runc sees one merged root filesystem. Layers are purely a build-and-storage concern.
 
-1. **Layers are content-addressed and cached.** An unchanged instruction with unchanged inputs reuses a previously-built layer instead of re-executing.
-2. **Cache invalidation cascades downward.** The moment one layer's cache misses, *every layer after it* must rebuild too — even if their own inputs are identical to last time.
-3. **Layers are shared on disk and over the network.** Two images built from the same base share that base's layers exactly once — not duplicated per image, and not re-transferred on push/pull if the remote already has them.
+3 things to remember:
+
+- **Layers are content-addressed and cached.** Same instruction, same inputs → skip the work, reuse the layer.
+- **Invalidation cascades down.** One cache miss forces every later layer to rebuild, even if their own inputs are identical.
+- **Layers are shared.** Two images on the same base store it once on disk, and skip re-uploading it on push if the registry already has the digest.
 
 ---
 
-## 3. The clean Dockerfile (the concept in isolation)
+## 3. Concept in Isolation (the mechanism, no prod wiring)
+
+Same app, ordered for cache: dependencies first, source code last. Edit `app.py` a hundred times — only the last layer rebuilds.
 
 ```dockerfile
-FROM python:3.11-slim            # Layer 1: base OS + Python runtime -- pulled once, reused everywhere
+FROM python:3.11-slim            # Layer 1: base OS + Python — pulled once, reused everywhere
 
 WORKDIR /app                     # Layer 2: creates /app in the image filesystem
 
-COPY requirements.txt .          # Layer 3: invalidated ONLY when requirements.txt's content changes
-RUN pip install -r requirements.txt   # Layer 4: the expensive step -- stays cached as long as Layer 3 didn't change
+COPY requirements.txt .          # Layer 3: invalidated ONLY when requirements.txt content changes
+RUN pip install -r requirements.txt   # Layer 4: the expensive step — cached while Layer 3 holds
 
-COPY . .                         # Layer 5: invalidated on ANY source file change -- deliberately LAST
+COPY . .                         # Layer 5: invalidated on ANY source change — deliberately LAST
 
-CMD ["python", "app.py"]         # metadata only -- no new filesystem layer, just image config
+CMD ["python", "app.py"]         # metadata only — no filesystem layer, just image config
 ```
 
-The ordering is the entire trick: dependencies are installed *before* the source code is copied in. Edit `app.py` a hundred times and Layers 1–4 keep hitting cache every single time — only Layer 5 rebuilds. Flip the order (`COPY . .` before `pip install`) and every code edit reinstalls every dependency from scratch, because the broken cache on the copy-everything layer cascades to the install layer right after it.
+**What this does:** `pip install` reuses its cache on every code edit, because the layer before it (`COPY requirements.txt`) only breaks when dependencies actually change. Flip the order and every edit reinstalls everything.
 
 ---
 
-## 4. Production reality: the same pattern in a real repo
+## 4. Real Production Incident
 
-Here's the actual Dockerfile for the Flask example in Docker's own `awesome-compose` repo — a maintained reference for real Compose stacks. Verbatim, annotated.
+**Incident: sev1 hotfix takes 24 minutes to deploy — every CI layer cache-missed**
+
+**T+0:** Prod checkout bug. Hotfix branch ready, one line changed. Usual deploy time: 5 minutes.
+
+**T+3m:** CI build starts. Last week's Dockerfile "cleanup" moved `COPY . .` above `RUN pip install`. Nobody noticed — app deploys were not urgent then.
+
+**T+8m:** Build reinstalls all OS packages and all pip dependencies from scratch. No cache hits.
+
+**T+19m:** Tests pass, image pushes — re-uploading layers the registry already had, because digests changed.
+
+**T+24m:** Rollout completes. Incident closed.
+
+**Impact:** MTTR 24 minutes instead of 5 — 19 extra minutes of checkout errors during a sev1.
+
+**Root cause** — instruction order destroyed the cache:
+
+```dockerfile
+FROM python:3.10-alpine
+COPY . .                             # any file edit busts cache HERE
+RUN pip3 install -r requirements.txt # 6-minute reinstall on every single build
+```
+
+**Fix** — dependencies before code, plus a BuildKit cache mount:
+
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM python:3.10-alpine
+COPY requirements.txt /app
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install -r requirements.txt   # cache mount: even a rebuild skips re-downloads
+COPY . /app                            # code edits bust only this cheap layer
+```
+
+**Prevention:** alert on build duration (a 2x jump means the cache broke), run `hadolint` in CI to catch `COPY . .` before dependency installs, and use registry-backed cache (`--cache-from`) so fresh CI runners still hit warm layers.
+
+---
+
+## 5. Production Design — docker/awesome-compose flask app
+
+Real Dockerfile from `docker/awesome-compose` — Docker's own maintained flask stack, same pattern at production grade:
+
+```mermaid
+flowchart TD
+    subgraph CI["CI runner (BuildKit)"]
+        DF["flask/app/Dockerfile<br/>syntax=docker/dockerfile:1.4"]
+        DF --> L1["FROM python:3.10-alpine AS builder<br/>platform: $BUILDPLATFORM for multi-arch"]
+        L1 --> L2["COPY requirements.txt /app"]
+        L2 --> L3["RUN --mount=type=cache,target=/root/.cache/pip pip3 install<br/>pip's download cache survives layer rebuilds"]
+        L3 --> L4["COPY . /app"]
+        L4 --> L5["ENTRYPOINT python3 + CMD app.py<br/>metadata, no layer"]
+    end
+    L5 --> REG["registry push<br/>only changed layers upload"]
+```
+
+**Real config from prod** (verbatim, trimmed):
 
 ```dockerfile
 # syntax=docker/dockerfile:1.4
@@ -94,29 +169,117 @@ COPY . /app
 
 ENTRYPOINT ["python3"]
 CMD ["app.py"]
-
-FROM builder as dev-envs
-
-RUN <<EOF
-apk update
-apk add git
-EOF
-
-RUN <<EOF
-addgroup -S docker
-adduser -S --shell /bin/bash --ingroup docker vscode
-EOF
-# install Docker tools (cli, buildx, compose)
-COPY --from=gloursdocker/docker / /
 ```
 
-**What this teaches that a hello-world can't:**
+**3 takeaways:**
 
-- **The exact same dependency-then-code ordering**, now in a repo Docker itself maintains — `COPY requirements.txt` → `pip3 install` → `COPY . /app`, not a toy simplification.
-- **`# syntax=docker/dockerfile:1.4`** pins the Dockerfile *frontend* version. BuildKit-specific instructions like `RUN --mount` need a frontend that understands them — this line is what makes that syntax legal. (Stale-fact correction: BuildKit is the **default** builder in current Docker Engine, not an opt-in flag you set with `DOCKER_BUILDKIT=1` — older tutorials still teach it as opt-in.)
-- **`RUN --mount=type=cache,target=/root/.cache/pip`** is a different kind of cache than layer caching. A *layer* cache skips re-running an instruction entirely. A *BuildKit cache mount* lets an instruction **re-run** but reuses a persistent directory (here, pip's download cache) across builds — so even when `requirements.txt` changes and Layer 3 *does* rebuild, pip doesn't re-download packages it already fetched last time. Layer caching and cache mounts solve overlapping but distinct problems.
-- **`--platform=$BUILDPLATFORM`** is a cross-compilation hint for `buildx` multi-arch builds — a preview of a later topic in this curriculum, not something a single-architecture build ever needs to think about.
-- **This file continues into a second stage** (`FROM builder as dev-envs`) — multi-stage builds are their own lesson later in this series. For now, the point is just that `builder`'s own instructions layer exactly like the clean example above; the second stage builds *on top of* that cached image rather than starting over.
+- **`# syntax=docker/dockerfile:1.4` makes `--mount` legal.** BuildKit-specific instructions need a frontend that understands them — this pin is it. (BuildKit is the default builder in current Docker Engine, not an opt-in `DOCKER_BUILDKIT=1` flag — older tutorials still teach it as opt-in.)
+- **A cache mount is not layer caching.** Layer cache skips re-running the instruction. A `--mount=type=cache` lets the instruction re-run but reuses pip's download directory — so even a real `requirements.txt` change doesn't re-download every package.
+- **`ENTRYPOINT` + `CMD` split is deliberate.** `python3` is fixed, `app.py` is the default argument — override the script at `docker run` without rebuilding.
+
+---
+
+## 6. Cloud Lens — How GCP/AWS actually implements this
+
+Cloud builders have the same layer problem with one twist: **their runners are ephemeral**, so a local layer cache never survives to the next build. Both clouds solve it differently.
+
+GCP Cloud Build runs kaniko, which stores its layer cache as an image in Artifact Registry — the cache survives because it lives next to your images, not on the runner:
+
+```bash
+gcloud builds submit --tag us-central1-docker.pkg.dev/myproj/apps/flask-app:v1.4.2
+# kaniko flags under the hood: --cache=true --cache-ttl=168h
+```
+
+AWS CodeBuild offers a `LOCAL` cache (dies with the build host) or an S3 cache (files, not layers). Teams that want real layer reuse on AWS run `buildx` with a registry cache in ECR:
+
+```bash
+aws codebuild start-build --project-name flask-app
+# buildspec runs: docker buildx build --cache-from type=registry,ref=...ecr.../flask-app:buildcache
+```
+
+Terraform — a Cloud Build trigger with kaniko's registry cache turned on:
+
+```hcl
+resource "google_cloudbuild_trigger" "flask" {
+  name = "flask-app"
+  build {
+    step {
+      name = "gcr.io/kaniko-project/executor:latest"
+      args = [
+        "--destination=us-central1-docker.pkg.dev/$${PROJECT_ID}/apps/flask-app:$${SHORT_SHA}",
+        "--cache=true",
+        "--cache-ttl=168h",
+      ]
+    }
+  }
+}
+```
+
+**Difference:** Cloud Build's kaniko cache lives in the registry and survives every ephemeral runner for free. CodeBuild's `LOCAL` layer cache dies with the host — on AWS, registry-backed buildx cache is the equivalent move, and you wire it yourself.
+
+---
+
+## 7. Library Lens — Exact library + code you would use
+
+The builder you want today is **BuildKit**, driven through `docker buildx` (buildx v0.14 line, BuildKit v0.14) or the GitHub Actions wrapper `docker/build-push-action@v6`:
+
+```yaml
+# .github/workflows/build.yml — registry-backed layer cache for a fresh runner every time
+- uses: docker/setup-buildx-action@v3
+- uses: docker/build-push-action@v6
+  with:
+    context: .
+    push: true
+    tags: ghcr.io/myorg/flask-app:v1.4.2
+    cache-from: type=registry,ref=ghcr.io/myorg/flask-app:buildcache
+    cache-to: type=registry,ref=ghcr.io/myorg/flask-app:buildcache,mode=max
+```
+
+Bash equivalent — the same cache without Actions:
+
+```bash
+docker buildx build \
+  --cache-from type=registry,ref=ghcr.io/myorg/flask-app:buildcache \
+  --cache-to   type=registry,ref=ghcr.io/myorg/flask-app:buildcache,mode=max \
+  -t ghcr.io/myorg/flask-app:v1.4.2 --push .
+
+docker buildx du          # see what the builder cache is actually holding
+docker system df          # local layer disk usage
+```
+
+---
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Every build reinstalls all dependencies**
+- Symptom: `pip install` / `npm install` runs on every build, even for a one-line code change
+- Why: `COPY . .` sits above the install step — any file edit busts the cache early
+- Detect: build log shows `[3/5] COPY . .` then no `CACHED` on the install step
+- Fix: copy the dependency manifest first, install, then copy source (section 3 ordering)
+
+**Break 2: Cache hits locally but never in CI**
+- Symptom: `docker build` is instant on your machine, fully rebuilds in the pipeline
+- Why: CI runners are fresh VMs — no local layer cache exists
+- Detect: CI log shows zero `CACHED` lines while local builds are all `CACHED`
+- Fix: `--cache-from type=registry,...` + `--cache-to ...,mode=max`, or kaniko `--cache=true`
+
+**Break 3: "no space left on device" during build**
+- Symptom: builds fail mid-`RUN` with disk errors on the builder
+- Why: dangling layers and stopped-builder cache accumulate until the disk fills
+- Detect: `docker system df` — build cache and dangling images in the tens of GB
+- Fix: `docker system prune` for locals, `docker buildx prune` on builders; schedule it on CI runners
+
+**Break 4: Huge build context, cache busts for no reason**
+- Symptom: "transferring context: 480MB" before every build; `COPY . .` never hits cache
+- Why: no `.dockerignore` — `.git`, `node_modules`, and log files go into the context and change every build
+- Detect: the context size line at build start, or `docker build` spending minutes before step 1
+- Fix: `.dockerignore` with `.git`, `node_modules`, `*.log`, `target/`, `__pycache__/`
+
+**Break 5: Cache mount silently not working**
+- Symptom: pip re-downloads every package even with `--mount=type=cache` in the Dockerfile
+- Why: missing `# syntax=docker/dockerfile:1.4` pin, or building with the legacy builder that ignores mounts
+- Detect: build log shows repeated `Downloading` lines for the same packages
+- Fix: add the syntax line, use `docker buildx build` (BuildKit), verify `RUN --mount` appears in the build steps
 
 ---
 
@@ -125,7 +288,3 @@ COPY --from=gloursdocker/docker / /
 - **Concept:** Docker image layers, the union filesystem (`overlay2`), and the `dockerd` → `containerd` → `runc` chain
 - **Domain:** docker
 - **Repo:** [docker/awesome-compose](https://github.com/docker/awesome-compose) → [`flask/app/Dockerfile`](https://github.com/docker/awesome-compose/blob/master/flask/app/Dockerfile) — Docker's official curated collection of real multi-service Compose stacks
-
-
-
-

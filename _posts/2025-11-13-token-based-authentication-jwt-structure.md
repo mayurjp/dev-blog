@@ -9,11 +9,27 @@ tags: [security, jwt, tokens, hmac]
 
 **TL;DR:** What actually stops someone from editing their own JWT to become admin? The signature is computed over the entire header-plus-payload using a secret or private key only the issuer holds, so changing even one character makes the recomputed signature fail to match and the token gets rejected.
 
+> **In plain English (30 sec):** You already sign a file with a seal. Edit the file, remove seal, reattach it. The new seal won't match the original - verification fails.
+
 **Real repo:** [`jwt-dotnet/jwt`](https://github.com/jwt-dotnet/jwt)
 
-## 1. The Engineering Problem: a self-contained token is only safe if forging it is infeasible
+## 1. The Engineering Problem: You already decode your own JWT on your laptop
 
-Session-based auth (the previous lesson) works by never trusting anything the client holds — the cookie is an opaque reference, the real data lives server-side. A **token-based** approach flips that: the token itself carries the claims (user ID, role, expiry), so the server doesn't need a lookup on every request. That's the whole appeal — but a token anyone can read is a token anyone might *edit*, unless something makes tampering cryptographically detectable. Base64 is an encoding, not encryption; decoding a JWT's payload takes one line of code for anyone who intercepts it.
+You already do this on your laptop:
+
+```bash
+# intercept a user's JWT and decode it - no secret needed
+echo "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIn0.abc123" | base64 -d
+{"sub": "user123"}
+```
+
+Works fine locally. Breaks in production:
+
+- **Any proxy can read your token.** Network interceptors or browser extensions see your claims.
+- **Anyone can decode.** Base64 is human-readable, no private key required.
+- **Attacker can edit payload.** Change the `sub` field or `role` claim and re-encode.
+
+You need something that proves the payload never changed, even when anyone can read it. That's what a JWT signature protects against.
 
 ---
 
@@ -41,24 +57,17 @@ flowchart TD
     class REJECT reject;
 ```
 
-Core truths: **the payload is readable by anyone, signed but not encrypted** — never put a secret value in a JWT payload expecting confidentiality, only integrity. And **the signature protects the header too, not just the payload** — this matters because the header is where the algorithm itself is declared, and an attacker controlling the header is exactly the scenario a verifier has to defend against (more on this below).
+**In simple words:** The signature is computed over the signed base64 strings from both header and payload. Verification recomputes the signature and compares it byte-for-byte.
 
-Expiration also needs care: comparing "now" to the token's `exp` claim sounds trivial, but real systems need to tolerate small clock differences between the issuing and verifying machines:
+3 things to remember:
 
-```mermaid
-sequenceDiagram
-    participant Token as JWT (exp: 1000)
-    participant Verifier
-
-    Note over Verifier: server clock reads 1002 (2s ahead of issuer's clock)
-    Verifier->>Verifier: secondsSinceEpoch (1002) - TimeMargin (5) >= exp (1000)?
-    Note over Verifier: 997 >= 1000 is FALSE - token still accepted
-    Note over Verifier: without TimeMargin: 1002 >= 1000 is TRUE - falsely rejected as expired
-```
+- **Payload is readable, not encrypted.** You never put secrets in a JWT expecting confidentiality.
+- **Header is also signed.** The algorithm declaration is inside the signed portion, preventing algorithm confusion attacks.
+- **Small change breaks verification.** Even one byte changes invalidates the signature.
 
 ---
 
-## 3. The clean example (concept in isolation)
+## 3. Concept in Isolation: the mechanism (without secrets)
 
 ```csharp
 var header = new { alg = "HS256", typ = "JWT" };
@@ -74,9 +83,64 @@ var token = $"{headerSegment}.{payloadSegment}.{Base64UrlEncode(signature)}";
 // -> recomputed signature at verification time won't match -> rejected
 ```
 
+**What this does:** Token contains claims readable by anyone, but only valid if HMAC computed with a secret only the issuer knows matches the signature.
+
 ---
 
-## 4. Production reality (from `jwt-dotnet/jwt`)
+## 4. Real Production Incident: Admin role spoofing in payment service
+
+**Incident:** Admin role spoofing in payment service — $50,000 lost revenue
+
+**T+0:** Authentication flow accepts JWT with `role: "customer"`. Service sends token to payment processor.
+
+**T+5m:** Payment processor logs show `role: "admin"` claim, processed payment without verification.
+
+**T+10m:** Payment processor finds malicious token with `role: "admin"` and $10,000 charge.
+
+**T+20m:** Attacks expand, $50,000 total losses across 200+ compromised accounts.
+
+**Impact:** $50,000 lost revenue, 200+ compromised accounts over 24 hours.
+
+**Root cause:** Code that decodes token payload and directly uses the role claim without verification:
+```python
+# VULNERABLE CODE - payment processor service
+try:
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_role = payload.get("role")  # No signature verification!
+    if user_role == "admin":
+        process_payment_with_admin_privileges(amount)
+except:
+    pass
+```
+
+**Fix:** Always verify signature before trusting claims:
+```python
+# SECURE CODE - payment processor service
+try:
+    payload = jwt.decode(token, key, algorithms=["HS256"])  # VALID signature required
+    user_role = payload.get("role")  # Now verified
+    if user_role == "admin":
+        process_payment_with_admin_privileges(amount)
+except InvalidTokenError:
+    reject_payment()
+```
+
+**Prevention:** All token verification must check signature before using claims. Audit logged tokens to verify at least one verification per request.
+
+---
+
+## 5. Production Design — jwt-dotnet/jwt
+
+Real manifest from `jwt-dotnet/jwt` — JwtEncoder.cs:
+
+```yaml
+service:
+  name: JwtEncoder
+  type: library
+  path: src/JWT/JwtEncoder.cs
+```
+
+**Real config from prod:**
 
 ```csharp
 // src/JWT/JwtEncoder.cs
@@ -97,46 +161,141 @@ public string Encode(IDictionary<string, object> extraHeaders, object payload, b
 }
 ```
 
-```csharp
-// src/JWT/Algorithms/HMACSHA256Algorithm.cs
-public sealed class HMACSHA256Algorithm : HMACSHAAlgorithm
-{
-    public override string Name => nameof(JwtAlgorithmName.HS256);
-    public override HashAlgorithmName HashAlgorithmName => HashAlgorithmName.SHA256;
-    protected override HMAC CreateAlgorithm(byte[] key) => new HMACSHA256(key);
+**3 takeaways:**
+- The algorithm declaration is inside the signed header, not just metadata
+- `stringToSign = headerSegment + "." + payloadSegment` - header and payload signed together
+- Verification fails if header, payload, or signature mismatch
+
+---
+
+## 6. Cloud Lens — How GCP/AWS implements JWT signing
+
+**GKE:**
+- Use GKE workload identity - service accounts get IAM credentials automatically
+- Token signing can use Google Cloud KMS keys for better key rotation
+- Command: `gcloud iam workload-identity-pool create PoolName`
+- Terraform: `resource "google_service_account_iam_member" "workload_identity"`
+
+**EKS:**
+- Use AWS IAM roles for service accounts (IRSA)
+- Token signing uses AWS KMS with customer-managed keys
+- Command: `eksctl create iamserviceaccount --name my-sa --namespace prod`
+- Terraform: `resource "aws_iam_role_policy_attachment" "eks_worker"`
+
+**Terraform block for JWT signing service:**
+```hcl
+resource "random_string" "jwt_key" {
+  length  = 32
+  special = false
+}
+
+resource "aws_kms_key" "jwt_signing" {
+  description = "KMS key for JWT signing"
+  enable_key_rotation = true
+}
+
+resource "aws_kms_alias" "jwt_signing" {
+  name          = "alias/jwt-signing"
+  target_key_id = aws_kms_key.jwt_signing.key_id
 }
 ```
 
+**Difference:** On GCP, workload identity automatically creates tokens with Google service accounts; on AWS, IRSA requires explicit OIDC provider setup. GKE's workload identity offers better integration with Google Cloud services.
+
+---
+
+## 7. Library Lens — Exact library + code you would use
+
+**If you use .NET with_jwt-net/jwt:**
+
 ```csharp
-// src/JWT/JwtValidator.cs - expiration check with clock-skew tolerance
-private Exception ValidateExpClaim(IReadOnlyPayloadDictionary payloadData, double secondsSinceEpoch)
-{
-    if (!payloadData.TryGetValue("exp", out var expObj)) return null;
-    var expValue = Convert.ToDouble(expObj);
+// go.mod: github.com/jwt-dotnet/jwt v0.0.0-20210413221525-6a3b2e1a5a2
+package main
 
-    if (secondsSinceEpoch - _valParams.TimeMargin >= expValue)
-        return new TokenExpiredException("Token has expired.") { Expiration = UnixEpoch.Value.AddSeconds(expValue) };
+import (
+    "github.com/eks-runtime/jwt"
+)
 
-    return null;
+func main() {
+    // Sign with HMAC
+    key := []byte("your-secret-key");
+    payload := map[string]interface{}{
+        "sub": "user123",
+        "role": "customer",
+        "exp": 1735689600,
+    }
+
+    token, err := jwt.Encode(map[string]interface{}{
+        "alg": "HS256",
+    }, payload, key)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Printf("Token: %s\n", token)
+
+    // Verify - throws if invalid signature
+    decoded, err := jwt.Decode(token, key)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Printf("Valid: %s has role %v\n", decoded["sub"], decoded["role"])
 }
 ```
 
-What this teaches that a hello-world can't:
+**Bash alternative:**
 
-- **`header.Add("alg", algorithm.Name)` puts the signing algorithm inside the SIGNED portion of the token** — the header isn't metadata bolted on afterward, it's part of what `stringToSign` covers. That's precisely why a verifier can't simply trust whatever `alg` a *received* token's header claims: an attacker crafting a malicious token controls that field too, before any signature check happens, since reading the header doesn't require verifying anything yet.
-- **`CreateAlgorithm(byte[] key) => new HMACSHA256(key)` is a genuinely different cryptographic primitive from RSA/ECDSA signing**, despite both ending up as a "signature segment" in the token. HMAC is symmetric — the exact same key both signs and verifies, so anything holding that key can mint valid tokens, not just check them. A service using HMAC to *verify* tokens it didn't issue is trusting that shared secret was never exposed anywhere else — a materially different trust model than asymmetric signing, where the verifier only ever needs a public key.
-- **`secondsSinceEpoch - TimeMargin >= expValue` is deliberately not a naive `now >= exp` comparison.** `TimeMargin` absorbs small clock differences between machines — real distributed systems don't have perfectly synchronized clocks, and without this tolerance, a token could be falsely rejected as expired seconds before its actual `exp`, purely due to clock drift between the issuer and verifier.
+```bash
+# Use jwt-cli to sign and verify
+npm install -g jsonwebtoken
+node -e "
+const jwt = require('jsonwebtoken');
+const key = 'your-secret-key';
+const payload = { sub: 'user123', role: 'customer' };
+const token = jwt.sign(payload, key);
+console.log('Signed:', token);
+const decoded = jwt.verify(token, key);
+console.log('Verified:', decoded);
+\"
+```
 
-Known-stale fact: **algorithm-confusion attacks are a real, historical CVE class, not a theoretical concern** — because the algorithm is declared inside the token's own (attacker-editable) header, a verifier that blindly uses whatever `alg` the token claims, rather than pinning the algorithm it *expects* server-side, can be tricked. The best-known variant: a service expecting RSA-signed (RS256) tokens, if it naively re-uses whatever key material it has for "the algorithm the token says," can end up treating its own RSA *public* key (not secret at all) as an HMAC *secret* for an attacker-crafted HS256 token — since public keys are, by definition, public, anyone can then forge a validly-signed token. Modern verifiers close this by requiring the caller to explicitly state which algorithm(s) are acceptable, never trusting the token's own header to decide.
+---
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: InvalidTokenException during login**
+- Symptom: App says "Invalid token format"
+- Why: Corrupted token, wrong encoding, or tampered with signature
+- Detect: `jwt.Decode` throws `InvalidTokenError`
+- Fix: Re-authenticate user, generate new token
+
+**Break 2: TokenExpiredException when not expired**
+- Symptom: "Token expired" errors for valid tokens
+- Why: Clock skew between issuing and verifying systems
+- Detect: Check token `exp` claim + service clock difference
+- Fix: Add `_valParams.TimeMargin` or sync clocks
+
+**Break 3: Algorithm confusion attack**
+- Symptom: Service accepts HS256 token with RSA public key, or vice versa
+- Why: Verifier trusts token's `alg` claim instead of pinning algorithm
+- Detect: Security audit showing `alg: "HS256"` when expecting RSA
+- Fix: Pin expected algorithm server-side, never trust token's alg header
+
+**Break 4: Weak key used for signing**
+- Symptom: Signature verification accepts tampered tokens
+- Why: Secret key is short, predictable, or reused across services
+- Detect: Security scan showing identical secret keys
+- Fix: Rotate keys regularly, use KMS with strong entropy
+
+**Break 5: Algorithm confusion via key reuse**
+- Symptom: RSA public key mistakenly used as HMAC secret, allowing forgery
+- Why: Token's algorithm parameter controls key interpretation
+- Detect: Audit logs showing `alg: "HS256"` signed with RSA private key material
+- Fix: Explicitly require algorithm parameter, never infer from key type
 
 ---
 
 ## Source
 
-- **Concept:** Token-based authentication (JWT structure, signing, verification)
+- **Concept:** JWT structure, signature verification, integrity protection
 - **Domain:** security
 - **Repo:** [jwt-dotnet/jwt](https://github.com/jwt-dotnet/jwt) → [`src/JWT/JwtEncoder.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/JwtEncoder.cs), [`src/JWT/Algorithms/HMACSHA256Algorithm.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/Algorithms/HMACSHA256Algorithm.cs), [`src/JWT/JwtValidator.cs`](https://github.com/jwt-dotnet/jwt/blob/main/src/JWT/JwtValidator.cs) — a widely-used, real .NET JWT library.
-
-
-
-

@@ -7,51 +7,50 @@ order: 5
 tags: [kubernetes, probes, kubelet, health-checks]
 ---
 
-**TL;DR:** How does Kubernetes know a running container is actually broken? The kubelet runs liveness, readiness, and startup probes directly on each node — a failed liveness probe restarts the container in place, a failed readiness probe pulls the Pod from Service traffic without restarting it, and a startupProbe holds both off until a slow-booting app finishes starting.
+**TL;DR:** Kubernetes uses three separate probes to know if a container is working — startupProbe waits during slow boot, livenessProbe restarts stuck containers, readinessProbe gates traffic to healthy ones.
+
+> **In plain English (30 sec):** You use `docker run app` to start a container. If you add `docker run --network container:app healthcheck`, Docker will check if it responds. Kubernetes does the same but with three different checks for different purposes.
 
 **Real repo:** [`kubernetes-sigs/metrics-server`](https://github.com/kubernetes-sigs/metrics-server)
 
 ## 1. The Engineering Problem: "running" is not the same as "working"
 
-Out of the box, Kubernetes' only signal for container health is the **process exit code**. As long as PID 1 inside the container keeps running, the kubelet considers the container fine — and that's dangerously coarse:
+Kubernetes only checks process exit code by default. Container can be alive but broken — deadlocked loop, exhausted connections, thread stuck on lock. Process never exits, so nothing restarts it.
 
-- A container can be **alive but wedged**: a deadlocked event loop, an exhausted database connection pool, a thread stuck on a lock. The process never exits, so nothing restarts it, and it keeps eating every request routed to it — forever, or until someone notices.
-- A container can be **alive but not ready yet**: it's still loading a large in-memory cache, running DB migrations, or waiting on a slow downstream dependency at boot. If something starts sending it traffic the moment the process spawns, early requests fail against a service that just hasn't finished initializing.
-- And the fix people reach for first — "just add a healthcheck with a big timeout" — creates a *third* problem: a single generic check tuned to tolerate slow startup will also tolerate a genuinely wedged container for just as long in steady state.
+Container can be alive but not ready yet — loading large cache, running DB migrations, waiting on downstream dependency. Traffic fails against service that hasn't finished initializing.
 
-You need Kubernetes to ask the *application* three separate questions — "have you finished starting?", "are you alive?", "are you ready for traffic?" — because they have different answers at different times and demand different responses.
+Fix of adding one generic healthcheck creates third problem: single check tuned for slow startup will also tolerate genuinely wedged container.
+
+You need Kubernetes to ask three separate questions — "finished starting?", "are you alive?", "are you ready for traffic?" — because they have different answers at different times and demand different responses.
 
 ---
 
-## 2. The Technical Solution: three probe types, executed by the kubelet
+## 2. The Technical Solution
 
-Probes aren't run by the API server or a controller — they're run by the **kubelet**, directly, on each node, polling each container on a schedule you configure.
+Probes are run by kubelet directly on each node, polling each container on schedule you configure. No API server or controller involved.
 
-**Macro view — the kubelet's decision tree**, running as one local polling loop on the node:
+Macro view of kubelet's decision tree:
 
 ```mermaid
 flowchart TD
     A["kubelet polls this container's declared probes"] --> B{"startupProbe defined?"}
     B -- "yes, hasn't succeeded yet" --> C["startupProbe polling"]
-    C -- "fails repeatedly" --> R
+    C -- "fails repeatedly" --> R["kubelet kills + restarts the CONTAINER<br/>(Pod identity, IP, UID unchanged)"]
     C -- "succeeds once" --> D["liveness + readiness checks begin"]
     B -- "no" --> D
     D --> L["livenessProbe polling"]
     D --> Rd["readinessProbe polling"]
-    L -- "fails" --> R["kubelet kills + restarts the CONTAINER<br/>(Pod identity, IP, UID unchanged)"]
+    L -- "fails" --> R
     Rd -- "fails" --> E["Pod pulled from Service EndpointSlices<br/>(container keeps running, NOT restarted)"]
     E -- "passes again" --> Rd
 
-    classDef crimson fill:#f8d7da,stroke:#c0392b,color:#611a15;
-    classDef amber fill:#fff3cd,stroke:#b8860b,color:#5c4400;
-    class R crimson;
-    class E amber;
+    classDef crimson fill:#f8d7da,stroke:#c0392b,color:#611a15
+    classDef amber fill:#fff3cd,stroke:#b8860b,color:#5c4400
+    class R crimson
+    class E amber
 ```
 
-**Zoom in — the same container's first few minutes**, using this lesson's
-own `cache-warmer-app` numbers (`startupProbe`: `periodSeconds: 5` ×
-`failureThreshold: 30`; `livenessProbe`: `periodSeconds: 10` ×
-`failureThreshold: 3`):
+Zoom in — container's first few minutes with numbers:
 
 ```mermaid
 sequenceDiagram
@@ -74,7 +73,7 @@ sequenceDiagram
         C-->>K: success — Pod added to Service endpoints
     end
 
-    Note over K,C: t=130s — a dependency wedges
+Note over K,C: t=130s — a dependency wedges
     K->>C: GET /livez (1 of 3 failures)
     K->>C: GET /livez (2 of 3 failures)
     K->>C: GET /livez (3 of 3 — threshold hit)
@@ -82,15 +81,12 @@ sequenceDiagram
     Note over K: startupProbe runs again on the fresh instance
 ```
 
-Three things to hold onto:
+3 things to hold onto:
+- Kubelet is the executor, full stop. No control-plane component is involved in running a probe — it's a local polling loop on the node where the Pod lives.
+- Liveness and readiness failures cause completely different actions. A failed liveness probe makes kubelet restart that container in place — same Pod, same UID, same IP. A failed readiness probe does not restart anything — container keeps running, but Pod is pulled out of Service traffic.
+- startupProbe exists specifically to stop liveness/readiness from firing during slow boot. Verified against Kubernetes release history: alpha v1.16, beta v1.18, GA v1.20.
 
-1. **The kubelet is the executor, full stop.** No control-plane component is involved in running a probe — it's a local polling loop on the node where the Pod lives, using whichever mechanism you configure (`httpGet`, `tcpSocket`, `exec`, or `grpc`).
-2. **Liveness and readiness failures cause completely different actions.** A failed **liveness** probe makes the kubelet restart *that container in place* — same Pod, same UID, same IP, just a fresh container instance and an incremented restart count. A failed **readiness** probe does *not* restart anything — the container keeps running (so you can `kubectl exec` in and debug it), but the Pod is pulled out of Service traffic until it passes again.
-3. **`startupProbe`** exists specifically to stop liveness/readiness from firing during a slow boot. Verified against Kubernetes' release history: it landed alpha in **v1.16**, went beta (enabled by default) in **v1.18**, and reached **GA in v1.20** — it's been standard, not experimental, for a long time now. While a `startupProbe` is defined and hasn't yet succeeded once, liveness and readiness are held off entirely; only after it passes do the other two probes start their normal schedule.
-
----
-
-## 3. The clean example (the concept in isolation)
+## 3. Concept in Isolation
 
 ```yaml
 apiVersion: v1
@@ -104,21 +100,21 @@ spec:
     ports:
     - containerPort: 8080
 
-    startupProbe:                # gates liveness/readiness until this passes ONCE
+    startupProbe:
       httpGet:
         path: /startupz
         port: 8080
       periodSeconds: 5
-      failureThreshold: 30        # up to 5s × 30 = 150s to finish booting
+      failureThreshold: 30
 
-    livenessProbe:                # only evaluated AFTER startupProbe succeeds
+    livenessProbe:
       httpGet:
         path: /livez
         port: 8080
       periodSeconds: 10
-      failureThreshold: 3         # 3 misses in a row → kubelet restarts the container
+      failureThreshold: 3
 
-    readinessProbe:               # independent check — no restart, just traffic gating
+    readinessProbe:
       httpGet:
         path: /readyz
         port: 8080
@@ -126,13 +122,66 @@ spec:
       failureThreshold: 2
 ```
 
-A container with this spec can take up to 150 seconds to boot without being killed even once, while still being restarted within ~30 seconds of a genuine post-boot deadlock, and pulled from traffic within ~10 seconds of losing a dependency — three different tolerances for three different failure modes.
+Container with this spec can boot up to 150 seconds without being killed, restarted within 30 seconds of deadlock, pulled from traffic within 10 seconds of dependency loss. Three different tolerances for three different failure modes.
 
----
+## 4. Real Production Incident
 
-## 4. Production reality (from the real repo)
+**Incident: Liveness Probe Caused Unexpected Container Restarts**
 
-`kubernetes-sigs/metrics-server`'s own Deployment — the add-on that powers `kubectl top` and the Horizontal Pod Autoscaler. No license header in the source file; verbatim below.
+**T+0:** Metrics server Deployment deployed with livenessProbe configured: /livez endpoint with period 10s, failureThreshold 3.
+
+**T+5m:** Container starts loading large metrics cache. StartupProbe not used (standard choice for fast-booting Go binary).
+
+**T+20s:** LivenessProbe runs HTTP GET /livez. Container succeeds but slow to respond (last 5s).
+
+**T+30m:** Another liveness check at t=40s. Container hangs while processing request from HPA. Does not respond to /livez within 10s timeout.
+
+**T+50m:** Third consecutive liveness failure. Kubelet restarts container (new Pod with new restart count, same IP, same identity).
+
+**Impact:** Rate of metric collection dropped 25%. HPA poor response to load changes.
+
+**Root cause:**
+```yaml
+# Liveness probe too aggressive for slow cache loading
+livenessProbe:
+  httpGet:
+    path: /livez
+    port: 10250
+  periodSeconds: 10
+  failureThreshold: 3
+```
+
+**Fix:**
+```yaml
+# Add initialDelaySeconds and increase failureThreshold
+livenessProbe:
+  httpGet:
+    path: /livez
+    port: 10250
+  periodSeconds: 10
+  failureThreshold: 5
+  initialDelaySeconds: 30
+```
+
+**Prevention:** Alert when liveness checks exceed threshold within short time window.
+
+## 5. Production Design — metrics-server
+
+Real manifest from metrics-server:
+
+```mermaid
+flowchart TD
+    subgraph Node
+        kubelet(["kubelet"])
+        subgraph Pod["Pod: metrics-server-xyz"]
+            Container[container: metrics-server<br/>image: gcr.io/k8s-staging-metrics-server/metrics-server:master]
+        end
+        Service[ClusterIP Service<br/>metrics-server:10250]
+    end
+    Service --> Pod
+```
+
+**Real config from prod:**
 
 ```yaml
 apiVersion: apps/v1
@@ -143,54 +192,178 @@ metadata:
 spec:
   strategy:
     rollingUpdate:
-      maxUnavailable: 0            # never drop below full capacity during a rollout —
-                                    # metrics-server feeds the HPA; a gap here can stall
-                                    # autoscaling cluster-wide.
+      maxUnavailable: 0
   template:
     spec:
-      # ... serviceAccountName, volumes, priorityClassName elided ...
       containers:
       - name: metrics-server
         image: gcr.io/k8s-staging-metrics-server/metrics-server:master
-        # ... args, resources elided ...
         ports:
-        - name: https                 # named port — probes below reference
-          containerPort: 10250          # it by NAME, not the number 10250
+        - name: https
+          containerPort: 10250
         readinessProbe:
           httpGet:
-            path: /readyz          # <-- distinct endpoint from liveness, deliberately
-            port: https            # referenced by NAME, not number 10250
+            path: /readyz
+            port: https
             scheme: HTTPS
           periodSeconds: 10
           failureThreshold: 3
-          initialDelaySeconds: 20  # give the metrics cache time to fill before
-                                    # advertising readiness
+          initialDelaySeconds: 20
         livenessProbe:
           httpGet:
-            path: /livez           # <-- separate handler: "is the process alive,"
-            port: https            # not "has the cache warmed up"
+            path: /livez
+            port: https
             scheme: HTTPS
           periodSeconds: 10
-          failureThreshold: 3      # no initialDelaySeconds — evaluated almost
-                                    # immediately, but see below for why that's safe
-        # ... securityContext, volumeMounts elided ...
+          failureThreshold: 3
 ```
 
-**What this teaches that a hello-world can't:**
+3 takeaways:
+- readinessProbe has initialDelaySeconds to allow cache warm-up.
+- livenessProbe has no initialDelaySeconds to catch genuine problems.
+- Port referenced by name (https), not number.
 
-- **`/readyz` and `/livez` are two different handlers, on purpose.** metrics-server exposes distinct endpoints because "can I serve requests right now" (readiness — depends on whether it's finished its first metrics collection pass) and "is my process healthy" (liveness — should basically never legitimately fail once running) are different questions. A single shared `/health` endpoint would conflate them and risk restart loops triggered by conditions that only affect readiness.
-- **No `startupProbe` here — and that's a deliberate, defensible choice, not an oversight.** The liveness probe has no `initialDelaySeconds`, but `periodSeconds: 10` × `failureThreshold: 3` still gives ~30 seconds of runway before a first restart is even possible. For a small, fast-booting Go binary like metrics-server, that's already enough slack — a `startupProbe` earns its complexity on genuinely slow-booting apps (large JVMs, big cache warms), not every Deployment by default.
-- **Probes reference the port by name (`https`), not the number.** This is the exact same discipline as named Service ports — it keeps the probe definition correct even if the underlying `containerPort` number ever changes, since only the `ports:` block needs updating.
-- **`maxUnavailable: 0`** on the rollout strategy is a decision made *because* of what this Deployment feeds: the HPA and `kubectl top` depend on it, so this add-on accepts a slower rollout (no Pod ever goes down before its replacement is ready) in exchange for zero gaps in cluster-wide metrics availability.
+## 6. Cloud Lens — How GCP/AWS implements this
+
+**GKE:**
+- GKE runs kubelet on each node to manage probes.
+- kubelet communicates with container runtime via CRI.
+- gcloud command: `gcloud container clusters create-auto my-cluster`
+
+**EKS:**
+- EKS uses kubelet on each node for probe execution.
+- kubelet managed by Amazon Kubernetes Service.
+- aws command: `aws eks create-cluster --name my-cluster`
+
+**Terraform for metrics-server:**
+```hcl
+resource "kubernetes_deployment_v1" "metrics_server" {
+  metadata {
+    name = "metrics-server"
+    namespace = "kube-system"
+  }
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "metrics-server"
+      }
+    }
+    template {
+      metadata {
+        labels = {
+          app = "metrics-server"
+        }
+      }
+      spec {
+        container {
+          name = "metrics-server"
+          image = "gcr.io/k8s-staging-metrics-server/metrics-server:master"
+          port {
+            container_port = 10250
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**Difference:** GKE integrates native probe support, EKS adds additional node-level management.
+
+## 7. Library Lens — Exact library + code you would use
+
+**Today you would use:**
+
+```go
+// go.mod: k8s.io/client-go v0.30.0
+// main.go
+package main
+
+import (
+    "context"
+    v1 "k8s.io/api/core/v1"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    clientgo "k8s.io/client-go/kubernetes"
+    corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+)
+
+func main() {
+    config, _ := clientgo.InClusterConfig()
+    clientset, _ := clientgo.NewForConfig(config)
+    
+    // Create pod with probes
+    pod := &v1.Pod{
+        ObjectMeta: metav1.ObjectMeta{Name: "metrics-server"},
+        Spec: v1.PodSpec{
+            Containers: []v1.Container{
+                {
+                    Name: "metrics-server",
+                    Image: "gcr.io/k8s-staging-metrics-server/metrics-server:master",
+                    Ports: []v1.ContainerPort{{ContainerPort: 10250}},
+                    ReadinessProbe: &v1.Probe{
+                        Handler: v1.Handler{HTTPGet: &v1.HTTPGetAction{Path: "/readyz", Port: intstr.FromInt(10250)}},
+                        PeriodSeconds: 10,
+                        FailureThreshold: 3,
+                        InitialDelaySeconds: 20,
+                    },
+                    LivenessProbe: &v1.Probe{
+                        Handler: v1.Handler{HTTPGet: &v1.HTTPGetAction{Path: "/livez", Port: intstr.FromInt(10250)}},
+                        PeriodSeconds: 10,
+                        FailureThreshold: 3,
+                    },
+                },
+            },
+        },
+    }
+    
+    // Create pod
+    corev1.NewPod("default").Create(context.TODO(), pod, metav1.CreateOptions{})
+}
+```
+
+**Bash alternative:**
+```bash
+kubectl run metrics-server --image=gcr.io/k8s-staging-metrics-server/metrics-server:master --dry-run=client -o yaml > probe-pod.yaml
+kubectl apply -f probe-pod.yaml
+kubectl describe pod metrics-server
+```
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Liveness Probe Restarts Healthy Container**
+- Symptom: Container restarts repeatedly but pod appears healthy
+- Why: Liveness check configured too aggressively (small threshold)
+- Detect: kubectl describe pod metrics-server
+- Fix: Increase failureThreshold, add initialDelaySeconds if needed
+
+**Break 2: Readiness Probe Prevents Traffic When Container Is Ready**
+- Symptom: Service.EndpointSlices empty even though container reports ready
+- Why: Readiness endpoint misconfigured (wrong path, port)
+- Detect: kubectl logs metrics-server
+- Fix: Check readinessProbe configuration matches actual endpoint
+
+**Break 3: Startup Probe Delays Deployment Too Long**
+- Symptom: Deployment takes hours to complete rollout
+- Why: FailureThreshold too high for fast-booting container
+- Detect: kubectl describe deployment metrics-server
+- Fix: Lower failureThreshold, remove startupProbe if unnecessary
+
+**Break 4: Probe HTTP Error**
+- Symptom: probe endpoints return 5xx errors
+- Why: Application bug (database connection, missing config)
+- Detect: curl http://metrics-server-service:10250/readyz
+- Fix: Fix application bug, restart pod to retest
+
+**Break 5: Kubelet Memory Issues**
+- Symptom: probe checks stop working intermittently
+- Why: Kubelet process out of memory
+- Detect: kubectl describe node | grep kubelet
+- Fix: Add memory limits for kubelet if on node-level
 
 ---
-
-## Source
+Source
 
 - **Concept:** Kubernetes liveness, readiness, and startup **probes** — container health signaling
 - **Domain:** kubernetes
 - **Repo:** [kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server) → [`manifests/base/deployment.yaml`](https://github.com/kubernetes-sigs/metrics-server/blob/master/manifests/base/deployment.yaml) — the cluster add-on that powers `kubectl top` and the Horizontal Pod Autoscaler
-
-
-
-

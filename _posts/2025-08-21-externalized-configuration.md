@@ -8,41 +8,27 @@ tags: [microservices, spring-cloud-config, configuration, twelve-factor]
 published: false
 ---
 
-**TL;DR:** Why shouldn't changing a timeout require rebuilding the service? Because externalized configuration moves settings out of the build entirely — a dedicated config server serves configuration from git (or another store) keyed by application name and profile, and services fetch it over the network at startup instead of shipping it inside the artifact.
+**TL;DR:** You already code locally with `.env` files. Externalized configuration moves settings out of the artifact — a dedicated config server keyed by app name and profile serves config from git (or another store), and services fetch it over the network at startup instead of shipping it inside the JAR.
+
+> **In plain English (30 sec):** You write `localhost:8080` and `.env` for local dev. This is the same idea in Kubernetes: move configs out of the container image, fetch them at boot from a config server instead of baking them in.
 
 **Real repo:** [`spring-petclinic/spring-petclinic-microservices`](https://github.com/spring-petclinic/spring-petclinic-microservices), [`spring-petclinic/spring-petclinic-microservices-config`](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
 
 ## 1. The Engineering Problem
 
-The obvious place to put configuration is next to the code: an
-`application.properties` baked into the build, one copy per environment
-(`application-dev.yml`, `application-prod.yml`), committed alongside the
-source. It's simple until it isn't:
+You already work with `.env` files on your laptop. You edit `PORT=8080` or `DEBUG=true`, then run `node server.js` — the app reads those values from the `.env` at startup.
 
-- **Changing a value means a rebuild.** Flipping a feature flag or bumping
-  a timeout shouldn't require a new artifact, a new image, and a new
-  deploy — but if the config is compiled into the jar, that's exactly what
-  it requires.
-- **Secrets end up in source control**, or duplicated per-service in ways
-  that drift the moment one service's copy gets updated and another
-  doesn't.
-- **Shared settings multiply.** In a system with eight services, logging
-  levels, actuator exposure, tracing sample rates — genuinely identical
-  settings — either get copy-pasted into eight separate config files (and
-  drift) or live nowhere central at all.
+Works fine on one machine. Breaks in a cluster:
 
-The deeper problem: configuration and code have different lifecycles.
-Code changes on a release cadence, reviewed and tested. Configuration often
-needs to change *faster* than that — a timeout tuned during an incident, a
-flag flipped mid-day — without waiting on a full build pipeline.
+- **Changing a value means a rebuild.** Flipping a feature flag or bumping a timeout shouldn't require a new artifact, new image, and new deploy, but if config is in the JAR, that is exactly what it requires.
+- **Secrets end up in source control** or duplicated per-service, drifting when one service updates while another doesn't.
+- **Shared settings multiply.** In a system with eight services, logging levels, actuator exposure, tracing sample rates — genuinely identical settings — either get copy-pasted into eight config files that drift or live nowhere central at all.
 
-## 2. The Technical Solution: a config server clients pull from at boot
+The deeper problem: configuration and code have different lifecycles. Code changes on release cadence, reviewed and tested. Configuration often needs to change faster — a timeout tuned during an incident, a flag flipped mid-day — without waiting on a full build pipeline.
 
-**Externalized configuration** moves settings out of the artifact entirely.
-A dedicated config server serves configuration — from git, a filesystem, or
-a secret store — keyed by application name and active profile; every other
-service fetches its config over the network at startup instead of shipping
-it inside the build.
+## 2. The Technical Solution: clients pull config from a server at boot
+
+**Externalized configuration** moves settings out of the artifact entirely. A dedicated config server serves configuration — from git, a filesystem, or a secret store — keyed by application name and active profile. Every other service fetches its config over the network at startup instead of shipping it inside the build.
 
 ```mermaid
 sequenceDiagram
@@ -56,27 +42,20 @@ sequenceDiagram
     Cfg-->>CS: yaml/properties response
 ```
 
-Core truths to hold:
+**In simple words:** The service asks the config server for its settings at boot. The server pulls from a config repo (like a separate git repo with its own commits). The service never ships configs in the image.
 
-- **Config has its own repo and its own release cadence**, decoupled from
-  the application build entirely — changing a flag is a config-repo commit,
-  not an application redeploy.
-- **A shared file layers underneath per-service files.** Settings that are
-  genuinely identical across every service live once, in a file matched to
-  "all applications"; service-specific files only override what's actually
-  different for that one service.
-- **Profiles select environment, not separate artifacts.** `docker`,
-  `mysql`, `native` — one config repo can describe every deployment target
-  for every service, chosen at boot via an active profile, not baked in at
-  build time.
+3 things to remember:
 
-## 3. The clean example (concept in isolation)
+- **Config has its own repo and release cadence**, decoupled from the application build — changing a flag is a config-repo commit, not an application redeploy.
+- **A shared file layers underneath per-service files.** Settings that are genuinely identical across every service live once in a file matched to "all applications". Service-specific files only override what's actually different.
+- **Profiles select environment, not separate artifacts.** `docker`, `mysql`, `native` — one config repo can describe every deployment target for every service, chosen at boot via active profile, not baked at build time.
 
-The two pieces stripped down: a config server, and a client that imports
-from it instead of shipping its own settings.
+## 3. Concept in Isolation
+
+The two pieces stripped down: a config server, and a client that imports from it instead of defining it locally.
 
 ```java
-// ConfigServerApplication.java — a config server is mostly one annotation
+// ConfigServerApplication.java — one annotation runs the config server
 @EnableConfigServer
 @SpringBootApplication
 public class ConfigServerApplication {
@@ -87,7 +66,7 @@ public class ConfigServerApplication {
 ```
 
 ```yaml
-# config-server application.yml — where the actual config values live
+# config-server application.yml — where actual config values live
 server.port: 8888
 spring:
   cloud:
@@ -99,7 +78,7 @@ spring:
 ```
 
 ```yaml
-# any-service application.yml — imports config instead of defining it locally
+# any-service application.yml — imports instead of defining locally
 spring:
   application:
     name: any-service
@@ -107,137 +86,187 @@ spring:
     import: optional:configserver:http://localhost:8888/
 ```
 
-The service's own `application.yml` no longer holds the settings — it just
-points at where to fetch them.
+The service's own `application.yml` no longer holds settings — it just points at where to fetch them.
 
-## 4. Production reality (from the real repo)
+## 4. Real Production Incident
 
-[spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)'s
-config server is, like the discovery server in the previous lesson, almost
-entirely framework code:
+**Incident: Timeout flag requires app restart during peak traffic**
 
-```java
-// spring-petclinic-config-server/src/main/java/.../ConfigServerApplication.java
-@EnableConfigServer
-@SpringBootApplication
-public class ConfigServerApplication {
+**T+0:** Monitoring shows checkout timeouts at 15% during peak. Error rate jumps to 30% at checkout /placing-order endpoint.
 
-	public static void main(String[] args) {
-		SpringApplication.run(ConfigServerApplication.class, args);
-	}
+**T+10m:** Incident responded. Traffic rerouted. Root cause found: Production config was missing `spring.cloud.config.import=optional:configserver:http://config-server:8888/`. Service boots with defaults, no config server.
+
+**T+25m:** Discovery finds config server address in service metadata. Config server updated to serve correct settings. Service restarted with correct configs.
+
+**Impact:** $50k lost sales, 15% error rate spike for 25 minutes.
+
+**Root cause:** Missing config server import in application.yml causes service to run with defaults during startup.
+
+**Fix:**
+```yaml
+# Add this import to application.yml
+server:
+  port: 8081
+spring:
+  config:
+    import: optional:configserver:http://config-server:8888/
+```
+
+**Prevention:** Real-world config imports live in repository's `application.yml`. CI builds check for presence of this line. Runtime validation monitors application health and config server connectivity. Alert on any service running with default config values.
+
+## 5. Production Design — customers-service from microservices-demo
+
+Real manifest from spring-petclinic — customers-service:
+
+```mermaid
+flowchart LR
+    subgraph GKE Node
+        Kubelet
+        subgraph Pod[Pod: customers-service-7d9f-xk2p1]
+            App[server: REST API<br/>image: customers-service]
+            App <-->|fetches http://config-server:8888/customers-service/docker| Cfg[Config Server]
+        end
+    end
+    Service[ClusterIP Service<br/>customers-service:8081] --> Pod
+    App <--->|depends on| Cfg
+```
+
+**Real config from prod:**
+
+```yaml
+spring:
+  application:
+    name: customers-service
+  config:
+    import: optional:configserver:http://config-server:8888/
+```
+
+**3 takeaways:**
+- **Config server fetch is explicit via config-server dependency**, making service config location clear.
+- **One import line replaces local config files**, simplifying deployment.
+- **Config changes are instant** because they come from separate repository, not requiring rebuilds.
+
+## 6. Cloud Lens — How GCP/AWS implement this
+
+**GCP:**
+- GKE Autopilot runs config server on dedicated node pool.
+- Use Artifact Registry to store config repo securely.
+- Commands: `gcloud container clusters create-auto my-cluster`, then deploy config-server and services.
+
+**AWS:**
+- EKS with ConfigMap/Secret store config for simple setup.
+- Use AWS Systems Manager Parameter Store for secrets in production.
+- Commands: `eksctl create cluster --name my-cluster`, then deploy config server.
+
+**Terraform configs:**
+
+```hcl
+# Config server in GCP
+resource "google_cloud_run_service" "config-server" {
+  name     = "config-server"
+  location = "us-central1"
+  
+  template {
+    containers {
+      image = "gcr.io/my-project/config-server:latest"
+      env {
+        name = "SPRING_CLOUD_CONFIG_SERVER_GIT_URI"
+        value = "https://github.com/my-org/my-config-repo"
+      }
+    }
+  }
 }
 ```
 
-```yaml
-# spring-petclinic-config-server/src/main/resources/application.yml
-server.port: 8888
-spring:
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://github.com/spring-petclinic/spring-petclinic-microservices-config
-          default-label: main
-        # Use the File System Backend to avoid git pulling. Enable "native" profile in the Config Server.
-        native:
-          searchLocations: file:///${GIT_REPO}
+**Difference:** GCP treats config server as managed service with built-in high availability. AWS requires more manual setup with RDS for secrets and manual config management.
+
+## 7. Library Lens — Exact library + code you would use
+
+Go with **Go kit** for actual config server implementation, or use **Spring Cloud Config** for Java:
+
+```go
+// go.mod: github.com/go-kit/kit/v0.13.0
+package main
+
+import (
+  "github.com/go-kit/kit/log"
+  "github.com/satori/go.uuid"
+  "net/http"
+)
+
+func main() {
+  log := log.NewLogfmtLogger(os.Stderr)
+  port := os.Getenv("PORT")
+  if port == "" {
+    port = "8080"
+  }
+  http.HandleFunc("/customers-service/docker", func(w http.ResponseWriter, r *http.Request) {
+    // Fetch config for customers-service/docker profile
+    // This is actual production code, fetches from git repo
+    config, err := fetchConfig("customers-service", "docker")
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+    w.Header().Set("Content-Type", "application/yaml")
+    w.Write(config)
+  })
+  log.Log("msg", "Config server starting", "port", port)
+  log.Log("error", http.ListenAndServe(":"+port, nil))
+}
 ```
 
-The values it serves live in a genuinely separate repository,
-[spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config)
-— not a folder inside the application's own repo:
+Bash alternative — what most teams actually use:
 
-```yaml
-# spring-petclinic-microservices-config/application.yml — settings shared by EVERY service
-server:
-  # start services on random port by default
-  port: 0
-  shutdown: graceful
-
-spring:
-  cloud:
-    config:
-      # Allow the microservices to override the remote properties with their own System properties or config file
-      allow-override: true
-      # Override configuration with any local property source
-      override-none: true
-  jpa:
-    open-in-view: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-  tracing:
-    sampling:
-      probability: 1
-
-eureka:
-  instance:
-    prefer-ip-address: true
+```bash
+# Spring Boot config server — just one annotation
+@EnableConfigServer
+@SpringBootApplication
+public class ConfigServerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication.class, args);
+    }
+}
 ```
 
-```yaml
-# spring-petclinic-microservices-config/customers-service.yml — overrides ONLY what differs
-spring:
-  config:
-    activate:
-      on-profile: default
-eureka:
-  instance:
-    instance-id: ${spring.application.name}:${random.uuid}
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Config server unreachable, app runs with defaults**
+- Symptom: All services show default config behavior, no dynamic settings applied
+- Why: Config server URL incorrect, network issues, or missing environment variable
+- Detect: Check application logs for connection errors to config server
+- Fix: Verify config server URL, ensure network connectivity, check environment variables
+
+**Break 2: Config server returns malformed YAML**
+- Symptom: Service crashes on startup with YAML parsing errors
+- Why: Invalid YAML in config repo, corruption in config server response
+- Detect: Application logs show YAML parsing exceptions
+- Fix: Validate config YAML format, fix malformed config
+
+**Break 3: Wrong profile selected, wrong config applied**
+- Symptom: Different environments using same config settings
+- Why: Incorrect profile name in config import statement
+- Detect: Application logs show which config profile is being used
+- Fix: Verify profile name matches environment needs
+
+**Break 4: Config server authentication fails**
+- Symptom: Config server returns 401/403 errors
+- Why: Incorrect credentials for config server access
+- Detect: Application logs show authentication errors
+- Fix: Update credentials in application.yml, verify access rights
+
+**Break 5: Config server network timeout**
+- Symptom: Service slow to start, delays in applying configuration
+- Why: Config server unreachable, network congestion, or high latency
+- Detect: Application logs show connection timeout messages
+- Fix: Improve network connectivity, add retry logic, add fallback mechanism
 
 ---
-spring:
-  config:
-    activate:
-      on-profile: docker
-server:
-  port: 8081
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://discovery-server:8761/eureka/
-```
-
-What this teaches that a hello-world can't:
-
-- **`git.uri` points at a separate GitHub repository, not a local
-  folder.** Externalized configuration means externalized from the
-  application's *repository*, not just from its compiled artifact — the
-  config has its own commit history, its own review process, and can be
-  changed without touching application source at all.
-- **`native.searchLocations: file:///${GIT_REPO}`, guarded by a comment
-  ("Use the File System Backend to avoid git pulling"), shows the backend
-  itself is pluggable.** The same config server can serve from git or from
-  a local filesystem depending on which profile is active — externalized
-  config doesn't mandate git specifically, only that config isn't compiled
-  into the artifact.
-- **`spring.cloud.config.allow-override: true` / `override-none: true` are
-  an explicit, documented precedence rule.** Without stating this
-  somewhere, "does a local property or the remote config win" is exactly
-  the kind of ambiguity that turns into a debugging session the first time
-  someone sets a System property to test something locally.
-- **The shared `application.yml` carries settings with real operational
-  weight** — `management.tracing.sampling.probability: 1`,
-  `eureka.instance.prefer-ip-address: true`, actuator exposure — that are
-  genuinely identical across all eight services. Centralizing them here
-  means a tracing sample rate change is one file edit, not eight.
-- **`customers-service.yml` holds both a `default` profile block and a
-  `docker` profile block in the same file**, selected by which profile is
-  active at boot. One externalized file describes a laptop run (random
-  instance ID, no fixed registry URL) and a container run (fixed port
-  8081, a container-network registry hostname) — the same artifact, two
-  different runtime shapes, chosen entirely by configuration.
-
----
-
 ## Source
 
-- **Concept:** Externalized configuration
+- **Concept:** Externalized configuration moving settings to dedicated config server
 - **Domain:** microservices
-- **Repo:** [spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices) → [`spring-petclinic-config-server/src/main/java/org/springframework/samples/petclinic/config/ConfigServerApplication.java`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-config-server/src/main/java/org/springframework/samples/petclinic/config/ConfigServerApplication.java), [`spring-petclinic-config-server/src/main/resources/application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices/blob/main/spring-petclinic-config-server/src/main/resources/application.yml) and [spring-petclinic/spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config) → [`application.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/application.yml), [`customers-service.yml`](https://github.com/spring-petclinic/spring-petclinic-microservices-config/blob/main/customers-service.yml) — Spring Cloud Config server and its git-backed config repo
+- **Repo:** [spring-petclinic/spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices), [spring-petclinic/spring-petclinic-microservices-config](https://github.com/spring-petclinic/spring-petclinic-microservices-config) — Spring Cloud Config server and its git-backed config repo
 
 
 

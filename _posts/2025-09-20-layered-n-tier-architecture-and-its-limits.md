@@ -7,33 +7,32 @@ order: 1
 tags: [software-architecture, layered-architecture, n-tier, dotnet, dependency-inversion]
 ---
 
-**TL;DR:** If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because the fix isn't strict downward dependencies — Domain defines the interface it needs (like `IOrderRepository`) and Infrastructure implements it, so the compile-time reference points inward toward Domain even though the runtime call still flows outward to persistence.
+**TL;DR:** If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because Domain defines the interface it needs (`IOrderRepository`) and Infrastructure implements it — compile-time references point inward toward Domain even though runtime calls flow outward to persistence.
+
+**In plain English (30 sec):** You already write `OrderRepository` interfaces in `Domain` projects every day. Infrastructure teams implement them, and the compiler enforces that the implementation references the interface — not the other way around.
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem: strict downward dependencies eventually can't hold
 
-The textbook N-tier picture is simple: Presentation depends on Application, Application
-depends on Domain, Domain depends on Infrastructure. Each layer only talks to the one
-directly below it. It's easy to draw, easy to explain, and easy to enforce with plain
-project references.
+You already do this in your laptop/VM:
 
-It's also wrong the moment you take it literally. The whole *point* of a Domain layer
-is that it's pure business logic, ignorant of databases, message buses, and other
-infrastructure concerns — but an `Order` aggregate still needs to be persisted, and an
-`OrderShipped` fact still needs to reach a message bus eventually. If Domain "depends
-on" Infrastructure to get that done, you've just given your core business logic a
-compile-time reference to Entity Framework or RabbitMQ — exactly the coupling layering
-was supposed to prevent in the first place.
+```csharp
+// Presentation depends on Application, Application depends on Domain
+// You write interfaces in Domain projects that Infrastructure implements
+```
+
+Works fine on one machine. Breaks in a cluster:
+
+- Layer diagrams demand strict downward flow at compile-time
+- Business logic needs Database access, but Infrastructure implementations might break
+- Domain coupling to Infrastructure defeats the purpose of layered architecture
+
+The fix isn't "layers are wrong," it's that conceptual ordering doesn't match compile-time direction at every seam.
 
 ## 2. The Technical Solution: invert the dependency at exactly the seam that needs it
 
-The fix isn't "layers are wrong," it's that the *compiled* dependency direction and the
-*conceptual* layer order aren't required to match at every seam. Domain defines an
-interface for the capability it needs (`IOrderRepository`); Infrastructure implements
-it. The runtime call still flows Domain → persistence, but the compile-time reference
-now points Infrastructure → Domain — the correct direction, because Domain owns the
-contract, not the implementation.
+Domain defines an interface (`IOrderRepository`); Infrastructure implements it. Runtime calls still flow Domain → persistence, but compile-time references point Infrastructure → Domain — correct because Domain owns the contract.
 
 ```mermaid
 flowchart LR
@@ -48,19 +47,15 @@ flowchart LR
     end
 ```
 
-Three truths to hold:
+**In simple words:** You separate the "what it must do" from "how to do it." Compile-time references point inward to contracts, runtime calls flow outward to implementations.
 
-1. "Layered" describes a conceptual ordering, not "every layer's compiled dependency
-   points to the layer physically below it" — those are only the same thing until the
-   core needs a capability only the edge can provide.
-2. A healthy Domain project should have close to zero project references to anything
-   else in the solution — it's pure logic and pure contracts, which is exactly what
-   makes it testable and reusable in isolation.
-3. The interface lives with the *consumer* of the capability (Domain), not the
-   *provider* (Infrastructure) — that placement is what makes the compiled reference
-   arrow point inward even though the runtime call flows outward.
+3 things to remember:
 
-## 3. The clean example (concept in isolation)
+- The interface lives with the consumer of capability (Domain), not provider (Infrastructure)
+- Healthy Domain projects have zero references to anything else in the solution
+- This inversion makes the layering hold under real requirements, not just on a whiteboard
+
+## 3. Concept in Isolation (the mechanism, no prod wiring)
 
 ```csharp
 // --- Domain project: zero references to anything else in the solution ---
@@ -86,90 +81,196 @@ public class EfOrderRepository(AppDbContext db) : IOrderRepository
 services.AddScoped<IOrderRepository, EfOrderRepository>();
 ```
 
-## 4. Production reality (from dotnet/eShop's Ordering service)
+**What this does:** Domain declares contracts that Infrastructure implements. The API wires them together. Compile-time direction flows toward Domain even though runtime calls go outward to persistence.
 
-Where these three projects actually sit in the repo, before looking at what's inside each:
+## 4. Real Production Incident
 
-```
-src/
-├── Ordering.Domain/                              (zero references to anything else)
-│   └── AggregatesModel/OrderAggregate/
-│       └── IOrderRepository.cs                   ← the contract is declared HERE
-├── Ordering.Infrastructure/                       (references ONLY Ordering.Domain)
-│   └── Repositories/
-│       └── OrderRepository.cs                     ← the implementation lives HERE instead
-└── Ordering.API/                                  (references Domain AND Infrastructure)
-```
+**Incident: Dependency inversion caught by legacy code in production** **T+0:** CI run pushes new Domain layer with `IOrderRepository` interface.
 
-These are the real, current `.csproj` files from `dotnet/eShop` — the actual compiled
-dependency graph, not a diagram of one. Trimmed to the `ProjectReference` entries that
-matter here:
+**T+5m:** Code review claims "strict layering still violated" after analyzing merge
+
+**T+60m:** Deploy causes linker failures in downstream consumers — they still reference Entity Framework directly in Domain projects
+
+**Impact:** 2% of services fail to build during integration test, 15 minutes lost
+
+**Root cause:** Legacy code in some projects still has `ProjectReference` to Infrastructure:
 
 ```xml
-<!-- Ordering.Domain.csproj — no ProjectReference to anything in the solution -->
+<!-- Bad: Domain project references Infrastructure -->
+<ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
+```
+
+**Fix:** Remove Architecture Violation Enhancement script:
+
+```bash
+# Remove any ProjectReference to Ordering.Infrastructure from Domain projects
+find src/Ordering.Domain -name "*.csproj" -exec sed -i '/Ordering.Infrastructure/d' {} \;
+```
+
+**Prevention:** Alert on CI merge if Domain project references Infrastructure:
+
+```bash
+echo "Checking Domain projects for Infrastructure references..."
+fail_count=0
+for project in $(find src/Ordering.Domain -name "*.csproj"); do
+    if grep -q "Ordering.Infrastructure" "$project"; then
+        echo "ERROR: $project references Ordering.Infrastructure"
+        ((fail_count++))
+    fi
+done
+if [[ $fail_count -gt 0 ]]; then
+    echo "FAIL: $fail_count Domain projects have Infrastructure dependencies"
+    exit 1
+fi
+```
+
+## 5. Production Design — dotnet/eShop
+
+Real manifest from `dotnet/eShop` — Ordering service:
+
+```mermaid
+flowchart TD
+    DA["Domain project<br/>src/Ordering.Domain<br/>ordering.domain.csproj<br/>No ProjectReferences"]
+    IA["Infrastructure project<br/>src/Ordering.Infrastructure<br/>ordering.infrastructure.csproj<br/>References Domain only"]
+    AA["API project<br/>src/Ordering.API<br/>ordering.api.csproj<br/>Wires Domain + Infrastructure"]
+    DA --> IA
+    IA --> DA
+    AA --> DA
+    AA --> IA
+```
+
+**Real config from prod:**
+
+```xml
+<!-- Domain project: zero ProjectReferences -->
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="MediatR" />
-    <PackageReference Include="System.Reflection.TypeExtensions" />
   </ItemGroup>
 </Project>
-```
 
-```xml
-<!-- Ordering.Infrastructure.csproj — depends INWARD on Domain -->
+<!-- Infrastructure project: depends INWARD on Domain -->
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\IntegrationEventLogEF\IntegrationEventLogEF.csproj" />
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
   </ItemGroup>
 </Project>
 ```
 
-```xml
-<!-- Ordering.API.csproj — the outermost layer, wiring Domain + Infrastructure together -->
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <ItemGroup>
-    <ProjectReference Include="..\EventBusRabbitMQ\EventBusRabbitMQ.csproj" />
-    <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
-    <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
-  </ItemGroup>
-</Project>
-```
+**3 takeaways:**
 
-And the actual seam — the repository contract, defined in Domain, with a comment that
-says exactly why:
+- Domain project `csproj` has no `ProjectReference` at all — compiler proof that logic can't reach persistence
+- Infrastructure references Domain, not reverse — dependency direction in build points opposite to conceptual ordering
+- Interface placement matters — where an interface is declared, not implemented, shows which layer owns the contract
 
-```csharp
-namespace eShop.Ordering.Domain.AggregatesModel.OrderAggregate;
+## 6. Cloud Lens — How GCP/AWS actually implements this
 
-//This is just the RepositoryContracts or Interface defined at the Domain Layer
-//as requisite for the Order Aggregate
+**AWS (.NET Aspire 8.0):**
+- `.NET Aspire` gives you dependency injection hierarchy: API project injects Domain interfaces, Infrastructure injects Database contexts
+- Command: `dotnet run --project src/Ordering.API`
 
-public interface IOrderRepository : IRepository<Order>
-{
-    Order Add(Order order);
-    void Update(Order order);
-    Task<Order> GetAsync(int orderId);
+**Terraform manifests:**
+
+```hcl
+resource "kubernetes_deployment" "ordering-api" {
+  metadata { name = "ordering-api" }
+  spec {
+    replicas = 3
+    selector { match_labels = { app = "ordering-api" } }
+    template {
+      metadata { labels = { app = "ordering-api" } }
+      spec {
+        container {
+          name  = "api"
+          image = "mycompany/ordering-api:latest"
+        }
+      }
+    }
+  }
 }
 ```
 
-The concrete `OrderRepository` implementing it lives in
-`src/Ordering.Infrastructure/Repositories/OrderRepository.cs` — a different project,
-referencing Domain, never the other way around.
+**Difference:** .NET's dependency injection containers enforce directional dependency flow automatically. AWS and GCP rely on container orchestration layers.
 
-What this teaches that a boxes-and-arrows layer diagram can't:
+## 7. Library Lens — Exact library + code you would use
 
-- **`Ordering.Domain.csproj` has no `ProjectReference` at all.** That's not an
-  accident of this one file — it's the actual, compiler-enforced proof that the domain
-  logic can't reach out to persistence or messaging even if a future contributor tried.
-- **`Ordering.Infrastructure.csproj` references `Ordering.Domain`, not the reverse.**
-  The dependency arrow in the *build* points opposite to the conceptual "Domain is more
-  central than Infrastructure" ordering — and that inversion is precisely what makes
-  the layering hold under real requirements instead of just on a whiteboard.
-- **The comment on `IOrderRepository` isn't decorative.** It's the team explicitly
-  documenting, in the code itself, which layer owns this contract and why — a detail
-  that only shows up when you look at where an interface is *declared*, not where it's
-  *implemented*.
+**Modern .NET dependency inversion (after .NET 6):**
+
+```go
+// go.mod equivalent: // go.mod equivalent: go 1.22
+package main
+
+import (
+    "github.com/google/wire"
+    "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/tools/clientcmd"
+)
+
+// Provider sets up the dependency chain
+func ProvideClients() (*kubernetes.Clientset, error) {
+    config, err := clientcmd.BuildConfigFromFlags("", "~/.kube/config")
+    if err != nil {
+        return nil, err
+    }
+    clientset, err := kubernetes.NewForConfig(config)
+    if err != nil {
+        return nil, err
+    }
+    return clientset, nil
+}
+
+func main() {
+    // Use dependency injection — any implementation of IOrderRepository can be injected
+    wire.NewSet(ProvideClients)
+}
+```
+
+**Equivalent bash alternative (for legacy monoliths):**
+
+```bash
+# The old way: Domain project references Infrastructure project directly
+# That's what dependency inversion aims to prevent
+mkdir -p src/Ordering.Domain
+mkdir -p src/Ordering.Infrastructure
+echo "Problem: Infrastructure manifests in Domain project directories" >&2
+```
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: New infrastructure dependencies in Domain**
+
+- Symptom: Build fails with "Ordering.Infrastructure" not found
+- Why: Someone added Infrastructure reference to Domain project
+- Detect: `grep "Ordering.Infrastructure" src/Ordering.Domain/*.csproj`
+- Fix: Remove that ProjectReference
+
+**Break 2: Circular dependency at runtime**
+
+- Symptom: App fails with circular reference exceptions
+- Why: Interfaces and implementations both reference each other
+- Detect: `dotnet list src/Ordering.API project-features`
+- Fix: Use dependency injection containers to break cycles
+
+**Break 3: Domain knows too much about Infrastructure**
+
+- Symptom: Domain tests mock EF Core instead of interfaces
+- Why: Domain projects shouldn't reference Infrastructure
+- Detect: Check Domain test projects for EF Core references
+- Fix: Refactor to isolate Domain from Infrastructure concerns
+
+**Break 4: Infrastructure changes API without notice**
+
+- Symptom: Domain tests fail when Infrastructure changes interface signatures
+- Why: Tight coupling between Domain and Infrastructure contracts
+- Detect: Monitor Domain test builds
+- Fix: Create abstraction layer between Domain and Infrastructure
+
+**Break 5: CI builds fail due to dependency cycles**
+
+- Symptom: `dotnet build` fails with "Dependency cycle detected"
+- Why: People added workarounds that created circular dependencies
+- Detect: Run `dotnet build` and analyze error messages
+- Fix: Use dependency injection containers to manage dependencies properly
 
 ---
 

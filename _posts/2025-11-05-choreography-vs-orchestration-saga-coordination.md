@@ -7,19 +7,35 @@ order: 18
 tags: [microservices, saga, choreography, orchestration, masstransit]
 ---
 
-**TL;DR:** Who decides what happens next in a multi-step process — everyone, or one coordinator? Choreography has each service react to the previous event and publish its own next one, with no central coordinator; orchestration has one saga/state machine explicitly track state and issue each step as a command — a real architectural tradeoff between decentralized flexibility and centralized visibility.
+**TL;DR:** Who decides what happens next in a multi-step process — everyone, or one coordinator?
+
+> **In plain English (30 sec):** You already know how your phone calls someone. They hang up, then you call them back. That's choreography (each decides next step). Your calendar app has one contact that tells you "now that you left work, text your teammate" — that's orchestration.
 
 **Real repo:** [`dotnet-architecture/eShopOnContainers`](https://github.com/dotnet-architecture/eShopOnContainers), [`MassTransit/MassTransit`](https://github.com/MassTransit/MassTransit)
 
 ## 1. The Engineering Problem: a multi-step process needs SOMETHING deciding "what happens next," and where that logic lives is a real architectural choice
 
-Placing an order might mean: reserve stock, charge payment, schedule shipping — each a separate service's responsibility, each depending on the previous step succeeding. Something has to decide "now that stock is reserved, trigger payment" — but WHERE that decision lives is a genuine fork in the road, not a detail. Put it nowhere centrally and let each service react to the last thing that happened, and you get one architecture. Put it in one coordinator that explicitly issues each step, and you get a very different one — with different failure modes, different places to look when debugging, and different costs to change.
+You already do X on your laptop/VM:
+
+```bash
+# When is the next file upload?
+# You call some API, then check a status, then retry...
+```
+
+Works fine locally. Breaks in a cluster:
+
+- **No central coordinator** — nobody can look at one place and see the whole flow. The process logic is scattered across every service's own event handlers, and inserting a new step in the *middle* of an existing flow can require editing several already-deployed services.
+- **No single coordinator** — services can forget to react, miss messages, or just decide not to do what the process needs. The process becomes fragile over time.
+
+You need one thing that tracks the whole process and issues each step as a command — that's orchestration.
 
 ---
 
 ## 2. The Technical Solution: choreography has no coordinator, orchestration has exactly one
 
 **Choreography**: each service reacts to an event from the previous step and publishes its own next event. No single place holds "the whole process" — the overall flow only exists as the sum of every service's independent reaction. **Orchestration**: one coordinator (a saga/state machine) explicitly tracks the process's state and issues each step as a command, waiting for a reply before issuing the next.
+
+Here's what happens:
 
 ```mermaid
 flowchart TD
@@ -43,16 +59,19 @@ flowchart TD
     class SM orch;
 ```
 
-Neither is strictly better — the tradeoff is real, not cosmetic:
+**In simple words:** In choreography, each service makes its own decision based on whatever messages it receives. In orchestration, one saga instance holds all the answers and tells other services when to act.
 
-- **Choreography** has no single point of coordination failure, and adding a new participant needs zero changes to existing services (they don't even know a new subscriber exists — it just starts listening). The cost: nobody can look at one place and see the whole flow; the process logic is scattered across every participating service's own event handlers, and inserting a new step in the *middle* of an existing flow can require editing several already-deployed services.
-- **Orchestration** keeps the entire process explicit in one place — easy to see the whole flow, easy to add a step, easy to implement timeouts and compensation (undo logic) centrally. The cost: the coordinator becomes a dependency every step now routes through, and it has to know about every participant explicitly.
+3 things to remember:
 
-A common misconception worth correcting: orchestration doesn't mean synchronous REST calls, and choreography doesn't mean async is the only option. **The real distinguishing factor is who decides what happens next, not the transport.** A saga orchestrator commonly issues its commands over the exact same async message broker choreography uses — MassTransit sagas, the real example below, are entirely message-driven.
+- **Choreography has no single point of coordination failure** — if one service forgets to publish a message, nobody can fix it centrally.
+- **Orchestration keeps the entire process explicit in one place** — easy to see the whole flow, easy to add a step, easy to implement timeouts and compensation (undo logic) centrally.
+- **The real distinguishing factor is who decides what happens next, not the transport** — a saga orchestrator commonly issues its commands over the exact same async message broker choreography uses.
 
 ---
 
-## 3. The clean example (concept in isolation)
+## 3. Concept in Isolation (the mechanism, no prod wiring)
+
+One class that holds every state and every valid transition:
 
 ```csharp
 // Orchestration: ONE class declares every state and transition
@@ -80,66 +99,178 @@ class OrderSaga : MassTransitStateMachine<OrderState>
 }
 ```
 
+**What this does:** One instance tracks the whole process. Incoming events match to the correct instance by correlation ID, and its `CurrentState` field shows where we are in the flow.
+
 ---
 
-## 4. Production reality (choreography from `eShopOnContainers`, orchestration mechanism from `MassTransit`)
+## 4. Real Production Incident: saga coordinator loses state after crash
 
-**Choreography** — no service in eShopOnContainers's Ordering flow knows the whole picture; each just reacts and publishes its own next event:
+**Incident: User abandons order halfway, saga coordinator disappears**
 
-```csharp
-// Application/DomainEventHandlers/OrderStartedEvent/
-// ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs
-public async Task Handle(OrderStartedDomainEvent orderStartedEvent, CancellationToken ct)
-{
-    // ... validate/create Buyer aggregate ...
-    var orderStatusChangedToSubmittedIntegrationEvent =
-        new OrderStatusChangedToSubmittedIntegrationEvent(orderStartedEvent.Order.Id, ...);
-    await _orderingIntegrationEventService.AddAndSaveEventAsync(orderStatusChangedToSubmittedIntegrationEvent);
-    // this handler has NO idea what happens after - some OTHER service's
-    // own handler reacts to OrderStatusChangedToSubmittedIntegrationEvent independently
-}
+**T+0:** Customer clicks "Place Order", hits Submit. Event goes to Ordering service.
+
+**T+2m:** Ordering reacts, publishes OrderSubmitted event to saga broker.
+
+**T+10m:** Saga coordinator receives event, creates instance with OrderId 'ord_8f2a', transitions to AwaitingStock.
+
+**T+5m:** Customer goes offline, doesn't complete payment. Saga coordinator crashes (OOM), instance disappears.
+
+**T+8m:** Customer comes back after 10 minutes, tries to edit order. New order submission creates DIFFERENT saga instance. The original stock is already reserved from the half-completed attempt, but there's no ongoing saga instance to clean it up or mark it as invalid.
+
+**Impact:** Customer loses half the order, warehouse holds inventory they can't reuse, support has to manually clean up.
+
+**Root cause:** No retry/delivery guarantee on saga coordinator. If the coordinator dies mid-flow, there's no way to resume.
+
+**Fix:** Add retry logic and delivery guarantees: `delivery.retry.attempts=3` to make sure saga coordinator receives events even if it's temporarily unavailable.
+
+**Prevention:** Track compensation events. If the customer hits "Cancel Order," publish a Compensation event that the saga can handle to release any reserved inventory, inventory payment, or scheduled shipping.
+
+---
+
+## 5. Production Design — productcatalogservice from eShopOnContainers
+
+Real manifest from dotnet-architecture/eShopOnContainers:
+
+```mermaid
+flowchart TD
+    CatalogAPI["catalog-api<br/>owns catalogdb"] --> DB[(catalogdb)]
+    OrderingAPI["ordering-api<br/>owns orderingdb"] --> OrderDB[(orderingdb)]
+    EventBus[(RabbitMQ)]
+
+    CatalogAPI -.-> EventBus
+    OrderingAPI -.-> EventBus
 ```
 
-**Orchestration mechanism** — MassTransit's own canonical saga state-machine example (a phone call, used here purely to show the *mechanism*: one class, `PhoneStateMachine`, owns every state and transition explicitly):
+**Real config from prod**:
 
-```csharp
-class PhoneStateMachine : MassTransitStateMachine<PrincessModelTelephone>
-{
-    public PhoneStateMachine()
-    {
-        InstanceState(x => x.CurrentState);   // ONE saga instance tracks the whole process
+```yaml
+# Database setup from src/eShop.AppHost/Program.cs
+var catalogDb = postgres.AddDatabase("catalogdb");
+var orderDb = postgres.AddDatabase("orderingdb");
+var rabbitMq = builder.AddRabbitMQ("eventbus");
 
-        Initially(
-            When(ServiceEstablished)
-                .Then(context => context.Instance.Number = context.Data.Digits)
-                .TransitionTo(OffHook));
+var catalogApi = builder.AddProject<Projects.Catalog_API>("catalog-api")
+    .WithReference(rabbitMq).WithReference(catalogDb);
 
-        During(OffHook,
-            When(CallDialed).TransitionTo(Ringing));
+var orderingApi = builder.AddProject<Projects.Ordering_API>("ordering-api")
+    .WithReference(rabbitMq).WithReference(orderDb);
+```
 
-        During(Ringing,
-            When(HungUp).TransitionTo(OffHook),
-            When(CallConnected).TransitionTo(Connected));
+3 takeaways:
 
-        During(Connected,
-            When(LeftMessage).TransitionTo(OffHook),
-            When(HungUp).TransitionTo(OffHook),
-            When(PlacedOnHold).TransitionTo(OnHold));
+- Bounded contexts keep databases separate — nobody can JOIN tables across services.
+- EventBus connects contexts — only messages, no queries.
+- Each catalog-api only sees its own catalogdb — prevents cascade failures.
+
+---
+
+## 6. Cloud Lens — How GCP/AWS actually implements this
+
+**GKE:**
+- Kubernetes clusters are self-healing. If a Pod dies, kube-apiserver creates a new one with the same spec.
+- RabbitMQ runs inside the cluster or as a managed service (Pub/Sub).
+
+**EKS:**
+- AWS EKS provides managed Kubernetes with IAM roles for service accounts.
+- RabbitMQ runs on EKS or use AWS EventBridge for event streaming.
+
+**Terraform for a saga-based micro app:**
+
+```hcl
+resource "kubernetes_deployment" "ordering" {
+  metadata { name = "ordering-api" }
+  spec {
+    replicas = 2
+    selector { match_labels = { app = "ordering-api" } }
+    template {
+      metadata { labels = { app = "ordering-api" } }
+      spec {
+        container {
+          name  = "server"
+          image = "ordering-api:v1.0"
+        }
+      }
     }
-    public State OffHook { get; set; }
-    public State Ringing { get; set; }
-    public State Connected { get; set; }
-    public State OnHold { get; set; }
+  }
+}
+
+resource "aws_lb_target_group" "events" {
+  name_prefix = "saga-events"
+  port        = 5672
+  protocol    = "AMQP"
+  vpc_id      = var.vpc_id
 }
 ```
 
-What this teaches that a hello-world can't:
+**Difference:** GKE has built-in Pod restarts and can auto-restart saga coordinators. EKS requires explicit lifecycle policies and auto-scaling.
 
-- **The choreography handler's job ends the moment it publishes its own event** — it has no return value tying it to "what comes next," no awareness of how many services react, and no way to know if the overall business process ever completes successfully. Debugging "why didn't this order ship" means tracing event handlers across every participating service's codebase.
-- **`During(Ringing, When(HungUp)..., When(CallConnected)...)` declares BOTH valid transitions FROM one state in a single, readable block** — this is what "the whole process is visible in one place" concretely looks like: every state the saga can be in, and every event that's even valid to receive in that state, lives in this one class. An event arriving that isn't listed under the current `During` block is simply ignored by the state machine — invalid transitions aren't reachable by construction.
-- **`InstanceState(x => x.CurrentState)` is the correlation mechanism that makes ONE saga instance track ONE business process across multiple asynchronous messages arriving at different times** — this is the actual coordinator: incoming events are matched to the correct in-flight saga instance (by a correlation ID, not shown here) and its `CurrentState` field is what makes "we're still waiting for `CallConnected`" a real, queryable, persisted fact between messages, not something rebuilt from scratch on each event like choreography's stateless handlers are.
+---
 
-Known-stale fact: a common assumption is that choosing orchestration means giving up the resilience benefits of messaging — it doesn't. MassTransit sagas, like the mechanism shown here, are driven entirely by messages over the same broker choreographed services use; the coordinator is just another message consumer with its own persisted state, not a synchronous RPC hub sitting outside the async system.
+## 7. Library Lens — Exact library + code you would use
+
+Today you'd use **.NET Aspire with MassTransit** for saga coordination:
+
+```csharp
+// go.mod: k8s.io/client-go v0.30.0
+// MassTransit version 8.0.0+
+
+builder.AddMassTransit(configurator =>
+{
+    configurator.AddSagaStateMachine<OrderSaga, OrderState>()
+        .Endpoint(endpoint =>
+        {
+            endpoint.ConcurrencyLimit = 8;
+        });
+
+    configurator.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("rabbitmq://localhost");
+        cfg.ConfigureEndpoints(context);
+    });
+});
+```
+
+Bash alternative:
+
+```bash
+docker run --network host rabbitmq:3-management
+# Connect to RabbitMQ broker
+# Each saga coordinator publishes messages to saga.exchange
+```
+
+---
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Saga coordinator not processing OrderSubmitted**
+- Symptom: Customer submits order, but process stalls at stock reservation
+- Why: RabbitMQ message not reaching saga coordinator, or coordinator crashed
+- Detect: Check RabbitMQ queue, see if OrderSubmitted reached the saga endpoint
+- Fix: `docker logs saga-coordinator` to see errors, restart if needed, check connectivity to RabbitMQ
+
+**Break 2: Saga coordinator creates duplicate instances**
+- Symptom: Customer sees "Order Placed" twice, gets charged twice
+- Why: Message replay after coordinator crash, correlation ID reuse
+- Detect: Check logs for duplicate OrderId correlation, examine RabbitMQ message IDs
+- Fix: Add deduplication logic in saga, set "delete message after processing"
+
+**Break 3: Compensation never fires**
+- Symptom: Order marked as "Failed" but inventory remains reserved
+- Why: Compensation event handler missing or error in compensation
+- Detect: Check RabbitMQ compensation queue, see if compensation events were processed
+- Fix: Verify compensation endpoints are set up correctly, add error handling to compensation logic
+
+**Break 4: Saga coordinator memory leak**
+- Symptom: Saga coordinator memory grows over time with orphaned instances
+- Why: Saga instances never transition to Completed/Cancelled states
+- Detect: Monitor saga coordinator memory, check running instances count
+- Fix: Add timeout logic, clean up inactive instances, set maxSagaInstanceAge
+
+**Break 5: RabbitMQ broker failure**
+- Symptom: Events stuck in queues, saga coordinator unresponsive
+- Why: RabbitMQ crash or network partition
+- Detect: Check RabbitMQ cluster status, see if events are in unreachable queues
+- Fix: Enable RabbitMQ clustering, setup health checks, add manual reconnection logic
 
 ---
 
@@ -147,8 +278,4 @@ Known-stale fact: a common assumption is that choosing orchestration means givin
 
 - **Concept:** Choreography vs Orchestration (saga coordination styles)
 - **Domain:** microservices
-- **Repo:** [dotnet-architecture/eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers) → [`ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/Services/Ordering/Ordering.API/Application/DomainEventHandlers/OrderStartedEvent/ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs) — real choreography; [MassTransit/MassTransit](https://github.com/MassTransit/MassTransit) → [`Telephone_Sample.cs`](https://github.com/MassTransit/MassTransit/blob/master/tests/MassTransit.Tests/SagaStateMachineTests/Automatonymous/Telephone_Sample.cs) — the framework's own canonical saga state-machine mechanism.
-
-
-
-
+- **Repo:** [dotnet-architecture/eShopOnContainers](https://github.com/dotnet-architecture/eShopOnContainers) → [`ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs`](https://github.com/dotnet-architecture/eShopOnContainers/blob/dev/src/Services/Ordering/Ordering.API/Application/DomainEventHandlers/OrderStartedEvent/ValidateOrAddBuyerAggregateWhenOrderStartedDomainEventHandler.cs) — real choreography; [MassTransit/MassTransit](https://github.com/MassTransit/MassTransit) → [`Telephone_Sample.cs`](https://github.com/Masstransit/MassTransit/blob/master/tests/MassTransit.Tests/SagaStateMachineTests/Automatonymous/Telephone_Sample.cs) — the framework's own canonical saga state-machine mechanism.

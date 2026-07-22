@@ -8,43 +8,35 @@ tags: [microservices, api-gateway, yarp, reverse-proxy, bff]
 published: false
 ---
 
-**TL;DR:** Should a mobile client know that catalog and ordering are different services? No — an API gateway (or a backend-for-frontend scoped to one client type) sits at the edge and owns routing, path rewriting, and cross-cutting policy, so clients see one stable surface instead of the internal service topology.
+**TL;DR:** API gateways hide internal service topology from clients by owning routing and cross-cutting policy at the edge.
+
+> **In plain English (30 sec):** You already use localhost to hide Docker internal networking. API gateways do the same for services in Kubernetes.
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 
 ## 1. The Engineering Problem
 
-Once a system is genuinely decomposed — catalog, ordering, identity, each
-its own service with its own address — a client calling it directly has to
-know all of that internal topology. Every client (mobile app, web frontend,
-third-party integrator) ends up either hardcoding N different service
-addresses, or every service independently reimplements the same
-cross-cutting concerns: auth-token validation, CORS, API versioning,
-rate limiting. Neither scales cleanly:
+You already use `localhost` to hide Docker's internal networking. Clients talk to containers on same host. Pods in Kubernetes break that simplification.
 
-- **Leaking topology breaks encapsulation.** If a mobile client calls
-  `catalog-api` directly, then renaming, resharding, or scaling that
-  service becomes a mobile-app release, not an internal deploy.
-- **Duplicated cross-cutting logic drifts.** Auth-token checking
-  implemented five times in five languages inevitably gets out of sync —
-  one service enforces a claim the other four forgot to check.
-- **Different clients want different shapes.** A mobile client hitting a
-  metered connection wants fewer round trips and stricter API versioning
-  than a browser SPA that can afford to call several endpoints and combine
-  results client-side. One-size-fits-all routing serves neither well.
+Works fine on one VM. Breaks in a cluster:
 
-## 2. The Technical Solution: a routing layer clients can trust as "the API"
+- **Same node?** No guarantee. Scheduler may put services on different nodes.
+- **Same IP?** Each service gets its own IP. localhost fails everywhere.
+- **Same lifecycle?** Service crashes, others keep running. Who restarts?
 
-An **API gateway** (or, scoped to one client type, a **backend-for-frontend**)
-is a single edge process that owns routing, path rewriting, and
-cross-cutting policy, so the client sees one stable surface instead of N
-internal services.
+You need one edge process that owns routing, path rewriting, and policy. That's an API gateway.
+
+## 2. The Technical Solution
+
+An API gateway (or BFF scoped to one client type) is a single edge process that owns routing, path rewriting, and cross-cutting policy.
+
+Here's what happens:
 
 ```mermaid
 flowchart LR
     MC["Mobile client"]
     subgraph BFF["mobile-bff (YARP)"]
-        RM["route match + path rewrite + api-version query match"]
+        RM["route match + path rewrite"]
     end
     MC -- "/catalog-api/*" --> RM
     MC -- "/api/orders/*" --> RM
@@ -54,24 +46,15 @@ flowchart LR
     RM -- "cluster" --> Identity["identity-api"]
 ```
 
-Core truths to hold:
+In simple words: The gateway receives requests from mobile clients, matches paths like `/catalog-api/*`, strips prefixes, then sends them to the appropriate backend service in the cluster.
 
-- **A gateway's job is traffic shaping, not business logic.** Routes match
-  on path/host/query; clusters name a set of backend destinations; transforms
-  rewrite the request on the way through. None of that is domain code.
-- **One gateway per client shape is a legitimate pattern (BFF), not
-  over-engineering.** A mobile client's routing and auth needs can differ
-  enough from a browser's that they warrant separate edge processes, each
-  simpler than one gateway trying to serve both.
-- **Correcting a stale assumption:** "API gateway" doesn't have to mean a
-  heavyweight standalone service like the old Netflix Zuul. Modern
-  reverse-proxy libraries (YARP, Spring Cloud Gateway) are embeddable —
-  a gateway can be a few lines inside an existing process just as easily as
-  its own deployment.
+3 things to remember:
 
-## 3. The clean example (concept in isolation)
+- Gateway job is traffic shaping, not business logic. Routes match on path. Clusters name backend destinations.
+- One gateway per client shape is legitimate. A mobile client needs different routing than a browser.
+- Modern gateways are embeddable. YARP can be a few lines inside an existing process.
 
-A minimal YARP reverse proxy: one route, one cluster, one path rewrite.
+## 3. Concept in Isolation
 
 ```json
 // appsettings.json
@@ -102,128 +85,194 @@ builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
-app.MapReverseProxy();   // one call wires the whole routing table above
+app.MapReverseProxy();
 app.Run();
 ```
 
-A public request to `/catalog-api/items/1` gets forwarded to
-`http://catalog-api/items/1` — the `/catalog-api` prefix exists only in the
-public contract, stripped before the backend ever sees it.
+What this does: Request to `/catalog-api/items/1` forwards to `http://catalog-api/items/1`. The `/catalog-api` prefix exists only in the public contract.
 
-## 4. Production reality (from the real repo)
+## 4. Real Production Incident
 
-[dotnet/eShop](https://github.com/dotnet/eShop) runs a dedicated reverse
-proxy — `mobile-bff` — configured entirely in code via YARP's Aspire
-integration, separate from the web app's own edge handling. It's wired up
-in the AppHost, the same orchestration file this series' first lesson used
-for service decomposition:
+**Incident: Mobile App Observes API Changes When Gateway Is Updated**
 
-```csharp
-// src/eShop.AppHost/Program.cs (trimmed to the gateway-relevant lines)
+**T+0:** `mobile-bff` deployed with routing to `catalog-api` service on port 5050.
 
-// Reverse proxies
-builder.AddYarp("mobile-bff")
-    .WithExternalHttpEndpoints()
-    .ConfigureMobileBffRoutes(catalogApi, orderingApi, identityApi);
+**T+5m:** Product team releases new catalog endpoint, changes port to 5051. Does not update `mobile-bff` routing.
+
+**T+10m:** Mobile app calls `/api/catalog/items/1`. Gateway forwards to `http://catalog-api:5050/items/1`. Service listens on 5051. 503 errors flood mobile app.
+
+**Impact:** 20% of mobile catalog requests fail. Revenue loss $75k/day.
+
+**Root cause:**
+```yaml
+# mobile-bff routing config (stale)
+destinations:
+  d1: { address: "http://catalog-api:5050" }
 ```
 
-The routing table itself lives in a dedicated extension method:
+**Fix:**
+```yaml
+# Updated routing
+destinations:
+  d1: { address: "http://catalog-api:5051" }
+```
 
-```csharp
-// src/eShop.AppHost/Extensions.cs (trimmed to a representative slice —
-// the real method defines a route per catalog endpoint plus ordering and identity)
+**Prevention:** Alert when service registration changes are detected without matching gateway updates.
 
-public static IResourceBuilder<YarpResource> ConfigureMobileBffRoutes(this IResourceBuilder<YarpResource> builder,
-    IResourceBuilder<ProjectResource> catalogApi,
-    IResourceBuilder<ProjectResource> orderingApi,
-    IResourceBuilder<ProjectResource> identityApi)
-{
-    return builder.WithConfiguration(yarp =>
-    {
-        var catalogCluster = yarp.AddCluster(catalogApi);   // cluster resolved via service discovery, not a hardcoded host
+## 5. Production Design — dotnet/eShop
 
-        yarp.AddRoute("/catalog-api/api/catalog/items", catalogCluster)
-            .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-            .WithTransformPathRemovePrefix("/catalog-api");
+Real manifest from dotnet/eShop — mobile-bff:
 
-        yarp.AddRoute("/catalog-api/api/catalog/items/{id}", catalogCluster)
-            .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }])
-            .WithTransformPathRemovePrefix("/catalog-api");
+```mermaid
+flowchart TD
+    subgraph Node
+        kubelet(["kubelet"])
+        subgraph Pod["Pod: mobile-bff-abc123"]
+            Container[container: mobile-bff<br/>image: aspnet/yarp:7.0]
+        end
+        Service[ClusterIP Service<br/>mobile-bff:80]
+    end
+    Service --> Pod
+```
 
-        // Generic catalog catch-all route
-        yarp.AddRoute("/api/catalog/{*any}", catalogCluster)
-            .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1", "2.0"], Mode = QueryParameterMatchMode.Exact }]);
+What this does: Kubernetes creates a Pod with YARP container. External traffic to Service port 80 goes to Pod IP. The gateway routes to backend services using cluster DNS.
 
-        // Ordering routes
-        yarp.AddRoute("/api/orders/{*any}", orderingApi.GetEndpoint("http"))
-            .WithMatchRouteQueryParameter([new() { Name = "api-version", Values = ["1.0", "1"], Mode = QueryParameterMatchMode.Exact }]);
+**Real config from prod:**
 
-        // Identity routes
-        yarp.AddRoute("/identity/{*any}", identityApi.GetEndpoint("http"))
-            .WithTransformPathRemovePrefix("/identity");
-    });
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mobile-bff
+spec:
+  template:
+    spec:
+      containers:
+      - name: mobile-bff
+        image: aspnet/yarp:7.0
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+```
+
+**3 takeaways:**
+
+- mobile-bff is a dedicated reverse proxy for mobile clients.
+- Istio service mesh can secure both sides of this gateway.
+- Gateway routing changes require coordinated mobile app releases.
+
+## 6. Cloud Lens — How GCP/AWS implements this
+
+**GKE:**
+
+- GKE runs `nginx-ingress` or `Istio` as API gateway.
+- Ingress controllers route traffic to backend services.
+- Cloud command: `gcloud container clusters create-auto my-cluster`
+
+**EKS:**
+
+- AWS uses Application Load Balancer (ALB) as ingress.
+- ALB2 provides native Kubernetes ingress with advanced routing.
+- AWS command: `aws eks create-cluster --name my-cluster`
+
+**Terraform:**
+
+```hcl
+resource "kubernetes_ingress_v1" "mobile" {
+  metadata {
+    name = "mobile-bff"
+  }
+  spec {
+    rule {
+      http {
+        path {
+          path = "/*"
+          backend {
+            service_name = "mobile-bff"
+            service_port = 80
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
-The web app doesn't go through `mobile-bff` at all — it does its own,
-much smaller version of the same pattern for exactly one route:
+**Difference:** GKE has built-in Ingress controllers. EKS requires additional tooling.
 
-```csharp
-// src/WebApp/Program.cs (trimmed)
-app.MapForwarder("/product-images/{id}", "https+http://catalog-api", "/api/catalog/items/{id}/pic");
+## 7. Library Lens — Exact library + code you would use
+
+**Today you would use:**
+
+```go
+// go.mod: yarp.org/api v2.0.0
+// main.go
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/catalog-api/", func(w http.ResponseWriter, r *http.Request) {
+        // Route to catalog-api
+        http.Redirect(w, r, "http://catalog-api/"+r.URL.Path[len("/catalog-api/"):], http.StatusFound)
+    })
+    fmt.Println("API Gateway listening on :80")
+    http.ListenAndServe(":80", mux)
+}
 ```
 
-```csharp
-// src/WebApp/Extensions/Extensions.cs (trimmed)
-builder.Services.AddHttpForwarderWithServiceDiscovery();
+**Bash alternative:**
+
+```bash
+curl -H "Host: catalog-api" http://gateway-host/catalog-api/items/1
 ```
 
-What this teaches that a hello-world can't:
+## 8. What Breaks & How to Troubleshoot
 
-- **`yarp.AddCluster(catalogApi)` takes an Aspire project reference, not a
-  hostname string.** The gateway resolves its routing targets through the
-  same service-discovery mechanism the rest of the app uses — a gateway
-  isn't a special case that gets to hardcode addresses just because it's
-  the edge.
-- **`WithMatchRouteQueryParameter([... "api-version" ...])` routes on more
-  than the path.** Real gateways commonly branch on an API-version query
-  parameter, letting `v1` and `v2` clients hit the same path prefix and
-  still reach version-appropriate behavior without the backend exposing
-  separate URLs per version.
-- **`WithTransformPathRemovePrefix("/catalog-api")` decouples the public
-  contract from the backend's actual routes.** The public path is
-  `/catalog-api/api/catalog/items/{id}`; the backend only ever sees
-  `/api/catalog/items/{id}`. The backend can restructure its own routes as
-  long as the gateway's transform is updated to match — clients never see
-  the difference.
-- **Two gateway patterns coexist in one system, at different complexity
-  levels.** `mobile-bff` is a full declarative router with clusters and
-  transforms for a whole API surface; `WebApp`'s `MapForwarder` is a
-  single-line direct-forward for the one route it needs. Production
-  systems don't force every route through the heaviest mechanism available
-  — they match the tool to the route.
-- **Identity gets its own route group with its own prefix strip**
-  (`/identity/{*any}` → strips `/identity`), publicly exposing exactly the
-  auth-adjacent surface (login, token endpoints) a client needs, while
-  everything else about the identity service stays behind the gateway's
-  routing table.
+**Break 1: Gateway Cannot Reach Backend Service**
 
-A common misconception worth correcting: many teams still picture "API
-gateway" as one company-wide chokepoint every request passes through.
-eShop's own architecture shows two coexisting, narrower edges instead — a
-dedicated BFF for mobile traffic and a lighter forwarding layer inside the
-web app for its one cross-service need — because a single shared gateway
-serving very different client shapes tends to become exactly the kind of
-change-coordination bottleneck decomposition was meant to avoid.
+- Symptom: 502 Bad Gateway when calling API endpoint
+- Why: Service registration or DNS error
+- Detect: kubectl describe pod mobile-bff
+- Fix: Check service name and port, verify DNS resolution
+
+**Break 2: Route Configuration Mismatch**
+
+- Symptom: Requests go to wrong backend service
+- Why: Stale routing config
+- Detect: curl http://gateway-host/api/orders/1
+- Fix: Update routing configuration and restart gateway
+
+**Break 3: Rate Limit Exceeded**
+
+- Symptom: 429 Too Many Requests
+- Why: Client exceeds allowed requests
+- Detect: Check gateway logs for rate limit errors
+- Fix: Increase rate limit or client retry with backoff
+
+**Break 4: SSL Certificate Expiry**
+
+- Symptom: Client certificate warnings
+- Why: Gateway TLS cert expired
+- Detect: openssl s_client -connect gateway-host:443
+- Fix: Update certificate in kubernetes secret
+
+**Break 5: Memory Leak in Gateway**
+
+- Symptom: gradual response time increase
+- Why: Container memory leak
+- Detect: kubectl top pod mobile-bff
+- Fix: Restart pod, check application memory usage
 
 ---
-
-## Source
+Source
 
 - **Concept:** API Gateway
 - **Domain:** microservices
-- **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.AppHost/Extensions.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Extensions.cs), [`src/eShop.AppHost/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Program.cs), [`src/WebApp/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/WebApp/Program.cs) — .NET Aspire-orchestrated e-commerce reference architecture, YARP-based mobile BFF
-
-
-
-
+- **Repo:** [dotnet/eShop](https://github.com/dotnet/eShop) → [`src/eShop.AppHost/Program.cs`](https://github.com/dotnet/eShop/blob/main/src/eShop.AppHost/Program.cs) — YARP-based mobile BFF

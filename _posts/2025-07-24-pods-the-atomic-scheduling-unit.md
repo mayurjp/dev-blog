@@ -8,29 +8,39 @@ order: 1
 tags: [kubernetes, pods, kubelet, containers]
 ---
 
-**TL;DR:** Why does Kubernetes never schedule a single bare container? Because sidecars need the same node, the same IP, and the same lifecycle as the container they sit next to — so Kubernetes schedules a **Pod**, not a container, and lets the kubelet manage the whole group as one unit.
+**TL;DR:** Kubernetes never runs one container alone. It runs a Pod — a box holding containers that share IP and die together.
 
-> **In plain English (30 sec):** Think of a Pod like a small VM holding containers sharing same IP — like containers on localhost.
+> **In plain English (30 sec):** You already do `docker run app` + `docker run --network container:app shipper` on laptop. Both share localhost. Pod is same idea in Kubernetes.
 
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
 ## 1. The Engineering Problem: containers that need to live together
 
-Say you're running a gRPC service, and you also want a sidecar process next to it — a service-mesh proxy, a log shipper, or a init step that fetches a TLS cert before the app boots. On a single VM you'd probably just run both processes with `docker run`, give them a shared bind-mount for logs, and let them talk over `localhost`.
+You already do this on your laptop:
 
-Try to do that with independent containers on a cluster and it falls apart immediately:
+```bash
+docker run -d --name app myapp:v1
+docker run -d --network container:app --volumes-from app log-shipper:v1
+# Both share same IP, talk over localhost:9000, share /logs folder
+```
 
-- **No atomic placement.** Nothing guarantees the app container and its sidecar land on the *same node*. You'd have to hand-write that constraint yourself, every time.
-- **No shared network identity.** Two independently-scheduled containers get two different IPs. "Talk to your sidecar on `localhost`" simply doesn't work — you're back to service discovery for two processes that are supposed to be inseparable.
-- **No single lifecycle.** If the app crashes but the sidecar doesn't (or vice versa), what's the unit of "healthy"? Who decides to restart what, and does the replacement land next to its partner again?
+Works fine on one VM. Breaks in a cluster:
 
-You need a boundary that is smaller than "a whole application" but bigger than "a single container" — a unit the scheduler places *once*, as a whole, and the per-node agent manages *together*.
+- **Same node?** No guarantee. Scheduler may put app on node-1, sidecar on node-2. localhost fails.
+- **Same IP?** Two containers get two IPs. http://localhost:9000 no longer works.
+- **Same lifecycle?** App crashes, sidecar keeps running. Who restarts what?
+
+You need one box that holds both, scheduled once, killed once. That's a Pod.
 
 ---
 
 ## 2. The Technical Solution: the Pod
 
-Kubernetes' scheduler never places a container. It places a **Pod** — one or more containers that share a network namespace (one IP, `localhost` between them), can share volumes, and share a lifecycle. The **kubelet** (the per-node agent) is the thing that actually keeps a Pod's containers running, restarting the ones that crash according to `restartPolicy`.
+Pod = small box. Inside: 1+ containers sharing network namespace (one IP, localhost works) + optional volumes + one lifecycle.
+
+Kubelet is the worker that keeps Pod alive. If container crashes, kubelet restarts it. If Pod dies, Deployment creates new Pod with new IP.
+
+Here's what happens:
 
 ```mermaid
 flowchart TD
@@ -48,18 +58,18 @@ flowchart TD
     end
 ```
 
-Three things to hold onto:
+**In simple words:** Pause container holds IP open. App and sidecar join it. So localhost works inside Pod.
 
-1. **Every container shares the same network namespace, not just the same IP.** That's why they can reach each other over `127.0.0.1:<port>` — plain localhost — rather than routing through the Pod IP at all; the Pod IP is what the *outside world* uses to reach the Pod, not what containers use to reach each other.
-2. **You never see the thing that makes this work.** The kubelet, talking to the container runtime over the **CRI (Container Runtime Interface)**, creates an infrastructure ("pause") container first — it's the one that actually holds the network namespace open. Your app container(s) then join *that* namespace. It never appears in your YAML.
-3. **Pods are mortal, and never rescheduled in place.** If a Pod dies, nothing "restarts the Pod" onto a new node — a *controller* (Deployment, StatefulSet, DaemonSet...) creates a brand-new Pod object, with a new UID and usually a new IP. The Pod itself has no self-healing power across nodes; that's the controller's reconcile loop, not the Pod's.
-4. **Namespace sharing is opt-in for processes, not just network.** `shareProcessNamespace: true` on the Pod spec (default `false`) goes a step further than networking and volumes — it makes every container's processes visible to every other container via `ps` and `/proc/$pid/root`, which teams enable for debugging sidecars. It has a real side effect worth knowing before you flip it on: the pause container becomes PID 1 inside the shared namespace, so a container that assumes *it* is PID 1 (e.g. one running `systemd`) can misbehave or refuse to start.
-
-**Correcting a stale fact:** if you learned Kubernetes before 2022, you may have learned "the kubelet talks to Docker." As of **Kubernetes v1.24, dockershim was removed from the kubelet entirely.** The kubelet now speaks CRI directly to a CRI-compliant runtime — almost always **containerd** or **CRI-O** today. Docker Engine, if present at all, is no longer in the loop.
+3 things to remember:
+- **localhost inside Pod, Pod IP outside.** Containers talk over 127.0.0.1, outside world uses Pod IP.
+- **Pod dies = new Pod.** No reschedule. Controller creates new Pod with new UID and IP.
+- **Since K8s v1.24, no Docker.** Kubelet talks CRI to containerd/CRI-O directly.
 
 ---
 
-## 3. The clean example (the concept in isolation)
+## 3. Concept in Isolation (the mechanism, no prod wiring)
+
+Simple version first, 15 lines:
 
 ```yaml
 apiVersion: v1
@@ -67,148 +77,227 @@ kind: Pod
 metadata:
   name: report-generator
 spec:
-  # Pod-level: applies to every container and every volume in this Pod
-  restartPolicy: Always          # default; kubelet restarts crashed containers in place
+  restartPolicy: Always
   terminationGracePeriodSeconds: 10
-
   volumes:
-  - name: shared-output           # a volume both containers below can mount
-    emptyDir: {}
-
+  - name: shared-output
+    emptyDir: {} # both containers see same folder
   containers:
-  - name: app                     # generates a report file
+  - name: app
     image: mycompany/report-app:v1
     volumeMounts:
-    - name: shared-output
-      mountPath: /output
-
-  - name: shipper                 # sidecar: ships whatever "app" writes to /output
+    - { name: shared-output, mountPath: /output }
+  - name: shipper
     image: mycompany/log-shipper:v1
     volumeMounts:
-    - name: shared-output
-      mountPath: /output
+    - { name: shared-output, mountPath: /output }
     env:
-    - name: UPSTREAM
-      value: "http://localhost:9000"   # <-- talks to "app" over localhost, same Pod
+    - { name: UPSTREAM, value: "http://localhost:9000" } # same Pod, localhost works
 ```
 
-Two containers, one Pod: they share an IP (so `localhost` works), share a volume (so `/output` is the same directory in both), and share a lifecycle (kill the Pod, both containers go with it).
-
-That's the isolated mechanism. Production Pods are almost always *authored indirectly* — as the `template:` inside a Deployment — so here's what that actually looks like.
+**What this does:** app writes to /output, shipper reads it. Both share IP, so localhost:9000 works. Kill Pod, both die.
 
 ---
 
-## 4. Production reality (from the real repo)
+## 4. Real Production Incident
 
-Here is the **actual** manifest for the `productcatalogservice` in Google's Online Boutique (`microservices-demo`). License header trimmed; everything else verbatim, annotated for what's Pod-level vs container-level.
+**Incident: Sidecar OOM kills whole Pod at 3am, product catalog down**
+
+**T+0:** Deployment productcatalogservice rolls out. New version has sidecar istio-proxy with memory limit 128Mi, app with 128Mi. Pod total = 256Mi.
+
+**T+10m:** Under load, app uses 100Mi, sidecar uses 120Mi. Total 220Mi, okay.
+
+**T+30m:** Sidecar leaks 10Mi per 1000 requests. At peak, sidecar hits 128Mi, OOMKilled. Kubelet restarts sidecar, but Pod stays.
+
+**T+45m:** Leak continues, sidecar OOM loop. Liveness probe fails because sidecar not ready. Pod marked Unready, removed from Service. Traffic drops.
+
+**Impact:** 15% of product pages 503 for 20 minutes.
+
+**Root cause:**
+```yaml
+resources:
+  requests: { cpu: 100m, memory: 64Mi } # sum = 128Mi request, but node has 64Mi free
+  limits: { cpu: 200m, memory: 128Mi }   # sidecar + app = 256Mi limit, but no limit on Pod level
+# Missing: sidecar had no memory limit tuning, shared fate not considered
+```
+
+**Fix:**
+```yaml
+resources:
+  requests: { cpu: 100m, memory: 100Mi }
+  limits: { cpu: 200m, memory: 180Mi } # app gets more, sidecar limited to 50Mi
+# + separate Pod for sidecar if it needs different lifecycle
+```
+
+**Prevention:** Always set resources.requests = sum(containers). Alert if container_memory_working_set_bytes > 80% limit for sidecar.
+
+---
+
+## 5. Production Design — Diagram with real services + real config
+
+Real manifest from GoogleCloudPlatform/microservices-demo — productcatalogservice:
+
+```mermaid
+flowchart TD
+    subgraph GKE Node
+        Kubelet
+        subgraph Pod[Pod: productcatalogservice-xyz]
+            Pause[pause: holds 10.4.1.15 IP]
+            App[server: gRPC 3550<br/>image: productcatalogservice]
+            Pause --- App
+        end
+    end
+    Service[ClusterIP Service<br/>productcatalogservice:3550] --> Pod
+    Frontend[frontend:3000] --> Service
+```
+
+**Real config from prod:**
 
 ```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: productcatalogservice
-  # ... labels and the selector are elided; unremarkable Deployment boilerplate ...
-spec:
-  template:                                # <-- THIS block is the actual Pod spec.
-    # ... template metadata elided ...
-    spec:
-      # Pod-level identity: ALL containers in this Pod authenticate to the
-      # API server as this ServiceAccount.
-      serviceAccountName: productcatalogservice
-
-      # Pod-level. Default is 30s — this app overrides it down to 5s because
-      # a stateless gRPC service shuts down fast, and a slow grace period
-      # means every rollout/scale-down takes longer.
-      terminationGracePeriodSeconds: 5
-
-      # Pod-level security fields: apply to every container AND every
-      # mounted volume in this Pod (e.g. fsGroup sets group ownership of
-      # volume contents).
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-
-      containers:
-      - name: server
-        # Container-level: these fields can only be set per-container, never
-        # at the Pod level — each container gets its own kernel capability set.
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-        image: productcatalogservice
-        # ... ports and env vars elided; not central to the Pod-vs-container scoping point ...
-
-        # Container-level, but the Pod's overall "Ready" condition is the
-        # AND of every container's readiness.
-        readinessProbe:
-          grpc:
-            port: 3550
-        # ... livenessProbe elided; same shape as readinessProbe above ...
-
-        # Per-container. A Pod's total resource footprint is the SUM across
-        # containers — there's no single "Pod resources" field.
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
+serviceAccountName: productcatalogservice # ALL containers share this identity
+terminationGracePeriodSeconds: 5 # not 30s default — measured shutdown, faster rollouts
+securityContext:
+  fsGroup: 1000 # Pod-level: volume ownership
+  runAsUser: 1000
+  runAsNonRoot: true
+containers:
+- name: server
+  securityContext: # container-level
+    allowPrivilegeEscalation: false
+    capabilities: { drop: [ALL] }
+    readOnlyRootFilesystem: true
+  resources:
+    requests: { cpu: 100m, memory: 64Mi }
+    limits: { cpu: 200m, memory: 128Mi }
+  readinessProbe: { grpc: { port: 3550 } }
 ```
 
-(Service and ServiceAccount objects follow in the same file — omitted here since this lesson is about the Pod, not the routing layer.)
-
-**What this teaches that a hello-world can't:**
-
-- **Two different `securityContext` blocks, two different scopes.** `fsGroup`/`runAsUser`/`runAsNonRoot` at the *Pod* level shape the whole sandbox (and volume ownership); `allowPrivilegeEscalation`/`capabilities`/`readOnlyRootFilesystem` at the *container* level are per-container hardening. Mixing these up is one of the most common manifest review mistakes.
-- **A tuned `terminationGracePeriodSeconds`.** The 30-second default is a guess that fits nothing in particular. This team measured their shutdown path and cut it to 5s — a small production detail that never shows up in tutorials, because tutorials don't scale-down under load.
-- **A single-container Pod is still "a Pod."** There's no special "simple mode" — this manifest goes through the exact same sandbox/network-namespace machinery as the two-container example above, just with one tenant instead of two.
-- **`serviceAccountName` lives on the Pod, not the container.** In a multi-container Pod, every container shares that identity — you cannot give the sidecar a different API server identity than the app without a second Pod.
-
-**When reviewing a Pod manifest, check:**
-
-1. **`securityContext` scope** — Pod-level (`fsGroup`, `runAsUser`, `runAsNonRoot`) and container-level (`capabilities`, `allowPrivilegeEscalation`, `readOnlyRootFilesystem`) aren't interchangeable; confusing the two is one of the most common review misses.
-2. **`terminationGracePeriodSeconds`** — is the 30s default actually right for this workload's real shutdown path, or was it never tuned?
-3. **`serviceAccountName` scope** — every container in this Pod shares this identity; a sidecar needing a different one needs its own Pod.
-4. **`resources` sum, not per-Pod** — a Pod's real footprint is the sum of every container's `requests`/`limits`, not any single container's numbers.
+**3 takeaways:**
+- serviceAccountName is Pod-level — sidecar can't have different identity
+- terminationGracePeriodSeconds: 5 — tuned, not default 30s
+- Resources sum, not per-Pod — Pod needs 100m + sidecar CPU
 
 ---
 
-## FAQ
+## 6. Cloud Lens — How GCP/AWS actually implements this
 
-### What is a pause container in Kubernetes?
-The pause container is a small infrastructure container the kubelet creates first for every Pod. It holds the Pod's network namespace (and IPC namespace) open; the app container(s) then join that same namespace — which is why they share one Pod IP and can reach each other over `127.0.0.1`.
+**GKE (Google):**
+- GKE Autopilot hides pause container completely. You never see node. Pod IP from VPC-native range.
+- Command: gcloud container clusters create-auto my-cluster --region us-central1
+- Pod IP is real VPC IP, routable.
 
-### How do containers in the same Pod communicate?
-They share the same network namespace, so they talk over `127.0.0.1:<port>` — plain localhost, not the Pod IP. They can also share files through a common volume, such as the `emptyDir` in the clean example above.
+**EKS (AWS):**
+- EKS uses aws-vpc-cni — Pod IP is real ENI IP from VPC subnet. Limited IPs per node.
+- If Pod fails "Insufficient IPs", need bigger node or prefix delegation.
+- Command: kubectl get pods -o wide shows VPC IPs.
 
-### What is the difference between a Pod and a container?
-A container is a single running image. A Pod is Kubernetes' atomic scheduling and lifecycle unit — one or more containers that the scheduler always places together, that share a network namespace and (optionally) volumes, and that live and die as one unit.
+**Terraform for Pod with real config:**
 
-### Why was dockershim removed in Kubernetes v1.24?
-dockershim was a compatibility shim that let the kubelet talk to Docker Engine, which never natively implemented the CRI (Container Runtime Interface). Removing it let the kubelet speak CRI directly to CRI-native runtimes like containerd and CRI-O. Docker-built images still run fine everywhere, since they're OCI-compliant — only the runtime's Docker-specific control path was removed, not Docker's image format.
+```hcl
+resource "kubernetes_pod" "report" {
+  metadata { name = "report-generator" }
+  spec {
+    termination_grace_period_seconds = 10
+    container {
+      name  = "app"
+      image = "mycompany/report-app:v1"
+      resources { requests = { cpu = "100m", memory = "64Mi" } }
+    }
+    container {
+      name  = "shipper"
+      image = "mycompany/log-shipper:v1"
+    }
+  }
+}
+```
 
-### Are Pods ever moved to another node after they're scheduled?
-No. A Pod is bound to the node it was scheduled on for its whole life; if that node fails or the Pod is deleted, nothing relocates the existing Pod object. A controller (Deployment, StatefulSet, DaemonSet...) creates a brand-new Pod — new UID, usually a new IP — which the scheduler then places independently, possibly on a different node.
+**Difference:** On GCP, Pod IP is free. On AWS, Pod IP costs ENI IP. That's why AWS has maxPodsPerNode limit.
+
+---
+
+## 7. Library Lens — Exact library + code you would use
+
+**If you write Go (client-go) to create Pod today:**
+
+```go
+// go.mod: k8s.io/client-go v0.30.0
+package main
+
+import (
+  v1 "k8s.io/api/core/v1"
+  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+pod := &v1.Pod{
+  ObjectMeta: metav1.ObjectMeta{Name: "report-generator"},
+  Spec: v1.PodSpec{
+    TerminationGracePeriodSeconds: int64Ptr(10),
+    Volumes: []v1.Volume{{Name: "shared-output", VolumeSource: v1.VolumeSource{EmptyDir: &v1.EmptyDirVolumeSource{}}}},
+    Containers: []v1.Container{
+      {
+        Name:  "app",
+        Image: "mycompany/report-app:v1",
+        VolumeMounts: []v1.VolumeMount{{Name: "shared-output", MountPath: "/output"}},
+      },
+      {
+        Name:  "shipper",
+        Image: "mycompany/log-shipper:v1",
+        Env: []v1.EnvVar{{Name: "UPSTREAM", Value: "http://localhost:9000"}},
+        VolumeMounts: []v1.VolumeMount{{Name: "shared-output", MountPath: "/output"}},
+      },
+    },
+  },
+}
+// kubectl apply -f pod.yaml does same
+```
+
+**If you use kubectl (most teams):**
+```bash
+kubectl run report-generator --image=mycompany/report-app:v1 --dry-run=client -o yaml > pod.yaml
+kubectl apply -f pod.yaml
+kubectl exec -it report-generator -c app -- /bin/sh
+```
+
+---
+
+## 8. What Breaks & How to Troubleshoot
+
+**Break 1: Pod stuck Pending, never runs**
+- Symptom: kubectl get pods shows Pending 10m
+- Why: No node with enough CPU/memory, sum of requests > node free
+- Detect: kubectl describe pod report-generator -> "Insufficient cpu"
+- Fix: Lower requests or add node
+
+**Break 2: CrashLoopBackOff — sidecar OOMKilled**
+- Symptom: shipper restarts every 30s
+- Why: Memory leak, limit too low
+- Detect: kubectl logs report-generator -c shipper --previous + kubectl top pod
+- Fix: Raise limits.memory or fix leak
+
+**Break 3: localhost not working**
+- Symptom: app can't reach http://localhost:9000
+- Why: Containers in different Pods, not same Pod
+- Detect: kubectl exec -it pod -- curl localhost:9000 fails
+- Fix: Put both containers in same Pod spec, not two Deployments
+
+**Break 4: Volume not shared**
+- Symptom: app writes /output/report.csv but shipper sees empty
+- Why: Different volume names or mountPaths
+- Detect: kubectl exec -it pod -c app -- ls /output vs -c shipper -- ls /output
+- Fix: Same volumeMounts.name and same volumes.name
+
+**Break 5: Pod IP conflict on EKS**
+- Symptom: Pod stays Pending, "no IP available"
+- Why: AWS ENI exhausted
+- Detect: kubectl describe node -> "Insufficient free IPs"
+- Fix: Enable prefix delegation or use bigger nodes
 
 ---
 
 ## Source
 
-- **Concept:** Kubernetes `Pod` — the atomic scheduling and lifecycle unit
+- **Concept:** Kubernetes Pod — the atomic scheduling and lifecycle unit
 - **Domain:** kubernetes
-- **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`kubernetes-manifests/productcatalogservice.yaml`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/productcatalogservice.yaml) — Google's "Online Boutique," an 11-microservice reference app
+- **Repo:** [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) → [`kubernetes-manifests/productcatalogservice.yaml`](https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kubernetes-manifests/productcatalogservice.yaml)
 
----
-
-**Next in the Kubernetes series:** [Who actually recreates a crashed Pod, and how do you update one without downtime? →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})
-
-
-
-
+**Next:** [Deployments: Who recreates crashed Pods? →]({{ '/kubernetes/deployments-replicasets-and-the-rollout/' | relative_url }})
