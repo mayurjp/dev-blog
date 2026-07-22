@@ -9,6 +9,8 @@ tags: [dotnet, performance, profiling, eventpipe, gc, diagnostics]
 ---
 
 **TL;DR:** How do you find a CPU or memory regression in a production .NET service without attaching a debugger? Use EventPipe-based CLI tools (`dotnet-trace`, `dotnet-counters`, `dotnet-gc`) to collect runtime telemetry live, then analyze traces and heap dumps offline.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [dotnet/runtime](https://github.com/dotnet/runtime)
 

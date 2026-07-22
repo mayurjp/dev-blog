@@ -9,6 +9,8 @@ tags: [dotnet, garbage-collector, gc, memory-management, runtime]
 ---
 
 **TL;DR:** Does the .NET GC scan the entire managed heap every time it runs? No — it divides objects into generations (gen0, gen1, gen2) based on survival age, collecting the youngest generation most frequently because short-lived objects die fast, while long-lived objects are promoted upward and collected rarely. This is why a gen0 collection takes microseconds, not milliseconds.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -153,13 +155,7 @@ public class GenerationalHeap
         for (int gen = 0; gen <= maxGeneration; gen++)
         {
             int survivalRate = _generations[gen].Count;
-            _generationBudgets[gen] = Math.Max(256 * 1024, survivalRate * 4096);
-        }
-    }
-
-    private bool IsAlive(object obj) =>
-        obj != null && GC.IsAlive(obj);
-}
+# ... (1 lines omitted)
 ```
 
 The original application code this serves would look like:

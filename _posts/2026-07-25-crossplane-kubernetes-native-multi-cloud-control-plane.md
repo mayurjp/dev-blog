@@ -9,6 +9,8 @@ tags: [multicloud, crossplane, kubernetes, infrastructure, cloud-agnostic]
 ---
 
 **TL;DR:** Does writing a Kubernetes YAML file actually create an RDS instance on AWS? In Crossplane it does — but the claim you `kubectl apply` doesn't map 1:1 to the cloud resource; it passes through a Composition (a template that selects which cloud resources to create and how to wire them together), which produces one or more Managed Resources (provider-specific objects that talk to the cloud API), all orchestrated by a controller engine that dynamically starts watches and runs a gRPC function pipeline — and understanding that chain is what separates "Crossplane works in a demo" from "Crossplane works in production."
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -248,59 +250,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 			if err := meta.AddControllerReference(rev, meta.AsController(meta.TypedReferenceTo(comp, v1.CompositionGroupVersionKind))); err != nil {
 				log.Debug(errOwnRev, "error", err)
 				r.record.Event(comp, event.Warning(reasonUpdateRev, err))
-
-				return reconcile.Result{}, errors.Wrap(err, errOwnRev)
-			}
-
-			if err := r.client.Update(ctx, rev); err != nil {
-				log.Debug(errOwnRev, "error", err)
-				r.record.Event(comp, event.Warning(reasonUpdateRev, err))
-
-				return reconcile.Result{}, errors.Wrap(err, errOwnRev)
-			}
-		}
-
-		if rev.GetLabels()[v1.LabelCompositionHash] != currentHash[:63] {
-			continue
-		}
-
-		existingRev = rev.Spec.Revision
-
-		if rev.Spec.Revision == latestRev {
-			continue
-		}
-
-		rev.Spec.Revision = latestRev + 1
-		if err := r.client.Update(ctx, rev); err != nil {
-			log.Debug(errUpdateRevSpec, "error", err)
-
-			if kerrors.IsConflict(err) {
-				return reconcile.Result{Requeue: true}, nil
-			}
-
-			r.record.Event(comp, event.Warning(reasonUpdateRev, err))
-
-			return reconcile.Result{}, errors.Wrap(err, errUpdateRevSpec)
-		}
-	}
-
-	if existingRev > 0 {
-		log.Debug("No new revision needed.", "current-revision", existingRev)
-		return reconcile.Result{}, nil
-	}
-
-	if err := r.client.Create(ctx, NewCompositionRevision(comp, latestRev+1)); err != nil {
-		log.Debug(errCreateRev, "error", err)
-		r.record.Event(comp, event.Warning(reasonCreateRev, err))
-
-		return reconcile.Result{}, errors.Wrap(err, errCreateRev)
-	}
-
-	log.Debug("Created new revision", "revision", latestRev+1)
-	r.record.Event(comp, event.Normal(reasonCreateRev, "Created new revision", "revision", strconv.FormatInt(latestRev+1, 10)))
-
-	return reconcile.Result{}, nil
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches: Compositions are *immutable once applied to a claim*. The reconciler doesn't patch existing revisions — it creates new ones with incremented revision numbers. This is why a Composition update doesn't instantly affect running claims: each claim references a specific revision, and only an explicit upgrade (or re-reconciliation) picks up the new one.

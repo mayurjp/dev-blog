@@ -9,6 +9,8 @@ tags: [docker, troubleshooting, debugging, buildx, multi-arch, oci]
 ---
 
 **TL;DR:** The image is not broken — it is `linux/arm64`. A plain `docker build` on an Apple Silicon Mac builds only for the builder's own platform, the classic image store can't store a manifest list, so what lands in the registry is one arm64 manifest with no platform choice in it. The amd64 CI runner pulls it anyway and the kernel refuses to `execve()` an aarch64 ELF binary.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

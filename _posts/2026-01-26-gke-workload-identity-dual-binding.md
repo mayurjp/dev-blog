@@ -5,9 +5,12 @@ date: 2026-01-26 09:00:00 +0530
 categories: gcp
 order: 7
 tags: [gcp, gke, workload-identity, kubernetes]
+description: "Why does a GKE Pod need two separate bindings to call a GCP API without a downloaded key file? Workload Identity requires an IAM binding granting the ..."
 ---
 
 **TL;DR:** Why does a GKE Pod need two separate bindings to call a GCP API without a downloaded key file? Workload Identity requires an IAM binding granting the Kubernetes ServiceAccount permission to impersonate the GCP service account, plus an annotation on that KSA telling GKE's metadata server which GSA to hand out tokens for — either binding alone is insufficient, and together they let a Pod get short-lived tokens with no exportable credential ever stored.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`terraform-google-modules/terraform-google-kubernetes-engine`](https://github.com/terraform-google-modules/terraform-google-kubernetes-engine)
 

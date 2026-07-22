@@ -5,7 +5,10 @@ date: 2026-04-06 09:00:00 +0530
 categories: architecture
 order: 9
 tags: [architecture, adr, documentation]
+description: "## 1. The Engineering Problem: current code shows *what* was decided, never *why*, and design docs drift or get silently rewritten"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: current code shows *what* was decided, never *why*, and design docs drift or get silently rewritten
 

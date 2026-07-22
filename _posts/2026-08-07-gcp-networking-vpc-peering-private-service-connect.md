@@ -9,6 +9,8 @@ tags: [gcp, networking, vpc-peering, private-service-connect, terraform]
 ---
 
 **TL;DR:** Why can't a VPC reach a third network that's peered to its peer, and how does a VM with no public IP still call Cloud Storage without going over the public internet? VPC Peering is deliberately non-transitive — each `google_compute_network_peering` resource is a point-to-point route exchange between exactly two networks, full stop — while Private Service Connect terminates Google API traffic on an internal IP address inside your own VPC via a global forwarding rule, so the request never leaves private RFC 1918 address space at all.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`terraform-google-modules/terraform-google-network`](https://github.com/terraform-google-modules/terraform-google-network)
 

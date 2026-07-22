@@ -5,6 +5,7 @@ date: 2025-11-07 09:00:00 +0530
 categories: microservices
 order: 19
 tags: [microservices, bff, aggregator, api-gateway]
+description: "Why does a mobile client need its own gateway instead of sharing the web app's?"
 ---
 
 **TL;DR:** Why does a mobile client need its own gateway instead of sharing the web app's?

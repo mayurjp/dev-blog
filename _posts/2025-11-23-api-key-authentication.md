@@ -5,6 +5,7 @@ date: 2025-11-23 09:00:00 +0530
 categories: security
 order: 8
 tags: [security, api-keys, hashing]
+description: "Why do API keys get shown to you exactly once, and never again? The server hashes the key immediately with a fast hash (safe here because the key is m..."
 ---
 
 **TL;DR:** Why do API keys get shown to you exactly once, and never again? The server hashes the key immediately with a fast hash (safe here because the key is machine-generated with full entropy) and never persists the plaintext, so there's no way to redisplay it later — only revoke and reissue.

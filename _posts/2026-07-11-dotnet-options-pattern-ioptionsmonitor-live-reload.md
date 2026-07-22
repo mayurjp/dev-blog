@@ -9,6 +9,8 @@ tags: [dotnet, configuration, options-pattern, ioptionsmonitor, live-reload]
 ---
 
 **TL;DR:** Does `IOptionsMonitor<T>` poll `appsettings.json` on a timer to notice when a value changes? No — it never polls anything itself. It subscribes once to `IConfiguration`'s own reload token, a push-based primitive that a specific provider (the JSON file provider's own file-system watcher, for instance) fires when it actually detects a change. When that token fires, the monitor invalidates its cached options and re-binds on the next read — no restart, no polling loop, and no reload logic duplicated inside `IOptionsMonitor` itself.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

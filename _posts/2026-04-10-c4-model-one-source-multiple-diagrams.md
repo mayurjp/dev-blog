@@ -5,7 +5,10 @@ date: 2026-04-10 09:00:00 +0530
 categories: architecture
 order: 11
 tags: [architecture, c4-model, diagramming, structurizr]
+description: "## 1. The Engineering Problem: hand-drawn diagrams at different zoom levels inevitably drift apart"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: hand-drawn diagrams at different zoom levels inevitably drift apart
 

@@ -5,6 +5,7 @@ date: 2025-09-26 09:00:00 +0530
 categories: kubernetes
 order: 10
 tags: [kubernetes, hpa, autoscaling, metrics-server]
+description: "How does Kubernetes decide when to add more Pods on its own? An HPA is a control loop that polls a metrics API (such as metrics-server) every sync per..."
 ---
 
 **TL;DR:** How does Kubernetes decide when to add more Pods on its own? An HPA is a control loop that polls a metrics API (such as metrics-server) every sync period, computes `desiredReplicas = ceil(currentReplicas * (currentMetricValue / desiredMetricValue))`, and patches the target's `replicas` field accordingly.

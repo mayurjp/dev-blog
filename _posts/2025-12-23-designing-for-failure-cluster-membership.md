@@ -5,9 +5,12 @@ date: 2025-12-23 09:00:00 +0530
 categories: system-design
 order: 12
 tags: [system-design, failover, orleans, distributed-systems]
+description: "How does a cluster tell the difference between a dead node and one it just can't reach? By never letting a single observer's suspicion declare a node ..."
 ---
 
 **TL;DR:** How does a cluster tell the difference between a dead node and one it just can't reach? By never letting a single observer's suspicion declare a node dead — Orleans' SWIM-style membership protocol requires multiple independent votes from different observers, each based on missed liveness probes, before gossiping a node as dead, so one observer's own network problem can't unilaterally evict a healthy node.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/orleans`](https://github.com/dotnet/orleans)
 

@@ -9,6 +9,8 @@ tags: [platform-engineering, developer-experience, internal-developer-platforms]
 ---
 
 **TL;DR:** Platform engineering exists because `kubectl apply` doesn't scale — not technically, but cognitively. When 200 developers all need to deploy services, configure monitoring, set up CI/CD, and manage secrets, the platform team builds an internal developer platform (IDP) that abstracts the infrastructure complexity into golden paths. The result: developers self-serve in minutes instead of filing tickets that take days.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. What platform engineering is (and what it isn't)
 

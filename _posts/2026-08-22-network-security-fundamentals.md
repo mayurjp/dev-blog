@@ -9,6 +9,8 @@ tags: [networking, security, firewall, ids, ips, ddos, vpn]
 ---
 
 **TL;DR:** How do you keep a network both reachable and safe? Layer defenses: **firewalls** enforce per-packet/per-flow policy, **IDS/IPS** detect and block intrusion patterns, and **DDoS mitigation** absorbs volumetric floods — with encrypted tunnels (VPN) protecting the transport itself.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [WireGuard/wireguard-linux](https://github.com/WireGuard/wireguard-linux) — a modern, minimal VPN tunnel that secures the transport layer, the foundation under the other defenses.
 

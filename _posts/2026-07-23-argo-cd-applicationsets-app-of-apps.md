@@ -7,7 +7,10 @@ domain: gitops
 order: 5
 source: argoproj/argo-cd
 source_url: "https://github.com/argoproj/argo-cd"
+description: "## TL;DR"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## TL;DR
 
@@ -142,7 +145,7 @@ func (r *ApplicationSetReconciler) createOrUpdateInCluster(
         })
     }
     return firstAppError(appErrors)
-}
+# ... (1 lines omitted)
 ```
 
 The lifecycle diagram shows how generators feed into reconciliation:
@@ -233,15 +236,7 @@ spec:
           values: |
             replicaCount: {{values.replicaCount}}
             environment: {{env}}
-      destination:
-        server: "{{url}}"
-        namespace: "{{component}}"
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
+# ... (1 lines omitted)
 ```
 {% endraw %}
 

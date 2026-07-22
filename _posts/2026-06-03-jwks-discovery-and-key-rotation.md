@@ -9,6 +9,8 @@ tags: [security, jwks, key-rotation, oidc, jwt, oauth2, ory-hydra]
 ---
 
 **TL;DR:** Every previous post in this series verifies a credential against a key that's simply assumed to already be correct — where does a verifier that has never talked to the issuer before actually get that key, and what happens to a million already-issued tokens the instant the issuer rotates it? A verifier fetches the issuer's public keys as a JSON Web Key Set (JWKS) from a well-known HTTP endpoint, matches each token to a key by its `kid`, and rotation works by *adding* a new key rather than replacing the old one — the old key's public half stays published until every token it signed has had time to expire.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 
@@ -161,17 +163,7 @@ func JWKS() []PublicJWK {
 	return out
 }
 
-// Verify looks the token's kid up in the SAME set JWKS() returns - it
-// never lets the token itself say which algorithm to check it with.
-func Verify(token *jwt.Token) (bool, error) {
-	kid, _ := token.Header["kid"].(string)
-	for _, k := range keys {
-		if k.KID == kid {
-			return verifyRS256(token, k.Public) // alg pinned here, not read from the token
-		}
-	}
-	return false, errors.New("kid not found in JWKS")
-}
+# ... (1 lines omitted)
 ```
 
 That's the whole mechanism: an append-only list, a "newest wins" rule for signing, a "return everything" rule for discovery, and an explicit, separate delete. Production `ory/hydra` implements the identical shape with a real database and real encryption at rest.

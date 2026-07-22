@@ -5,7 +5,10 @@ date: 2026-02-21 09:00:00 +0530
 categories: cicd
 order: 9
 tags: [cicd, github-actions, self-hosted-runners, kubernetes]
+description: "## 1. The Engineering Problem: 'self-hosted' says nothing about whether state carries between jobs"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: "self-hosted" says nothing about whether state carries between jobs
 

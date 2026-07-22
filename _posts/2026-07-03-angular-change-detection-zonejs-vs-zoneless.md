@@ -9,6 +9,8 @@ tags: [angular, change-detection, zonejs, zoneless, signals]
 ---
 
 **TL;DR:** Does Angular trigger change detection because it specifically knows which component's state just changed, or because *something* async finished somewhere in the whole application? With Zone.js, it's the second one — any of the dozens of global async APIs Zone.js monkey-patches (`setTimeout`, `Promise`, event listeners) emptying its microtask queue triggers a full, application-wide check, with zero information about what actually changed. Zoneless replaces that blanket trigger with typed, explicit notifications — a `NotificationSource` enum value that sets a *specific* dirty flag — so the scheduler knows something closer to what actually needs checking, not just that time passed.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

@@ -5,6 +5,7 @@ date: 2025-08-11 09:00:00 +0530
 categories: kubernetes
 order: 4
 tags: [kubernetes, configmaps, secrets, kubelet]
+description: "Why shouldn't config and credentials live inside the container image? Kubernetes stores configuration as its own API objects — a **ConfigMap** for ord..."
 ---
 
 **TL;DR:** Why shouldn't config and credentials live inside the container image? Kubernetes stores configuration as its own API objects — a **ConfigMap** for ordinary config, a **Secret** for sensitive data — separate from any Pod, and the kubelet injects their contents into a container at runtime, either as environment variables or as mounted files.
@@ -85,7 +86,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
-immutable: true                # this version of the config never changes in place
+immutable: true
 data:
   LOG_LEVEL: "info"
   retry-policy.json: |
@@ -96,9 +97,8 @@ kind: Secret
 metadata:
   name: app-db-credentials
 type: Opaque
-stringData:                    # stringData: write plaintext here; the API server
-  DB_PASSWORD: "hunter2"       # base64-encodes it into .data on write — you never
-                                # hand-encode a Secret in a real manifest.
+stringData:
+  DB_PASSWORD: "hunter2"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -118,20 +118,20 @@ spec:
         env:
         - name: LOG_LEVEL
           valueFrom:
-            configMapKeyRef:  { name: app-config, key: LOG_LEVEL }   # frozen at start
+            configMapKeyRef:  { name: app-config, key: LOG_LEVEL }
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:     { name: app-db-credentials, key: DB_PASSWORD }
         volumeMounts:
         - name: retry-policy
-          mountPath: /etc/config           # kept in sync by the kubelet on change
+          mountPath: /etc/config
       volumes:
       - name: retry-policy
         configMap:
           name: app-config
           items:
           - key: retry-policy.json
-            path: retry-policy.json
+# ... (6 lines omitted)
 ```
 
 Now the same two mechanisms as they're actually used to run Prometheus's stack.

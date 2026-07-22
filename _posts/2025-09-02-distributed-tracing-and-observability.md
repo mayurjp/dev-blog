@@ -6,9 +6,12 @@ categories: microservices
 order: 7
 tags: [microservices, distributed-tracing, opentelemetry, observability, istio]
 published: false
+description: "If checkout is slow, which of six downstream calls is actually to blame? Distributed tracing assigns a trace ID at the edge and propagates it through ..."
 ---
 
 **TL;DR:** If checkout is slow, which of six downstream calls is actually to blame? Distributed tracing assigns a trace ID at the edge and propagates it through every hop so a collector can reassemble all the spans into one call graph with per-span timing, showing exactly which downstream call is the bottleneck.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo), [`istio/istio`](https://github.com/istio/istio)
 
@@ -194,9 +197,7 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
         grpc.WithTransportCredentials(insecure.NewCredentials()),
         grpc.WithStatsHandler(otelgrpc.NewClientHandler()))   // client-side propagation hook
     if err != nil {
-        panic(errors.Wrapf(err, "grpc: failed to connect %s", addr))
-    }
-}
+# ... (1 lines omitted)
 ```
 
 The infrastructure-level mechanism comes from

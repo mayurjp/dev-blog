@@ -9,6 +9,8 @@ tags: [genai, vector-database, hnsw, qdrant, embeddings]
 ---
 
 **TL;DR:** When your vector collection grows beyond ~10k points, brute-force cosine search becomes linearly slower with every new embedding — HNSW solves this by organizing vectors into a layered navigable graph that achieves logarithmic-time approximate nearest neighbor search with sub-millisecond latency.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ---
 
@@ -242,10 +244,7 @@ impl GraphLayers {
             }
         }?;
 
-        // Step 4: Trim to top-k and return sorted
-        Ok(nearest.into_iter_sorted().take(top).collect_vec())
-    }
-}
+# ... (1 lines omitted)
 ```
 
 Key production details:
@@ -364,29 +363,7 @@ fn search_entry_on_level(
     links.clear();
     links.reserve(2 * self.get_m(0));
 
-    let mut changed = true;
-    let mut current_point = ScoredPointOffset {
-        idx: entry_point,
-        score: points_scorer.score_point(entry_point),
-    };
-
-    while changed {
-        changed = false;
-        links.clear();
-        self.for_each_link(current_point.idx, level, |link| {
-            links.push(link);
-        });
-
-        points_scorer.score_points(links, limit)
-            .for_each(|score_point| {
-                if score_point.score > current_point.score {
-                    changed = true;
-                    current_point = score_point;
-                }
-            });
-    }
-    current_point
-}
+# ... (1 lines omitted)
 ```
 
 This is the "highway" part of HNSW. On each upper layer, only the single best neighbor is followed — no beam, no priority queue. The `links_buffer` is reused across levels to avoid repeated allocations. The `while changed` loop converges in a handful of iterations because upper layers have long-range links that quickly get you to the right neighborhood.
@@ -446,14 +423,7 @@ pub fn link_new_point(
     }
 
     // Mark point as ready for search
-    self.ready_list.set_aliased(point_id as usize, true);
-
-    // Update entry points if this point is the new highest-level
-    self.entry_points.lock().new_point(
-        point_id, level,
-        |point_id| points_scorer.filters().check_vector(point_id),
-    );
-}
+# ... (1 lines omitted)
 ```
 
 Construction mirrors search: find the entry point, descend to the new point's level, then link at each level by finding the nearest neighbors and inserting bidirectional edges with a heuristic that prunes low-quality links.

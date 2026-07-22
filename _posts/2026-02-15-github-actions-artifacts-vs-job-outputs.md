@@ -6,10 +6,13 @@ categories: cicd
 order: 6
 tags: [cicd, github-actions, artifacts, build-outputs]
 excerpt: ""
+description: "Why can't you just use a job output to pass a compiled binary to the next job? Job outputs only carry small string values, not real files; `actions/up..."
 ---
 {% raw %}
 
 **TL;DR:** Why can't you just use a job output to pass a compiled binary to the next job? Job outputs only carry small string values, not real files; `actions/upload-artifact` uploads actual files to GitHub's artifact storage under an explicit name, and `actions/download-artifact` in a later job retrieves them by matching that name, since each job runs on its own separate runner with no shared filesystem.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 

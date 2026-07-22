@@ -5,6 +5,7 @@ date: 2026-05-06 09:00:00 +0530
 categories: observability
 order: 1
 tags: [observability, opentelemetry, metrics, logs, traces, csharp]
+description: "Why does turning on OpenTelemetry require three separate configuration calls instead of one? Because logs, metrics, and traces are three structurally ..."
 ---
 
 **TL;DR:** Why does turning on OpenTelemetry require three separate configuration calls instead of one? Because logs, metrics, and traces are three structurally different instrumentation APIs (`Logging.AddOpenTelemetry`, `WithMetrics`, `WithTracing`) that only converge at the final export step, so each pillar needs its own explicit registration even though they all end up going to the same OTLP collector.

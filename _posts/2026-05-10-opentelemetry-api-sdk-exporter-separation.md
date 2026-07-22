@@ -5,6 +5,7 @@ date: 2026-05-10 09:00:00 +0530
 categories: observability
 order: 3
 tags: [observability, opentelemetry, instrumentation, dotnet, csharp]
+description: "A library adds tracing spans — how does it work whether or not the app has configured a tracing backend? OpenTelemetry splits into a vendor-neutral AP..."
 ---
 
 **TL;DR:** A library adds tracing spans — how does it work whether or not the app has configured a tracing backend? OpenTelemetry splits into a vendor-neutral API package (which library code depends on, and which is safely no-op by default via `TracerProvider.Default`) and a separate SDK/exporter setup that only the application's entry point wires up, so library code never needs to know whether or how tracing is configured.

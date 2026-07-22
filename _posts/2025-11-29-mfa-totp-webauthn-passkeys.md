@@ -5,9 +5,12 @@ date: 2025-11-29 09:00:00 +0530
 categories: security
 order: 11
 tags: [security, mfa, totp, webauthn, passkeys]
+description: "How does a security key prove it wasn't cloned, without ever sharing its private key? Every WebAuthn authenticator increments a signature counter with..."
 ---
 
 **TL;DR:** How does a security key prove it wasn't cloned, without ever sharing its private key? Every WebAuthn authenticator increments a signature counter with each use and embeds it in the signed assertion, so the server rejects any new assertion whose counter isn't strictly greater than the last one it saw — exactly what happens once a cloned device starts signing from its own duplicate sequence.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`authelia/authelia`](https://github.com/authelia/authelia)
 

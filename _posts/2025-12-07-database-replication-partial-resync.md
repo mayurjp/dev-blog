@@ -5,9 +5,12 @@ date: 2025-12-07 09:00:00 +0530
 categories: system-design
 order: 4
 tags: [system-design, replication, redis, leader-follower]
+description: "How does a replica catch up after a network blip without re-copying the whole database? The leader keeps a bounded replication backlog tagged with an ..."
 ---
 
 **TL;DR:** How does a replica catch up after a network blip without re-copying the whole database? The leader keeps a bounded replication backlog tagged with an offset, and on reconnect checks that the replica's replication lineage still matches and that the needed offset is still within the backlog before streaming only the missing slice; if either check fails, it falls back to a full resync.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 

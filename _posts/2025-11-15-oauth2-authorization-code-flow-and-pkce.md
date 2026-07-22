@@ -5,6 +5,7 @@ date: 2025-11-15 09:00:00 +0530
 categories: security
 order: 4
 tags: [security, oauth2, pkce, authorization-code]
+description: "How does a mobile app prove it's the same client that started login, without a secret? PKCE has the client generate a random `code_verifier` locally, ..."
 ---
 
 **TL;DR:** How does a mobile app prove it's the same client that started login, without a secret? PKCE has the client generate a random `code_verifier` locally, send only its hash (`code_challenge`) up front, then reveal the verifier at token exchange so the server can confirm it matches — a stolen authorization code alone is useless without the verifier that was never transmitted until then.

@@ -9,6 +9,8 @@ tags: [genai, multi-agent, orchestration, autogen, agent-teams]
 ---
 
 **TL;DR:** If you wire three LLM agents to a shared message bus so they can talk to each other freely, who decides which agent speaks next, when the conversation stops, and how context flows between turns? Without a coordinator, the answer is nobody -- the agents produce an unbounded loop until you hit a token limit or a timeout. AutoGen solves this with a `BaseGroupChatManager` that owns the message thread, selects speakers, and enforces termination conditions, while individual agents like `AssistantAgent` remain stateless workers that only respond when asked.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

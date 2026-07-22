@@ -9,6 +9,8 @@ tags: [dotnet, signalr, aspire, blazor, websockets, telemetry]
 ---
 
 **TL;DR:** Why does the Aspire Dashboard show live-updating traces, structured logs, and resource state without ever hitting F5 — and what happens when the WebSocket behind the Blazor circuit drops?
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

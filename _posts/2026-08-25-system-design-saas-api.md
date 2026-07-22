@@ -8,6 +8,8 @@ order: 4
 tags: [aspnet-webapi, system-design, api-design, multi-tenant, saas]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The problem
 
 Design the API surface for a multi-tenant SaaS platform where:
@@ -216,25 +218,7 @@ public class ValidateRequestFilter : IActionFilter
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-                context.Result = new BadRequestObjectResult(new ValidationProblemDetails(errors)
-                {
-                    Title = "Validation Failed",
-                    Status = 400,
-                    Type = "https://errors.myapp.com/validation-error"
-                });
-            }
-        }
-    }
-
-    public void OnActionExecuted(ActionExecutedContext context) { }
-}
-
-// Registration
-builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator>();
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<ValidateRequestFilter>();
-});
+# ... (1 lines omitted)
 ```
 
 ## 5. Structured error responses with ProblemDetails
@@ -325,8 +309,7 @@ public class AuditLogMiddleware
         };
 
         _ = Task.Run(() => _auditStore.WriteAsync(auditEntry));
-    }
-}
+# ... (1 lines omitted)
 ```
 
 ## Review checklist

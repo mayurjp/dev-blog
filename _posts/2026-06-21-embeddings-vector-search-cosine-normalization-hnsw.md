@@ -9,6 +9,8 @@ tags: [genai, embeddings, vector-search, hnsw, qdrant, cosine-similarity]
 ---
 
 **TL;DR:** Does finding the "closest" embedding to a query really mean computing `dot(a,b) / (|a| * |b|)` fresh against every stored vector, and comparing the query to the entire index one by one? Neither, in a real production vector database: cosine similarity is normalized away into a plain dot product by pre-processing every vector to unit length *once*, at insert time — so there's no division or square root left to compute per comparison — and approximate nearest-neighbor search (HNSW) replaces a full linear scan with a greedy descent through a small, hierarchical graph, only doing a real wide search at the very end.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

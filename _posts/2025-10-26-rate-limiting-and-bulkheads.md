@@ -5,6 +5,7 @@ date: 2025-10-26 09:00:00 +0530
 categories: microservices
 order: 13
 tags: [microservices, rate-limiting, bulkhead, resilience]
+description: "What's the difference between limiting how often you're called and how many calls run at once? Rate limiting (a token bucket) caps throughput over tim..."
 ---
 
 **TL;DR:** What's the difference between limiting how often you're called and how many calls run at once? Rate limiting (a token bucket) caps throughput over time — how often requests are allowed — while a bulkhead caps concurrent occupancy — how many requests can be in flight against a dependency at once — and production systems need both because they defend against different failure modes.

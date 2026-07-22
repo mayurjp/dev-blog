@@ -9,6 +9,8 @@ tags: [angular, testing, testbed, di, platform, component-fixture]
 ---
 
 **TL;DR:** Does `TestBed.createComponent()` succeed by just mounting a component into a bare DOM element the way a plain unit test might? No — `TestBed.initTestEnvironment()` requires a `PlatformRef`, and without it, no component can be instantiated at all. The platform provides the root injector, and every component created by `TestBed` lives under that injector's child hierarchy — which is how `NgZone`, `ApplicationRef`, `ChangeDetectorRef`, and the entire change-detection pipeline become available to the component under test. TestBed is not a DOM container; it's a full Angular bootstrap, miniaturized for a single test.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

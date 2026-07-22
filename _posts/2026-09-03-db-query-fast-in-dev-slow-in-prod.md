@@ -9,6 +9,8 @@ tags: [databases, troubleshooting, debugging, postgresql, explain-analyze, autov
 ---
 
 **TL;DR:** The production query is not slow because production has more data — it is slow because the planner's row estimate is 53,000x too high, so it correctly prices a sequential scan as cheaper than the index. The estimate is wrong because `autovacuum_analyze_scale_factor` is a *percentage* of table size, and on a 204-million-row table that percentage has not been crossed in six weeks.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

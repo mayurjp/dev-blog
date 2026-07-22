@@ -8,6 +8,8 @@ order: 6
 tags: [mlops, model-serving, kserve, inference, batch-processing, online-inference]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 **Q:** Why can't you just run the same batch scoring pipeline to serve a prediction API with sub-100ms latency?
@@ -199,18 +201,7 @@ async def __call__(
         start = time.time()
         response = (
             await self.postprocess(response, headers)
-            if inspect.iscoroutinefunction(self.postprocess)
-            else self.postprocess(response, headers)
-        )
-        postprocess_ms = get_latency_ms(start, time.time())
-
-    # --- Latency logging (optional, gated by flag) ---
-    if self.enable_latency_logging is True:
-        trace_logger.info(
-            f"requestId: {request_id}, preprocess_ms: {preprocess_ms}, "
-            f"predict_ms: {predict_ms}, postprocess_ms: {postprocess_ms}"
-        )
-    return response, response_headers
+# ... (1 lines omitted)
 ```
 
 Production details this reveals that a hello-world tutorial never shows:

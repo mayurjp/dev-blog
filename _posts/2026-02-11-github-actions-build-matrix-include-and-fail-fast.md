@@ -6,10 +6,13 @@ categories: cicd
 order: 4
 tags: [cicd, github-actions, build-matrix, testing]
 excerpt: ""
+description: "Why does one failed OS in a build matrix sometimes cancel every other OS's tests? GitHub's default `fail-fast: true` behavior cancels every other in-p..."
 ---
 {% raw %}
 
 **TL;DR:** Why does one failed OS in a build matrix sometimes cancel every other OS's tests? GitHub's default `fail-fast: true` behavior cancels every other in-progress matrix leg the moment any single one fails, trading complete cross-platform information for saved compute; setting `fail-fast: false` explicitly gives up that savings so every platform finishes and you see the full picture.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`App-vNext/Polly`](https://github.com/App-vNext/Polly)
 

@@ -8,6 +8,8 @@ order: 90
 tags: [aws, troubleshooting, debugging, iam, s3, security]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "My EC2 instance has an IAM role with a policy that grants `s3:GetObject` on `my-bucket`. I can run `aws s3 cp` from the instance CLI and it works. But when my .NET application on the same instance calls the S3 SDK, it returns AccessDenied."

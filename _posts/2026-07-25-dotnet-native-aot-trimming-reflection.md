@@ -9,6 +9,8 @@ source_repo: dotnet/runtime
 tags: [dotnet, native-aot, trimming, serialization, source-generation]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Native AOT compiles .NET to a single ahead-of-time binary with no JIT. The IL trimmer statically analyzes assemblies and **strips unreferenced types, constructors, and metadata** at publish time. `System.Text.Json` historically relied on `System.Reflection` to discover properties, constructors, and converters at runtime. Once the trimmer removes that metadata, serialization silently fails or throws at runtime. The fix is a compile-time annotation — `[JsonSerializable]` on a `JsonSerializerContext` subclass — that tells the source generator and trimmer exactly which types participate in serialization, so nothing gets trimmed away and no reflection is needed.

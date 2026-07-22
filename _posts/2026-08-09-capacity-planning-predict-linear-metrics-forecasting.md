@@ -9,6 +9,8 @@ tags: [observability, capacity-planning, prometheus, predict_linear, performance
 ---
 
 **TL;DR:** Can a metrics dashboard actually predict "this disk fills up in three days" instead of just showing that it's 85% full right now? Yes — Prometheus's `predict_linear()` function fits a linear regression over a recent window of a time series and projects it forward by a chosen duration, which is exactly the mechanism behind kubernetes-mixin's real `KubePersistentVolumeFillingUp` warning alert: it doesn't just threshold on "how full is it now," it thresholds on "will this be empty in four days at the current rate."
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

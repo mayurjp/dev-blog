@@ -5,7 +5,10 @@ date: 2026-03-21 09:00:00 +0530
 categories: ddd
 order: 12
 tags: [ddd, validation, invariants, csharp, mediatr]
+description: "## 1. The Engineering Problem: 'is this input well-formed' and 'does this preserve the domain's rules' are different questions, checked at different m..."
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: "is this input well-formed" and "does this preserve the domain's rules" are different questions, checked at different moments
 

@@ -5,9 +5,12 @@ date: 2026-05-08 09:00:00 +0530
 categories: observability
 order: 2
 tags: [observability, structured-logging, dotnet, csharp]
+description: "`logger.LogInformation($'User {userId}')` and `logger.LogInformation('User {UserId}', userId)` look the same — why is only one structured? Because .NE..."
 ---
 
 **TL;DR:** `logger.LogInformation($"User {userId}")` and `logger.LogInformation("User {UserId}", userId)` look the same — why is only one structured? Because .NET's structured logging parses the template string for `{Name}` placeholders at log-call time and passes each name/value pair (plus the original template) as separate, individually queryable fields, while string interpolation collapses everything into one opaque message before the logging API ever sees it.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 

@@ -9,6 +9,8 @@ tags: [databases, glossary, sql]
 ---
 
 **TL;DR:** This is the reference page for the database vocabulary used throughout this blog's storage, transactions, and scaling posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it from definition to mechanism.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 The posts in this domain assume you already know what a B-tree is, what isolation level you're running at, or why a shard key is not a search filter. If a term lands cold, find it here first. The list is grouped by theme, not alphabetically, because these concepts build on each other.
 

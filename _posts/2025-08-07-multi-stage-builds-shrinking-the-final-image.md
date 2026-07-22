@@ -6,9 +6,12 @@ categories: docker
 order: 3
 tags: [docker, multi-stage-builds, buildkit, image-size, dockerfile]
 published: false
+description: "Why does your production image ship a full Go toolchain to run one binary? Multi-stage builds let a single Dockerfile declare multiple `FROM` stages, ..."
 ---
 
 **TL;DR:** Why does your production image ship a full Go toolchain to run one binary? Multi-stage builds let a single Dockerfile declare multiple `FROM` stages, each with its own isolated filesystem, so only the final stage — typically just the compiled binary pulled in via `COPY --from=<stage>` — actually ships, leaving the compiler, headers, and source tree behind in an earlier, discarded stage.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`grafana/grafana`](https://github.com/grafana/grafana)
 
@@ -150,16 +153,7 @@ FROM ubuntu-base AS final-ubuntu
 # use --target=final-distroless to select this variant: no shell, no package
 # manager — everything is COPY'd in pre-built rather than installed here.
 FROM distroless-base AS final-distroless
-COPY --from=distroless-prep /tmp/distroless-passwd /etc/passwd
-COPY --from=distroless-prep /tmp/distroless-group /etc/group
-COPY --link --from=grafana-assets /usr/share/grafana /usr/share/grafana
-COPY --link --from=grafana-plugins /usr/share/grafana/data /usr/share/grafana/data
-USER $GF_UID
-ENTRYPOINT ["/usr/share/grafana/bin/grafana", "server", "--homepath=/usr/share/grafana", "--config=/etc/grafana/grafana.ini", "--packaging=docker"]
-CMD ["cfg:default.log.mode=console"]
-
-# Default stage — no AS, and no --target at build time, means Alpine ships.
-FROM final-alpine
+# ... (1 lines omitted)
 ```
 
 **What this teaches that a hello-world can't:**

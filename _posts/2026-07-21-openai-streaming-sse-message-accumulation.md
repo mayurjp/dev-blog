@@ -9,6 +9,8 @@ tags: [genai, streaming, sse, openai, python-sdk, server-sent-events]
 ---
 
 **TL;DR:** Streaming from the OpenAI API sends tokens one at a time over Server-Sent Events, but the wire protocol delivers raw bytes that arrive in arbitrary chunk sizes -- a single HTTP chunk might contain half an SSE event, multiple events, or a fragment that spans two events. The SDK's `SSEDecoder` must buffer bytes until it sees the double-newline delimiter (`\n\n`) that marks a complete SSE frame, only then deserializing the JSON payload into a `ChatCompletionChunk`. Each chunk carries a *delta* (a partial token or tool-call fragment), not a complete message. The SDK's `Stream.__stream__` method feeds these deltas into `process_response_data`, which Pydantic-parses them into typed objects. For the Assistants API, a separate `accumulate_event` function merges each delta into an in-memory snapshot so that by the time the stream ends, you have a full `Message` object -- deltas were never the final product; the accumulated snapshot was. Understanding this two-layer buffering (protocol-level chunking in `SSEDecoder`, semantic-level accumulation in `Stream.__stream__`) is what separates "I can stream text" from "I can build reliable streaming applications."
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -162,14 +164,7 @@ def __stream__(self) -> Iterator[_T]:
 
                 yield process_data(
                     data={"data": data, "event": sse.event}
-                    if self._options is not None
-                    and self._options.synthesize_event_and_data
-                    else data,
-                    cast_to=cast_to,
-                    response=response,
-                )
-    finally:
-        response.close()
+# ... (1 lines omitted)
 ```
 
 Two critical behaviors here: (1) the `[DONE]` sentinel -- a string, not JSON -- terminates the stream without error, and (2) the `finally: response.close()` ensures the HTTP connection is released even if the consumer stops iterating early or an exception is raised. This prevents connection leaks, which are a common production failure mode with streaming APIs.
@@ -259,8 +254,7 @@ def accumulate_delta(acc: dict[object, object], delta: dict[object, object]) -> 
                     acc_value[index] = accumulate_delta(acc_entry, delta_entry)
 
         acc[key] = acc_value
-
-    return acc
+# ... (1 lines omitted)
 ```
 
 The `index` and `type` fields are *overwritten*, not accumulated -- they are discriminators that identify which content block or tool call a delta belongs to. Without this, a tool call at index 0 would have its `index` field corrupted by a later delta. The list accumulation logic handles the common case (simple lists extended in-place) and the complex case (lists of objects merged by `index` key) separately.

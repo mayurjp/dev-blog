@@ -9,6 +9,8 @@ tags: [gitops, argocd, self-heal, auto-sync, reconciliation]
 ---
 
 **TL;DR:** Argo CD's auto-sync uses a reconciliation loop that compares desired state against live state, decides whether to sync based on status and revision changes, and gates self-heal with exponential backoff to prevent infinite sync loops.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The Engineering Problem
 

@@ -5,7 +5,10 @@ date: 2026-03-19 09:00:00 +0530
 categories: ddd
 order: 11
 tags: [ddd, rich-domain-model, anemic-domain-model, csharp]
+description: "## 1. The Engineering Problem: having a behavior method doesn't guarantee it's the *only* way to reach that state"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: having a behavior method doesn't guarantee it's the *only* way to reach that state
 

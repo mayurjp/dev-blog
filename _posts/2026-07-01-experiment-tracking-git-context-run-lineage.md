@@ -9,6 +9,8 @@ tags: [mlops, mlflow, experiment-tracking, reproducibility, run-lineage]
 ---
 
 **TL;DR:** Six months after a model ships, can anyone say exactly which code commit, hyperparameters, and dataset version produced it? If that answer depends on someone having remembered to write it down, it's not really guaranteed. MLflow makes it structural instead: every experiment run automatically captures its git commit — no logging call required — and every artifact or model a run produces is stored under a path keyed by that run's own ID, so the model file and its full lineage are permanently the same record, not two things a human has to keep in sync.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`mlflow/mlflow`](https://github.com/mlflow/mlflow)
 

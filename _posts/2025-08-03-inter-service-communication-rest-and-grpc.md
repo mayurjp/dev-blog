@@ -6,9 +6,12 @@ categories: microservices
 order: 2
 tags: [microservices, grpc, rest, protobuf, api-design]
 published: false
+description: "Why does the browser get REST while services talk gRPC to each other? REST/JSON stays at the edge because browsers and third parties need human-readab..."
 ---
 
 **TL;DR:** Why does the browser get REST while services talk gRPC to each other? REST/JSON stays at the edge because browsers and third parties need human-readable payloads without generated code, while gRPC handles internal service-to-service calls because both ends are code you control and a compiler-checked, binary, HTTP/2 contract is cheaper and safer.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
@@ -210,27 +213,7 @@ func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 }
 
 // PlaceOrder fans out to six other services to fulfill ONE checkout request
-func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderRequest) (*pb.PlaceOrderResponse, error) {
-    prep, err := cs.prepareOrderItemsAndShippingQuoteFromCart(ctx, req.UserId, req.UserCurrency, req.Address)
-    // ...
-    txID, err := cs.chargeCard(ctx, &total, req.CreditCard)
-    // ...
-    shippingTrackingID, err := cs.shipOrder(ctx, req.Address, prep.cartItems)
-    // ...
-    _ = cs.emptyUserCart(ctx, req.UserId)
-    // ...
-    if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
-        log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
-    }
-    // ...
-}
-
-// each dependency call is the generated client, invoked like a local method
-func (cs *checkoutService) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
-    shippingQuote, err := pb.NewShippingServiceClient(cs.shippingSvcConn).
-        GetQuote(ctx, &pb.GetQuoteRequest{Address: address, Items: items})
-    // ...
-}
+# ... (1 lines omitted)
 ```
 
 The `frontend` service is the actual REST/gRPC seam from section 2 — it

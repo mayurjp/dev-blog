@@ -9,6 +9,8 @@ tags: [genai, a2a, agent-protocol, multi-agent, interoperability, json-rpc]
 ---
 
 **TL;DR:** If you build two AI agents on different frameworks and want them to collaborate on a task, raw HTTP POST is not enough — Agent A does not know what Agent B can do, what input formats it accepts, how long it will take, or whether it supports streaming. The Google A2A (Agent-to-Agent) protocol solves this by defining three layers that raw HTTP skips entirely: an **Agent Card** (a self-describing manifest at a well-known URL), a **Task lifecycle** (SUBMITTED → WORKING → COMPLETED with state-machine semantics), and a **Message/Part protocol** (structured content containers with typed payloads). Without these, every agent pair requires a hand-written integration. With them, any A2A-compliant agent can discover, negotiate, and delegate to any other A2A-compliant agent — regardless of which framework built it.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ---
 

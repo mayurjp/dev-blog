@@ -8,6 +8,8 @@ order: 91
 tags: [azure, troubleshooting, debugging, sql, performance, dtu]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "Our API is snappy before lunch (50-100ms p95) but starting around 1 PM the p95 latency climbs to 3-5 seconds. The slowdown is always at the same time of day. Restarting the database fixes it for about an hour."

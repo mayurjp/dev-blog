@@ -8,6 +8,8 @@ order: 90
 tags: [azure, troubleshooting, debugging, app-service, performance, dotnet]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "Our API on Azure App Service returns 503 Service Unavailable every 10 minutes, lasting for about 15-30 seconds. The health-check endpoint also returns 503 during these windows. It is reproducible in production but never in dev."

@@ -5,7 +5,10 @@ date: 2026-02-25 09:00:00 +0530
 categories: cicd
 order: 11
 tags: [cicd, github-actions, branch-protection, terraform]
+description: "## 1. The Engineering Problem: a CI result is just information unless something enforces it"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: a CI result is just information unless something enforces it
 

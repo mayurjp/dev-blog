@@ -6,7 +6,10 @@ categories: cicd
 order: 12
 tags: [cicd, github-actions, security, supply-chain]
 excerpt: ""
+description: "{% raw %}"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 {% raw %}
 

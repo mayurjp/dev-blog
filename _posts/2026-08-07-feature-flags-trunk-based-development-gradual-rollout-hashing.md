@@ -11,6 +11,8 @@ excerpt: ""
 {% raw %}
 
 **TL;DR:** How does a feature flag SDK decide, without a database lookup on every request, that the *same* user always lands on the *same* side of a 10% gradual rollout  instead of flipping randomly each time they refresh?
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem: long-lived branches trade one kind of risk for a worse one
 

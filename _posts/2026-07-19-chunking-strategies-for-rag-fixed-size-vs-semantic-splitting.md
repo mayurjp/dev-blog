@@ -9,6 +9,8 @@ tags: [genai, rag, chunking, llama-index, embeddings]
 ---
 
 **TL;DR:** Does chunking just mean cutting a document every N characters or tokens? No — naive fixed-size splitting routinely slices through a sentence or a table row, and the resulting chunk's embedding represents a fragment of an idea rather than the idea itself, which quietly degrades retrieval without ever throwing an error. `llama_index`'s `SentenceSplitter` fixes this with a hierarchical split-then-merge pipeline that prefers sentence boundaries and only falls back to smaller units when it has to; its `SemanticSplitterNodeParser` goes further and chunks on *meaning* shifts — measured as embedding-distance breakpoints between adjacent sentences — instead of a token budget at all.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

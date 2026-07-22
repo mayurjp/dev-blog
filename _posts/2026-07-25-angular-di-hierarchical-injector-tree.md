@@ -8,6 +8,8 @@ order: 4
 tags: [angular, dependency-injection, injector-tree, providedIn, di]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Angular's DI walks a tree of node injectors — each backed by a 256-slot bloom filter — before it ever reaches an environment injector, so a token registered on a component's element injector silently shadows the same token provided at root.
@@ -226,45 +228,7 @@ function lookupTokenUsingNodeInjector<T>(
       } else {
         previousTView = lView[TVIEW];
         injectorIndex = getParentInjectorIndex(parentLocation);
-        lView = getParentInjectorView(parentLocation, lView);
-      }
-    }
-
-    while (injectorIndex !== -1) {
-      const tView = lView[TVIEW];
-      if (bloomHasToken(bloomHash, injectorIndex, tView.data)) {
-        const instance: T | {} | null = searchTokensOnInjector<T>(
-          injectorIndex,
-          lView,
-          token,
-          previousTView,
-          flags,
-          hostTElementNode,
-        );
-        if (instance !== NOT_FOUND) {
-          return instance;
-        }
-      }
-      parentLocation = lView[injectorIndex + NodeInjectorOffset.PARENT];
-      if (
-        parentLocation !== NO_PARENT_INJECTOR &&
-        shouldSearchParent(
-          flags,
-          lView[TVIEW].data[injectorIndex + NodeInjectorOffset.TNODE] === hostTElementNode,
-        ) &&
-        bloomHasToken(bloomHash, injectorIndex, lView)
-      ) {
-        previousTView = tView;
-        injectorIndex = getParentInjectorIndex(parentLocation);
-        lView = getParentInjectorView(parentLocation, lView);
-      } else {
-        injectorIndex = -1;
-      }
-    }
-  }
-
-  return notFoundValue;
-}
+# ... (1 lines omitted)
 ```
 
 The `includeViewProviders` flag controls whether `viewProviders` (private to a component) are visible during resolution. It is set to `true` only when Angular is instantiating the component itself — not when a child directive queries upward:

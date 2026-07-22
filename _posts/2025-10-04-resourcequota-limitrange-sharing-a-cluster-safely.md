@@ -5,9 +5,12 @@ date: 2025-10-04 09:00:00 +0530
 categories: kubernetes
 order: 14
 tags: [kubernetes, resourcequota, limitrange, admission-control]
+description: "What stops one namespace from starving every other team of cluster capacity? A `ResourceQuota` caps the namespace's total resource consumption and obj..."
 ---
 
 **TL;DR:** What stops one namespace from starving every other team of cluster capacity? A `ResourceQuota` caps the namespace's total resource consumption and object counts against a hard ceiling, while a `LimitRange` fills in missing per-Pod defaults — before `ResourceQuota` ever evaluates them.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`kubernetes/website`](https://github.com/kubernetes/website)
 

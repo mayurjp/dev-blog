@@ -194,11 +194,7 @@ func injectChaosInSerialMode(ctx context.Context, experimentsDetails *experiment
                     return stacktrace.Propagate(err, "could not check pod statuses by workload names")
                 }
             }
-            duration = int(time.Since(ChaosStartTimeStamp).Seconds())
-        }
-    }
-    return nil
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches that a hello-world "kill a pod" script can't:

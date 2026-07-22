@@ -8,6 +8,8 @@ order: 10
 tags: [angular, ssr, hydration, universal, ivy]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Angular's non-destructive hydration skips the destructive tear-down-and-rebuild that most SSR frameworks impose: instead of destroying the server-rendered DOM and re-creating it from scratch, Angular walks the live DOM tree, claims each node via `ngh` attribute annotations serialized into `TransferState`, and wires up event listeners, change detection, and component instances in-place. The result is a single pass over the existing DOM — no flicker, no wasted layout, no double render.

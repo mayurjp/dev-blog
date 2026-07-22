@@ -8,6 +8,8 @@ order: 5
 tags: [angular, rxjs, async-pipe, observables, subscription, memory-leak]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Angular's `async` pipe subscribes to an Observable in the template, binds emitted values to the view, and unsubscribes automatically when the component is destroyed — no `ngOnDestroy` boilerplate required. The teardown chain works because RxJS operators like `switchMap` call `unsubscribe()` on the previous inner subscription before creating a new one, so even rapidly-flipping streams never leak.

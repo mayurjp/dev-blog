@@ -9,6 +9,8 @@ tags: [kubernetes, multi-tenancy, resourcequota, networkpolicy, namespace-isolat
 ---
 
 **TL;DR:** Creating a `Namespace` per tenant gives you naming isolation and an RBAC scoping boundary — nothing more. Without a `ResourceQuota`, one tenant's workload can consume the entire cluster's CPU/memory and starve every other tenant; without a default-deny `NetworkPolicy`, every Pod in every namespace can reach every other Pod in the cluster by default, tenant boundaries or not. Real multi-tenant clusters compose namespace-scoped `ResourceQuota`/`LimitRange` objects with namespace-scoped `NetworkPolicy` isolation — two independently-applied mechanisms, not one. From `kubernetes/website`'s real quota examples and `ahmetb/kubernetes-network-policy-recipes`' real isolation recipes.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

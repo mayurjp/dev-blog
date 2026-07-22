@@ -9,6 +9,8 @@ tags: [databases, stream-processing, flink, event-time, watermarks, windowing]
 ---
 
 **TL;DR:** In a stream, "now" isn't when a record arrives — it's the timestamp stamped on the event itself, and a late network hop or a straggling partition can deliver an "old" event well after "newer" ones. Flink solves the resulting "how do I know a 10:00-10:05 window is safe to close" problem with **watermarks**: a periodically emitted signal, computed from the maximum event timestamp seen minus a bounded out-of-orderness allowance, that tells every downstream window "no event older than this will arrive from here on" — window firing is watermark-triggered, not clock-triggered.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`apache/flink`](https://github.com/apache/flink)
 

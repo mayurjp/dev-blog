@@ -8,6 +8,8 @@ order: 90
 tags: [aspnet-webapi, troubleshooting, debugging, async, threading, performance]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "Our `/api/orders/recent` endpoint returns 502 Bad Gateway after exactly 30 seconds when the site has more than about 20 concurrent users. Works fine in dev with 1-2 users."

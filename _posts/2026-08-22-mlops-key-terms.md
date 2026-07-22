@@ -9,6 +9,8 @@ tags: [mlops, glossary, machine-learning, production]
 ---
 
 **TL;DR:** This is the shared vocabulary for every MLOps post on this blog — a model is a learned function, a feature is the input you feed it, and the rest of the terms describe how you train, store, serve, and keep that function honest in production. Bookmark it; the 101 and the deeper posts link back here.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## Training
 

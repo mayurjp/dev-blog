@@ -6,6 +6,7 @@ categories: kubernetes
 order: 6
 tags: [kubernetes, volumes, persistentvolumes, storage]
 published: false
+description: "You write `localhost:3000` when developing locally. A container's writable layer dies with the container, same as your laptop container. Pod-scoped vo..."
 ---
 
 **TL;DR:** You write `localhost:3000` when developing locally. A container's writable layer dies with the container, same as your laptop container. Pod-scoped volumes (`emptyDir`, `configMap`, `secret`) share data only within one Pod. Use a `PersistentVolumeClaim` to request storage that lives outside the Pod.

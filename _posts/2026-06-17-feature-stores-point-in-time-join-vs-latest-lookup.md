@@ -9,6 +9,8 @@ tags: [mlops, feature-store, feast, training-serving-skew, point-in-time-correct
 ---
 
 **TL;DR:** Shouldn't "the feature value at prediction time" for training and "the feature value right now" for serving just be the same lookup, evaluated at different moments? No — because a training example's "prediction time" is a specific historical timestamp already baked into the training data, and naively joining a feature's *latest* value onto that historical example lets the model see data from *after* the label happened (a leak, not a feature). Feast implements this as two genuinely different queries: `get_historical_features` does a point-in-time join that explicitly excludes anything newer than each example's own timestamp; `get_online_features` has no such constraint at all — it just returns whatever the latest value is right now, because production serving only ever has "now."
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`feast-dev/feast`](https://github.com/feast-dev/feast)
 

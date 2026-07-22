@@ -5,7 +5,10 @@ date: 2026-07-29 09:00:00 +0530
 domain: mlops
 order: 12
 source_repo: great-expectations/great_expectations
+description: "## TL;DR"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## TL;DR
 
@@ -181,9 +184,7 @@ class ExpectationValidationGraph:
         for metric_id, metric_info_item in metric_info.items():
             metric_exception_info.update(
                 cast(Set[ExceptionInfo], metric_info_item["exception_info"])
-            )
-
-        return metric_exception_info
+# ... (1 lines omitted)
 ```
 
 Each `MetricEdge` links a left metric to an optional right metric (for compound computations). The `_edge_ids` set makes `add()` an O(1) duplicate check. The `ExpectationValidationGraph` wraps this per-expectation, filtering the global metric info down to only the metrics this expectation's graph requires.
@@ -245,45 +246,7 @@ suite.add_expectation(
     }
 )
 
-# ── Structural contracts ──────────────────────────────────────────────
-# Dataset must have at least 10,000 rows (minimum for statistical power)
-suite.add_expectation(
-    {
-        "expectation_type": "expect_table_row_count_to_be_between",
-        "kwargs": {"min_value": 10_000},
-    }
-)
-
-# Column count must be exactly what the feature pipeline expects
-suite.add_expectation(
-    {
-        "expectation_type": "expect_table_columns_to_match_ordered_list",
-        "kwargs": {
-            "column_list": [
-                "customer_id",
-                "age",
-                "plan_type",
-                "monthly_spend",
-                "tenure_months",
-                "support_tickets",
-                "churn_label",
-            ]
-        },
-    }
-)
-
-# ── Value range contracts ─────────────────────────────────────────────
-# monthly_spend must be non-negative and below $10,000 (sanity bound)
-suite.add_expectation(
-    {
-        "expectation_type": "expect_column_values_to_be_between",
-        "kwargs": {
-            "column": "monthly_spend",
-            "min_value": 0,
-            "max_value": 10_000,
-        },
-    }
-)
+# ... (1 lines omitted)
 ```
 
 ---

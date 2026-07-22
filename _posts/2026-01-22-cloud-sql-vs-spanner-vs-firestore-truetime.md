@@ -5,9 +5,12 @@ date: 2026-01-22 09:00:00 +0530
 categories: gcp
 order: 5
 tags: [gcp, spanner, cloud-sql, firestore, truetime]
+description: "How does Spanner let you trade consistency for speed on a per-query basis? Spanner's TrueTime — a globally-synchronized clock with a bounded uncertain..."
 ---
 
 **TL;DR:** How does Spanner let you trade consistency for speed on a per-query basis? Spanner's TrueTime — a globally-synchronized clock with a bounded uncertainty interval — lets it assign externally-ordered timestamps without a global lock, so the same database can serve a `TimestampBound.Strong` read for absolute latest data or a bounded-staleness read from a nearby replica, chosen per query rather than fixed for the whole database.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`googleapis/google-cloud-dotnet`](https://github.com/googleapis/google-cloud-dotnet)
 

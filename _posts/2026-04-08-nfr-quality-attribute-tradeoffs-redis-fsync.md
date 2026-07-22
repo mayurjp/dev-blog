@@ -5,7 +5,10 @@ date: 2026-04-08 09:00:00 +0530
 categories: architecture
 order: 10
 tags: [architecture, non-functional-requirements, quality-attributes, redis]
+description: "## 1. The Engineering Problem: 'fast' and 'durable' are in direct tension, and different applications need genuinely different answers"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: "fast" and "durable" are in direct tension, and different applications need genuinely different answers
 

@@ -5,9 +5,12 @@ date: 2025-11-19 09:00:00 +0530
 categories: security
 order: 6
 tags: [security, oauth2, refresh-tokens, token-rotation]
+description: "What happens when a stolen refresh token gets used after the real client already used it? Every refresh rotates the token — issuing a new one and inva..."
 ---
 
 **TL;DR:** What happens when a stolen refresh token gets used after the real client already used it? Every refresh rotates the token — issuing a new one and invalidating the old — so if that already-consumed old token is ever replayed, the server can't tell attacker from legitimate retry and revokes the entire token family instead.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 

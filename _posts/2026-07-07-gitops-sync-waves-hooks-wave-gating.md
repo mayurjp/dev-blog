@@ -9,6 +9,8 @@ tags: [gitops, argo-cd, sync-waves, hooks, resource-ordering]
 ---
 
 **TL;DR:** Is `argocd.argoproj.io/sync-wave: "5"` just a documentation hint, or does it actually gate when a resource gets applied? It genuinely gates execution — the wave number feeds directly into the strict sort order the sync engine applies resources in, and Argo CD's reconcile loop won't touch any resource in a later wave while anything in the current wave is still running. Ordering isn't a suggestion here; it's enforced by the loop's own control flow on every tick.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

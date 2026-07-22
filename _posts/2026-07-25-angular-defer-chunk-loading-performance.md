@@ -8,6 +8,8 @@ order: 14
 tags: [angular, defer, lazy-loading, chunks, performance, change-detection, onpush]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Angular's `@defer` block creates separate JavaScript chunks at **build time**, not at runtime via a network request. The template compiler captures every component and directive dependency inside the `@defer` block, emits a `DependencyResolverFn` that calls `loadComponent()` / `loadDirective()` on each, and the bundler (esbuild) splits that resolver into its own chunk file. At runtime, when a trigger fires, the `ɵɵdefer` instruction invokes the resolver, which executes dynamic `import()` calls that load the pre-split chunk — **the browser fetches a `.js` file it already knows the URL of, no HTTP round-trip for discovery**. This is fundamentally different from lazy-loading a route, where the chunk URL must be negotiated at runtime; here the chunk path is baked into the build output.
@@ -209,14 +211,7 @@ export function ɵɵdefer(
     null,                // STATE_IS_FROZEN_UNTIL
     null,                // LOADING_AFTER_CLEANUP_FN
     null,                // TRIGGER_CLEANUP_FNS
-    null,                // PREFETCH_TRIGGER_CLEANUP_FNS
-    ssrUniqueId,         // SSR_UNIQUE_ID
-    ssrBlockState,       // SSR_BLOCK_STATE
-    null,                // ON_COMPLETE_FNS
-    null,                // HYDRATE_TRIGGER_CLEANUP_FNS
-  ];
-  setLDeferBlockDetails(lView, adjustedIndex, lDetails);
-}
+# ... (1 lines omitted)
 ```
 
 Key detail: `dependencyResolverFn` is stored in `TDeferBlockDetails` (static, one per template), not in `LDeferBlockDetails` (instance, one per rendered block). This means the resolver function is a shared reference — the bundler splits it once, and every defer block using the same dependencies shares the same chunk.

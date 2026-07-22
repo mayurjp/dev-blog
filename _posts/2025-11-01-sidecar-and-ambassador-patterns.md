@@ -5,6 +5,7 @@ date: 2025-11-01 09:00:00 +0530
 categories: microservices
 order: 16
 tags: [microservices, sidecar, ambassador, kubernetes]
+description: "How does a proxy container end up in every Pod without any Deployment mentioning it? A sidecar shares a Pod's network namespace and lifecycle with the..."
 ---
 
 **TL;DR:** How does a proxy container end up in every Pod without any Deployment mentioning it? A sidecar shares a Pod's network namespace and lifecycle with the app container, and mesh sidecars like Istio's are auto-injected by a Kubernetes mutating webhook so no team has to hand-add the container; an ambassador is the same pattern scoped to one external dependency, translating its protocol and auth so the app never has to.

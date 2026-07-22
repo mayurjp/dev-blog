@@ -5,9 +5,12 @@ date: 2026-04-14 09:00:00 +0530
 categories: databases
 order: 2
 tags: [databases, normalization, entity-framework, sql]
+description: "Why does Address live as columns on the Orders table, but Buyer gets its own table? Address is a value object with no identity of its own and is never..."
 ---
 
 **TL;DR:** Why does Address live as columns on the Orders table, but Buyer gets its own table? Address is a value object with no identity of its own and is never shared across orders, so EF Core's `.OwnsOne` embeds its fields directly as columns on Orders; Buyer has its own identity and is referenced by many orders over time, so it's mapped with `.HasOne().WithMany().HasForeignKey()` as a genuinely separate, normalized table.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 

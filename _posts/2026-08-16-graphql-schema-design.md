@@ -9,6 +9,8 @@ tags: [api-design, graphql, dataloader, n-plus-1, batching]
 ---
 
 **TL;DR:** Why does a GraphQL query explode into hundreds of SQL calls? Because each field resolver fires independently; a DataLoader batches all keys requested in the same tick into one batched fetch.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [graphql/graphql-js](https://github.com/graphql/graphql-js) — the reference execution engine that resolves fields one at a time, and the companion [graphql/dataloader](https://github.com/graphql/dataloader) that batches and caches loads per request.
 

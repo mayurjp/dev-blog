@@ -5,9 +5,12 @@ date: 2026-04-28 09:00:00 +0530
 categories: databases
 order: 9
 tags: [databases, full-text-search, inverted-index, lucene, java]
+description: "Why does searching 'The Quick FOX' match a document containing 'quick fox jumps'? Both the indexed document and the query text pass through the identi..."
 ---
 
 **TL;DR:** Why does searching "The Quick FOX" match a document containing "quick fox jumps"? Both the indexed document and the query text pass through the identical analyzer pipeline — tokenize, then lowercase, then strip stopwords — before anything is compared, so casing, word order, and common words like "the" never affect whether they match.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`apache/lucene`](https://github.com/apache/lucene)
 

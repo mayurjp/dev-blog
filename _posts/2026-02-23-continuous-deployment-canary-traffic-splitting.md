@@ -6,7 +6,10 @@ categories: cicd
 order: 10
 tags: [cicd, github-actions, continuous-deployment, canary, gcp]
 excerpt: ""
+description: "{% raw %}"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 {% raw %}
 

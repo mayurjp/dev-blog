@@ -9,6 +9,8 @@ tags: [genai, llm, prompt-engineering, langchain, chat-models]
 ---
 
 **TL;DR:** A prompt built by concatenating "instructions" and "user input" into one string has no way to tell the model which part is which — so once user input can contain text that *looks like* an instruction, the model can't reliably distinguish the two. The fix isn't better wording; it's structural: chat-model APIs expose distinct message roles (`system`/`human`/`ai`), and a real prompting framework like `langchain-ai/langchain` builds each role as its own typed template object rather than a shared piece of one flat string.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

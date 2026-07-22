@@ -6,7 +6,10 @@ categories: observability
 order: 8
 tags: [observability, alerting, on-call, prometheus, sre]
 excerpt: ""
+description: "{% raw %}"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 {% raw %}
 

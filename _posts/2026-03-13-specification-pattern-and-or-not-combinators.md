@@ -5,9 +5,12 @@ date: 2026-03-13 09:00:00 +0530
 categories: ddd
 order: 8
 tags: [ddd, specification-pattern, csharp]
+description: "Why does `AndSpecification` evaluate its right side even after its left side already fails? Because it doesn't short-circuit like `&&` on purpose — a ..."
 ---
 
 **TL;DR:** Why does `AndSpecification` evaluate its right side even after its left side already fails? Because it doesn't short-circuit like `&&` on purpose — a visitor walks the same specification tree afterward to collect validation errors from every node, and a node that was never evaluated has no result to collect, so skipping it would silently produce incomplete error reporting.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`BrighterCommand/Brighter`](https://github.com/BrighterCommand/Brighter)
 

@@ -9,6 +9,8 @@ tags: [mlops, canary, traffic-shifting, argo-rollouts, ml-ops]
 ---
 
 **TL;DR:** Deploying a new ML model version behind a Kubernetes Service looks identical to deploying any other container — but the failure mode is different: latency creep, accuracy drift, and silent regression all hide behind a green health check. Argo Rollouts gives you canary traffic shifting (percentage-based, enforced by a real mesh or ingress) combined with `AnalysisRun` gates so a model only gets promoted when inference metrics like p99 latency and accuracy pass configurable thresholds.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`argoproj/argo-rollouts`](https://github.com/argoproj/argo-rollouts)
 
@@ -191,45 +193,7 @@ func (c *rolloutContext) reconcileTrafficRouting() error {
 				weightDestinations = append(weightDestinations, c.calculateWeightDestinationsFromExperiment()...)
 			} else {
 				desiredWeight = weightutil.MaxTrafficWeight(c.rollout)
-			}
-		}
-
-		if !c.checkReplicasAvailable(c.stableRS,
-			weightutil.MaxTrafficWeight(c.rollout)-desiredWeight) {
-			return nil
-		}
-
-		err = reconciler.UpdateHash(canaryHash, stableHash, weightDestinations...)
-		if err != nil {
-			return err
-		}
-
-		err = reconciler.SetWeight(desiredWeight, weightDestinations...)
-		if err != nil {
-			c.recorder.Warnf(c.rollout,
-				record.EventOptions{EventReason: "TrafficRoutingError"}, err.Error())
-			return err
-		}
-
-		if modified, newWeights := calculateWeightStatus(
-			c.rollout, canaryHash, stableHash, desiredWeight, weightDestinations...); modified {
-			c.recorder.Eventf(c.rollout, record.EventOptions{
-				EventReason: conditions.TrafficWeightUpdatedReason,
-			}, trafficWeightUpdatedMessage(c.rollout.Status.Canary.Weights, newWeights))
-			c.newStatus.Canary.Weights = newWeights
-		}
-
-		weightVerified, err := reconciler.VerifyWeight(desiredWeight, weightDestinations...)
-		c.newStatus.Canary.Weights.Verified = weightVerified
-		if err != nil {
-			c.recorder.Warnf(c.rollout, record.EventOptions{
-				EventReason: conditions.WeightVerifyErrorReason,
-			}, conditions.WeightVerifyErrorMessage, err)
-			return nil
-		}
-	}
-	return nil
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches that the YAML-only examples cannot:

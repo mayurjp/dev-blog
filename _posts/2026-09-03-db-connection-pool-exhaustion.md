@@ -9,6 +9,8 @@ tags: [databases, troubleshooting, debugging, postgresql, connection-pooling, np
 ---
 
 **TL;DR:** The pool is exhausted, the database is not. Connections are being held by transactions parked on an outbound HTTP call — `pg_stat_activity` shows 96 of them in state `idle in transaction`, waiting on `ClientRead`, executing nothing. Pool occupancy is arrival rate times hold time, and hold time stopped being about queries.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

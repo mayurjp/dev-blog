@@ -5,7 +5,10 @@ date: 2026-05-16 09:00:00 +0530
 categories: observability
 order: 6
 tags: [observability, log-aggregation, loki, full-text-search, go]
+description: "## 1. The Engineering Problem: indexing every word of every log line is expensive, for queries that usually don't need it"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: indexing every word of every log line is expensive, for queries that usually don't need it
 

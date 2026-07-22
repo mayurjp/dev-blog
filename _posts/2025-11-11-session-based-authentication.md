@@ -5,9 +5,12 @@ date: 2025-11-11 09:00:00 +0530
 categories: security
 order: 2
 tags: [security, sessions, cookies, django]
+description: "Where does 'you're logged in' actually live — in the cookie, or on the server? The cookie carries only an opaque, randomly generated session key; the ..."
 ---
 
 **TL;DR:** Where does "you're logged in" actually live — in the cookie, or on the server? The cookie carries only an opaque, randomly generated session key; the real identity and permissions live server-side, indexed by that key, so revoking a session is just deleting one row.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`django/django`](https://github.com/django/django)
 

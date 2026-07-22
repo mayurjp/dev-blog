@@ -5,9 +5,12 @@ date: 2025-12-29 09:00:00 +0530
 categories: design-patterns
 order: 4
 tags: [design-patterns, observer, rxnet, concurrency]
+description: "How do you notify 1,000 subscribers without a lock blocking every notification? By making the observer list an immutable array that's swapped atomical..."
 ---
 
 **TL;DR:** How do you notify 1,000 subscribers without a lock blocking every notification? By making the observer list an immutable array that's swapped atomically with `Interlocked.CompareExchange` on subscribe/unsubscribe, so publishing a notification only ever needs a single lock-free read of the current array.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/reactive`](https://github.com/dotnet/reactive)
 

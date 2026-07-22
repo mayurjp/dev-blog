@@ -5,6 +5,7 @@ date: 2025-07-26 09:00:00 +0530
 categories: microservices
 order: 1
 tags: [microservices, ddd, bounded-context, architecture]
+description: "Don't split by table. Split by business boundary where each service owns its own DB and talks only via APIs or events."
 ---
 
 **TL;DR:** Don't split by table. Split by business boundary where each service owns its own DB and talks only via APIs or events.

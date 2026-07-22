@@ -9,6 +9,8 @@ tags: [kubernetes, networking, cni, kube-proxy, iptables, ipvs, networkpolicy]
 ---
 
 **TL;DR:** A `Service`'s `ClusterIP` isn't backed by a running load-balancer process anywhere in the cluster — `kube-proxy` programs packet-rewriting rules directly into each node's own network stack, and which mechanism it uses (`iptables` vs `IPVS`) changes real behavior: `iptables` mode doesn't actually do round-robin, it chains per-rule random-probability matches, while `IPVS` mode uses a genuine in-kernel load-balancing table with real scheduling algorithms. Underneath that, a separate mechanism entirely — the **CNI plugin** — is what makes Pod-to-Pod IPs routable at all, and is also what actually enforces `NetworkPolicy`, which `kube-proxy` has no role in. From `kube-proxy`'s real `iptables`/`ipvs` proxier source, and `ahmetb/kubernetes-network-policy-recipes` for the CNI-enforced layer.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

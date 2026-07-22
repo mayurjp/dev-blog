@@ -5,9 +5,12 @@ date: 2026-01-08 09:00:00 +0530
 categories: design-patterns
 order: 9
 tags: [design-patterns, dependency-injection, ioc, dotnet]
+description: "How does a DI container decide which constructor to call when a class has three? It sorts constructors by parameter count and tries each from most to ..."
 ---
 
 **TL;DR:** How does a DI container decide which constructor to call when a class has three? It sorts constructors by parameter count and tries each from most to fewest parameters, picking the first one whose parameters are all resolvable — and separately tracks a chain of services currently being resolved so it can detect and fail fast on circular dependencies instead of overflowing the stack.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime)
 

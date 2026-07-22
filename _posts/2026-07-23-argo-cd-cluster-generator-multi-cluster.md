@@ -11,6 +11,8 @@ source_url: "https://github.com/argoproj/argo-cd"
 ---
 
 **TL;DR:** Does the cluster generator actually *read* cluster Secrets at runtime, or does it just use a static list you paste in? It reads them live — every time the ApplicationSet controller reconciles, `ClusterGenerator.GenerateParams` queries the Kubernetes API for Secrets labeled `argocd.argoproj.io/secret-type: cluster`, extracts `name`, `server`, `project`, and metadata from each, and emits one parameter map per matching cluster. Register a new cluster in Argo CD and the next reconciliation cycle automatically creates the corresponding `Application` — zero manifest edits required.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -151,14 +153,7 @@ spec:
         targetRevision: '{{.values.revision}}'
         path: '{{.path}}'
       destination:
-        server: '{{.server}}'
-        namespace: '{{.component}}'
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true
-        syncOptions:
-          - CreateNamespace=true
+# ... (1 lines omitted)
 ```
 {% endraw %}
 

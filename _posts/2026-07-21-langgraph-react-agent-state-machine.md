@@ -9,6 +9,8 @@ tags: [genai, langgraph, react-agent, agentic-loop, tool-calling, state-machine]
 ---
 
 **TL;DR:** A ReAct agent alternates between an LLM deciding which tool to call (Reason + Act) and a runtime executing that tool and feeding the result back (Observe) — but a naive `while True` loop over tool calls has no checkpointing, no parallel tool dispatch, no interrupt-before-approval, and no recovery from mid-loop failures. LangGraph solves this by expressing the exact same loop as a `StateGraph` where the agent node, the tool node, and the conditional "should I keep going?" edge are first-class graph primitives — giving you persistence, human-in-the-loop, streaming, and replay for free, without writing a single loop.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ---
 

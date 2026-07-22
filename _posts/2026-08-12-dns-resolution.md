@@ -9,6 +9,8 @@ tags: [networking, dns, recursive, ttl, cname, split-horizon]
 ---
 
 **TL;DR:** How does `www.example.com` become `93.184.216.34`? A stub resolver asks a recursive resolver, which walks the hierarchy iteratively (root → TLD → authoritative), honoring TTLs, following CNAME chains, while split-horizon serves different answers to different clients.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [miekg/dns](https://github.com/miekg/dns) — a Go DNS library whose `Client`, wire `Msg` format, and `RR_Header.Ttl` field model exactly what travels on the wire.
 

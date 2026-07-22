@@ -9,6 +9,8 @@ tags: [security, threat-modeling, stride, dread, attack-trees]
 ---
 
 **TL;DR:** Why do threat modeling exercises so often turn into a shallow six-box checklist that gets filled in once and never questioned? Because STRIDE isn't "ask these six questions about the whole system" — it's six threat categories, each of which only applies to *specific kinds* of diagram elements (an actor can be spoofed, a data store cannot), and skipping that element-type filter is exactly what produces the generic, low-signal threat lists this exercise gets a bad reputation for.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`OWASP/threat-dragon`](https://github.com/OWASP/threat-dragon)
 

@@ -5,9 +5,12 @@ date: 2025-09-06 09:00:00 +0530
 categories: docker
 order: 8
 tags: [docker, healthcheck, restart-policy, compose, reliability]
+description: "Why is a container marked running while the process inside it is stuck? `docker ps` only reports whether a container's PID 1 process is still alive, n..."
 ---
 
 **TL;DR:** Why is a container marked running while the process inside it is stuck? `docker ps` only reports whether a container's PID 1 process is still alive, not whether it's actually working — a separate `HEALTHCHECK` probe run inside the container on an interval, combined with an independent restart policy for actual process exits, is what lets Docker (and dependents via `depends_on: condition: service_healthy`) distinguish "alive" from "serving" and react to both.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted)
 
@@ -154,21 +157,7 @@ services:
   nginx:
     restart: unless-stopped
     ports:
-      - "$SENTRY_BIND:80/tcp"
-    image: "nginx:1.31.2-alpine"
-    healthcheck:
-      <<: *healthcheck_defaults
-      test:
-        - "CMD"
-        - "/usr/bin/curl"
-        - http://localhost
-    depends_on:
-      web:
-        condition: service_healthy
-        restart: true
-      relay:
-        condition: service_started
-        restart: true
+# ... (1 lines omitted)
 ```
 
 **What this teaches that a hello-world can't:**

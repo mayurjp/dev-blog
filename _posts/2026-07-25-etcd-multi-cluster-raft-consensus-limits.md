@@ -9,6 +9,8 @@ tags: [multicloud, etcd, raft, consensus, disaster-recovery, kubernetes]
 ---
 
 **TL;DR:** Can you run a single etcd cluster stretched across two cloud providers for unified multi-cloud state? No — Raft's correctness guarantee is that a majority of nodes must acknowledge every committed write, and cross-cloud network partitions turn that majority into a availability-killer: a 5-node cluster split 3/2 across clouds will keep the majority side running but completely stall writes from the minority side, while etcd's lessor (lease manager) elects exactly one primary for the entire cluster, meaning one cloud's nodes are fully demoted during normal operation, not active-active.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -202,9 +204,7 @@ func (s *EtcdServer) run() {
             }
         },
         // ...
-    }
-    // ...
-}
+# ... (1 lines omitted)
 ```
 
 **`server/lease/lessor.go`** — the lessor that makes cross-cloud lease management impossible under one cluster:
@@ -260,18 +260,7 @@ func (le *lessor) Demote() {
     le.clearScheduledLeasesCheckpoints()
     le.clearLeaseExpiredNotifier()
 
-    if le.demotec != nil {
-        close(le.demotec)
-        le.demotec = nil
-    }
-}
-
-// isPrimary tells whether this lessor manages lease expiry.
-// Only the Raft leader's lessor is primary — there is exactly one
-// for the entire cluster, not one per cloud or region.
-func (le *lessor) isPrimary() bool {
-    return le.demotec != nil
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches that a hello-world can't:

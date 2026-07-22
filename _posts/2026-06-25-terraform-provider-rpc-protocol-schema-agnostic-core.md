@@ -9,6 +9,8 @@ tags: [multicloud, terraform, iac, grpc, provider-protocol]
 ---
 
 **TL;DR:** If Terraform "supports" AWS, GCP, Azure, and dozens of other providers, does that mean Terraform's own core codebase has grown a hardcoded, ever-expanding pile of provider-specific logic — one code path per cloud? No — Terraform core and every provider are separate operating-system processes talking over one fixed gRPC protocol, and a resource's actual field shape (exactly the AWS RDS-vs-GCP-Cloud-SQL divergence covered in this domain's first lesson) is never compiled into core at all. It travels as opaque bytes core doesn't parse, and core only learns what those bytes mean for a given resource type by calling one generic RPC — `GetProviderSchema` — at startup.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

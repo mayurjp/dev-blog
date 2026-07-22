@@ -9,6 +9,8 @@ tags: [design-patterns, fundamentals, oop]
 ---
 
 **TL;DR:** A design pattern is a *named, reusable solution to a recurring design problem* — not a piece of code you copy, and not a badge to earn. The proof is in a real codebase: dotnet/eShop puts `IOrderRepository` in the domain layer and keeps EF Core in the infrastructure layer, so business code never touches the database library. The skill is knowing when the problem is real — and when a single function is enough.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. What is a design pattern (and what it isn't)
 

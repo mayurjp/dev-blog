@@ -5,6 +5,7 @@ date: 2025-08-17 09:00:00 +0530
 categories: kubernetes
 order: 5
 tags: [kubernetes, probes, kubelet, health-checks]
+description: "Kubernetes uses three separate probes to know if a container is working — startupProbe waits during slow boot, livenessProbe restarts stuck containers..."
 ---
 
 **TL;DR:** Kubernetes uses three separate probes to know if a container is working — startupProbe waits during slow boot, livenessProbe restarts stuck containers, readinessProbe gates traffic to healthy ones.

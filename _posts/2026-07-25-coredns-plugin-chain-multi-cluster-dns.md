@@ -7,6 +7,8 @@ categories: multicloud
 order: 8
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 CoreDNS resolves multi-cluster service names by walking a **plugin chain** — not a static A-record zone file. Each plugin (`kubernetes`, `forward`, `cache`, `errors`) receives a `plugin.Handler` pointer to the next plugin and either answers the query or calls `plugin.NextOrFailure()` to delegate. In a multi-cluster setup the `kubernetes` plugin switches between local `findServices()` and `findMultiClusterServices()` paths based on the `multicluster` Corefile directive, consulting `ServiceImport` objects instead of plain `Service` objects. If none of those resolve, the query falls through to `forward`, then `cache`, then `errors`. Understanding this chain is critical because misordering plugins or omitting `fallthrough` silently breaks cross-cluster name resolution.

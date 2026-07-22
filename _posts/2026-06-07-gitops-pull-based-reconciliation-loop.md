@@ -9,6 +9,8 @@ tags: [gitops, argo-cd, kubernetes, reconciliation, continuous-delivery]
 ---
 
 **TL;DR:** A traditional CD pipeline pushes changes into a cluster by handing a CI job cluster-admin credentials and running `kubectl apply` once, at the end of a build — after that, nothing is watching, so a manual `kubectl edit` or a half-applied rollout just sits there uncorrected until the next deploy. GitOps flips the direction: an in-cluster controller continuously fetches the declared state from git, diffs it against what's actually running, and re-converges the cluster toward git on its own — no pipeline holds a cluster credential, and drift gets caught, not just deploys.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

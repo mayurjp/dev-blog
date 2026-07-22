@@ -6,9 +6,12 @@ categories: docker
 order: 6
 tags: [docker, networking, bridge, dns, service-discovery, traefik]
 published: false
+description: "How does one container find another when IPs change on every restart? Every user-defined bridge network runs an embedded DNS server that resolves each..."
 ---
 
 **TL;DR:** How does one container find another when IPs change on every restart? Every user-defined bridge network runs an embedded DNS server that resolves each container's name to its current IP on every lookup, so containers address each other by a stable service name instead of a hardcoded IP that goes stale the instant a container restarts.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`traefik/traefik`](https://github.com/traefik/traefik)
 

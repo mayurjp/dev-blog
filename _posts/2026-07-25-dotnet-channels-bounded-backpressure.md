@@ -9,6 +9,8 @@ tags: [dotnet, channels, concurrency, backpressure, producer-consumer]
 ---
 
 **TL;DR:** Does your channel slow down the producer when the consumer falls behind? A bounded channel blocks the writer's `WriteAsync` the instant the internal deque hits capacity — that's backpressure. An unbounded channel never blocks because its `ConcurrentQueue` has no capacity check — a fast producer with a slow consumer will allocate items until the process runs out of memory. The runtime gives you both choices; the production consequences are entirely your problem.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

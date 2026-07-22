@@ -8,6 +8,8 @@ order: 8
 tags: [angular, control-flow, template-compiler, viewcontainerref, ivy]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Angular's `@if`, `@else`, and `@for` are not just syntactic sugar over `*ngIf`/`*ngFor` — they compile into dedicated IR operations (`ConditionalCreate`, `RepeaterCreate`, `Conditional`) that the reify phase turns into `conditionalCreate` and `repeaterCreate` runtime instructions, each allocating an embedded view slot and managing it through the `ViewContainerRef`-backed template infrastructure.
@@ -196,14 +198,7 @@ export function generateConditionalExpressions(job: ComponentCompilationJob): vo
           new ir.SlotLiteralExpr(conditionalCase.targetSlot),
           test,
         );
-      }
-
-      // Save the resulting aggregate expression.
-      op.processed = test;
-      op.conditions = [];
-    }
-  }
-}
+# ... (1 lines omitted)
 ```
 
 Key insight: the `SlotLiteralExpr` emits a literal slot index (e.g., `0`, `1`, `2`). The runtime `conditional()` instruction uses this index to select which embedded view to create/destroy — no `TemplateRef` lookup, no `*ngIf` directive instantiation.

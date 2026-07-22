@@ -5,6 +5,7 @@ date: 2025-08-05 09:00:00 +0530
 categories: kubernetes
 order: 2
 tags: [kubernetes, deployments, replicasets, rollouts]
+description: "A ReplicaSet recreates crashed Pods. A Deployment swaps old Pods for new ones step by step, so capacity never hits zero."
 ---
 
 **TL;DR:** A ReplicaSet recreates crashed Pods. A Deployment swaps old Pods for new ones step by step, so capacity never hits zero.

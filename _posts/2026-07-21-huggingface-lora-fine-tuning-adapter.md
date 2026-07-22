@@ -9,6 +9,8 @@ tags: [genai, fine-tuning, lora, peft, huggingface, transformers, adapters]
 ---
 
 **TL;DR:** When you fine-tune a 7B-parameter model, do you really need to update — and store — all 7 billion weights? No. LoRA (Low-Rank Adaptation) freezes the original model weights entirely and injects tiny trainable low-rank matrices into specific layers, producing an adapter checkpoint that is typically 0.1-1% the size of the full model. Hugging Face's `Trainer` integrates this transparently through PEFT's `PeftAdapterMixin` — when it detects a PEFT model, it saves only adapter weights, skips loading full model weights on checkpoint resume, and reports the correct parameter count. The base model never moves; only the adapter does.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ---
 

@@ -9,6 +9,8 @@ tags: [multicloud, istio, service-mesh, multi-cluster, envoy, east-west-gateway]
 ---
 
 **TL;DR:** Can two Kubernetes clusters on different clouds share a single Istio service mesh when their pod CIDRs are entirely unreachable from each other? Istio's answer is the **east-west (E/W) gateway** — a dedicated Envoy deployed at the edge of each cluster that accepts cross-network traffic and tunnels it into the destination cluster. The control plane (Pilot) doesn't expose every remote pod IP as a direct endpoint. Instead, the `EndpointsByNetworkFilter` in the endpoint builder *replaces* remote-network pod IPs with the E/W gateway's own address, weighted across multiple gateways for load spreading. The filter is not optional decoration — without it, the mesh silently generates EDS entries pointing at unreachable private IPs.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem: pod IPs across cloud VPCs are unreachable from each other
 
@@ -187,42 +189,7 @@ func (b *EndpointBuilder) EndpointsByNetworkFilter(endpoints []*LocalityEndpoint
                 lbEp.LoadBalancingWeight = &wrappers.UInt32Value{Value: weight}
             }
 
-            // Directly reachable: same network or no gateways
-            forceGateway := b.network == "" && epNetwork != "" && len(gateways) > 0
-            if !forceGateway && (b.proxy.InNetwork(epNetwork) || len(gateways) == 0) {
-                if util.GetEndpointHost(lbEp) != "" {
-                    lbEndpoints.append(ep.istioEndpoints[i], lbEp)
-                }
-                continue
-            }
-
-            if len(reachableGateways) == 0 {
-                continue
-            }
-
-            // Cross-network requires mTLS for SNI routing (sidecar mode)
-            if (!features.EnableAmbientMultiNetwork || isSidecarProxy(b.proxy)) && !isMtlsEnabled(lbEp) {
-                continue
-            }
-
-            splitWeightAmongGateways(weight, reachableGateways, gatewayWeights)
-        }
-
-        // Sort gateways for deterministic output, then emit weighted gateway endpoints
-        gateways := maps.Keys(gatewayWeights)
-        gateways = model.SortGateways(gateways)
-        for _, gw := range gateways {
-            epWeight := gatewayWeights[gw]
-            gwEp := buildNetworkGatewayEndpoint(b, gw, epWeight)
-            gwIstioEp := &model.IstioEndpoint{Network: gw.Network}
-            lbEndpoints.append(gwIstioEp, gwEp)
-        }
-
-        lbEndpoints.refreshWeight()
-        filtered = append(filtered, lbEndpoints)
-    }
-    return filtered
-}
+# ... (1 lines omitted)
 ```
 
 And `selectNetworkGateways` — the function that picks which E/W gateways to use — prefers gateways in the same cluster as the target endpoints to minimize an extra cross-cluster hop:

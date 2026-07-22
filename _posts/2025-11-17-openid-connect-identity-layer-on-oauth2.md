@@ -5,9 +5,12 @@ date: 2025-11-17 09:00:00 +0530
 categories: security
 order: 5
 tags: [security, oidc, oauth2, id-token]
+description: "OIDC adds a separate ID token with standardized claims — who (`sub`), when (`auth_time`), how (`acr`/`amr`) — plus `at_hash` and `nonce` to bind it to..."
 ---
 
 **TL;DR:** OIDC adds a separate ID token with standardized claims — who (`sub`), when (`auth_time`), how (`acr`/`amr`) — plus `at_hash` and `nonce` to bind it to the access token.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`ory/hydra`](https://github.com/ory/hydra)
 

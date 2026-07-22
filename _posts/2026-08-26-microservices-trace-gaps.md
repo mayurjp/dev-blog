@@ -8,6 +8,8 @@ order: 90
 tags: [microservices, troubleshooting, debugging, distributed-tracing, opentelemetry, dotnet]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "Our distributed trace in Jaeger shows the API gateway calling Service A (5ms), then a 500ms gap, then Service B (3ms), then another 400ms gap, then Service C. The network team says inter-service latency is sub-5ms. What's eating 900ms?"

@@ -5,9 +5,12 @@ date: 2026-03-29 09:00:00 +0530
 categories: architecture
 order: 5
 tags: [architecture, serverless, faas, aws-lambda, csharp]
+description: "Eliminating cold starts by cloning an already-initialized function creates a new bug class — what breaks? Anything meant to be unique per environment ..."
 ---
 
 **TL;DR:** Eliminating cold starts by cloning an already-initialized function creates a new bug class — what breaks? Anything meant to be unique per environment (a random identifier, a fresh network handle) — every environment restored from the same snapshot would otherwise share the exact same value, unless application code registers an explicit "after restore" hook to regenerate it.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`aws/aws-lambda-dotnet`](https://github.com/aws/aws-lambda-dotnet)
 

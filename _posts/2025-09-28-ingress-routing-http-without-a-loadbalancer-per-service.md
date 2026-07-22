@@ -5,9 +5,12 @@ date: 2025-09-28 09:00:00 +0530
 categories: kubernetes
 order: 11
 tags: [kubernetes, ingress, nginx, routing]
+description: "How do you route HTTP traffic to 20 Services without 20 cloud load balancers? An Ingress object declares host/path routing rules, and an Ingress Contr..."
 ---
 
 **TL;DR:** How do you route HTTP traffic to 20 Services without 20 cloud load balancers? An Ingress object declares host/path routing rules, and an Ingress Controller (like ingress-nginx) watches those rules and turns them into real proxy behavior — templating and reloading `nginx.conf` — behind one shared external entry point with TLS terminated centrally.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`kubernetes/ingress-nginx`](https://github.com/kubernetes/ingress-nginx)
 

@@ -23,9 +23,12 @@ system_design:
     - "ClusterIP versus headless Service"
     - "kube-proxy iptables versus IPVS or eBPF dataplane"
     - "plain Kubernetes Services versus service mesh"
+description: "How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtu..."
 ---
 
 **TL;DR:** How do containers talk to each other without hardcoding IP addresses? Kubernetes inserts a **Service** — a permanent routing layer with a stable virtual IP and DNS name — in front of the volatile pods, tracking which pods are currently alive and Ready via a label selector so clients never need a pod's real IP.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`GoogleCloudPlatform/microservices-demo`](https://github.com/GoogleCloudPlatform/microservices-demo)
 
@@ -478,7 +481,7 @@ At 1000 RPS, plain `ClusterIP` is still the default answer. You move to headless
 
 ---
 
-## 11. Prevention Checklist
+## 11. Review Checklist
 
 - Service selector matches Deployment pod template labels.
 - Deployment `spec.selector.matchLabels` matches `spec.template.metadata.labels`.
@@ -491,7 +494,7 @@ At 1000 RPS, plain `ClusterIP` is still the default answer. You move to headless
 
 ---
 
-## 12. Question Bank (control-plane depth — the mental-model test)
+## 12. FAQ (control-plane depth — the mental-model test)
 
 **Q1. When a pod restarts and gets a new IP, how does the Service learn the new IP so fast?**
 A control-plane controller *watches* the API for pod changes and republishes the Service's backing address list within milliseconds. Classically this was the **Endpoints** object (the `Endpoints` controller). **Modern Kubernetes (v1.19+) uses `EndpointSlices`** — the `EndpointSlice` controller writes the pod IPs, ports, and per-address `ready` conditions into sliced objects that scale far better than one giant Endpoints blob. `kube-proxy` and DNS consume those slices to reprogram routing. *(If an interviewer says "Endpoints object," the sharper answer is "EndpointSlices now — Endpoints is the legacy compatibility view.")*

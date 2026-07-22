@@ -5,9 +5,12 @@ date: 2025-10-08 09:00:00 +0530
 categories: docker
 order: 10
 tags: [docker, registries, oci, manifests]
+description: "What actually happens when you run `docker push`? Every layer and image config is stored as a content-addressed blob keyed by its SHA-256 digest, and ..."
 ---
 
 **TL;DR:** What actually happens when you run `docker push`? Every layer and image config is stored as a content-addressed blob keyed by its SHA-256 digest, and a manifest simply lists the digests making up one image, so pushing a rebuilt image only uploads blobs the registry doesn't already have — and a single tag can point to different manifests for different platforms via an image index.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`distribution/distribution`](https://github.com/distribution/distribution), [`opencontainers/image-spec`](https://github.com/opencontainers/image-spec)
 

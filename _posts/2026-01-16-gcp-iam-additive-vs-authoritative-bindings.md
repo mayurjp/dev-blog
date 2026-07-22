@@ -5,9 +5,12 @@ date: 2026-01-16 09:00:00 +0530
 categories: gcp
 order: 2
 tags: [gcp, iam, terraform, least-privilege]
+description: "Why can one Terraform IAM resource type accidentally revoke a teammate's access? `google_project_iam_member` is additive and safely coexists with gran..."
 ---
 
 **TL;DR:** Why can one Terraform IAM resource type accidentally revoke a teammate's access? `google_project_iam_member` is additive and safely coexists with grants managed elsewhere, while `google_project_iam_binding` is authoritative — it replaces the entire member list for that role, silently dropping anyone not listed, even principals granted access outside that Terraform run.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`terraform-google-modules/terraform-google-iam`](https://github.com/terraform-google-modules/terraform-google-iam)
 

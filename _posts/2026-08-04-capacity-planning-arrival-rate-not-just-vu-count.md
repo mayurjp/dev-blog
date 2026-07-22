@@ -9,6 +9,8 @@ tags: [system-design, capacity-planning, load-testing, fermi-estimation, k6, lit
 ---
 
 **TL;DR:** Why isn't "spin up 200 virtual users and see what happens" a valid capacity test? Because virtual-user count and request rate are only related through response time, and response time is exactly the thing you're trying to find the limits of — so a VU-count-based load test silently changes the request rate the moment the system under test slows down, which is precisely when you most need the rate to hold steady. k6's `constant-arrival-rate` executor decouples the two: you specify the target rate directly (iterations per time unit) and k6 dynamically allocates however many VUs it takes to sustain it, up to a hard `maxVUs` ceiling — and when even that ceiling isn't enough, it emits a `dropped_iterations` metric instead of silently letting the real rate fall below your target. That gap between target and delivered rate *is* the capacity finding.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`grafana/k6`](https://github.com/grafana/k6)
 

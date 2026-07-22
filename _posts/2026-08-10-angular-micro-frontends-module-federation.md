@@ -8,6 +8,8 @@ order: 15
 tags: [angular, micro-frontends, module-federation]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 How can an Angular shell ship independently of the feature teams that build its pages, and still load those pages at runtime without bundling or redeploying the shell? Module Federation turns each remote Angular app into a self-describing "remote entry" that the shell fetches on demand, while a shared-scope version resolver dedupes libraries and flags version skew instead of silently breaking.

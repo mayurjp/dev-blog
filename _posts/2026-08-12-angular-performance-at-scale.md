@@ -9,6 +9,8 @@ tags: [angular, performance, bundle-analysis, lazy-loading, angular-cli, esbuild
 ---
 
 **TL;DR:** How do you keep a large Angular app's initial load fast as it grows? Use the esbuild application builder's `stats.json` metafile for bundle analysis, configure `budgets` to fail the build on bloat, and lean on route-level lazy loading plus `@defer` to keep the initial chunk small.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [angular/angular-cli](https://github.com/angular/angular-cli)
 

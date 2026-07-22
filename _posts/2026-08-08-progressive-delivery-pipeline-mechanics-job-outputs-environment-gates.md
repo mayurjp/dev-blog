@@ -11,6 +11,8 @@ excerpt: ""
 {% raw %}
 
 **TL;DR:** A canary rollout is described as "10%, then 50%, then 100%"  but mechanically, that's three or four separate pipeline jobs, possibly separated by hours, possibly run by different people clicking approve. What actually carries "which revision are we even talking about" from the first job to the last one?
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem: a single deploy step can shift traffic, but it can't pause for a human
 

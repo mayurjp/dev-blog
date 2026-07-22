@@ -5,9 +5,12 @@ date: 2026-04-02 09:00:00 +0530
 categories: architecture
 order: 7
 tags: [architecture, plugin-architecture, microkernel, terraform, go]
+description: "Why does a Terraform provider refuse to start unless a specific environment variable is set? A magic-cookie handshake (`TF_PLUGIN_MAGIC_COOKIE`) prove..."
 ---
 
 **TL;DR:** Why does a Terraform provider refuse to start unless a specific environment variable is set? A magic-cookie handshake (`TF_PLUGIN_MAGIC_COOKIE`) proves the process was launched specifically as a Terraform plugin, by Terraform, on purpose — without it, a provider binary run directly or invoked by an unrelated program refuses to start serving requests at all.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 

@@ -9,6 +9,8 @@ tags: [security, zero-trust, beyondcorp, identity-aware-proxy, oauth2-proxy]
 ---
 
 **TL;DR:** If a request is coming from inside the corporate VPN, why isn't that enough to trust it? Because network location proves nothing about *who* is making the request or whether their access is still valid right now — so a zero-trust identity-aware proxy re-authenticates and re-authorizes every single request against a live session, and passes the upstream application only an identity it verified itself, never a network-position claim.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`oauth2-proxy/oauth2-proxy`](https://github.com/oauth2-proxy/oauth2-proxy)
 

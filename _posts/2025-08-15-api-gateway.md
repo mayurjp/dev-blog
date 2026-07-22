@@ -6,6 +6,7 @@ categories: microservices
 order: 4
 tags: [microservices, api-gateway, yarp, reverse-proxy, bff]
 published: false
+description: "API gateways hide internal service topology from clients by owning routing and cross-cutting policy at the edge."
 ---
 
 **TL;DR:** API gateways hide internal service topology from clients by owning routing and cross-cutting policy at the edge.

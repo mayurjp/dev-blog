@@ -5,9 +5,12 @@ date: 2026-04-22 09:00:00 +0530
 categories: databases
 order: 6
 tags: [databases, migrations, schema-changes, go]
+description: "A migration crashes halfway through — how does the tool know not to just retry it? `golang-migrate` marks the target version dirty in its tracking tab..."
 ---
 
 **TL;DR:** A migration crashes halfway through — how does the tool know not to just retry it? `golang-migrate` marks the target version dirty in its tracking table before running the migration's SQL and only marks it clean after it succeeds; if the process dies mid-migration, the dirty flag stays set and every subsequent run refuses to proceed until a human explicitly forces that version clean.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`golang-migrate/migrate`](https://github.com/golang-migrate/migrate)
 

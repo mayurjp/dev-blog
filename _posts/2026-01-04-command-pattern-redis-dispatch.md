@@ -5,9 +5,12 @@ date: 2026-01-04 09:00:00 +0530
 categories: design-patterns
 order: 7
 tags: [design-patterns, command, redis]
+description: "How does Redis run 200+ different commands through the exact same dispatch code? Each command is represented as a `redisCommand` struct holding a func..."
 ---
 
 **TL;DR:** How does Redis run 200+ different commands through the exact same dispatch code? Each command is represented as a `redisCommand` struct holding a function pointer plus metadata, so the generic execution path looks up the struct once and dispatches through a single, uniform `c->cmd->proc(c)` call regardless of which command is running.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`redis/redis`](https://github.com/redis/redis)
 

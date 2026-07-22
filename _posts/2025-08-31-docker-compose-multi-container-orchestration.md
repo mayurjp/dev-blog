@@ -6,9 +6,12 @@ categories: docker
 order: 7
 tags: [docker, compose, orchestration, yaml-anchors, depends-on]
 published: false
+description: "How do you start twenty dependent containers in the right order, reliably? `docker compose` reads a declarative YAML spec, resolves each service's `de..."
 ---
 
 **TL;DR:** How do you start twenty dependent containers in the right order, reliably? `docker compose` reads a declarative YAML spec, resolves each service's `depends_on` graph, and — when a `condition: service_healthy` is declared — waits for a dependency's healthcheck to actually pass, not merely for its process to start, before bringing up whatever depends on it.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted)
 
@@ -123,8 +126,7 @@ volumes:
   sentry-postgres: { external: true }
   sentry-redis: { external: true }
 
-# No `networks:` block anywhere in the full 837-line file — all ~70 services
-# reach each other through Compose's implicit default network and DNS-by-name.
+# ... (1 lines omitted)
 ```
 
 **What this teaches that a hello-world can't:**

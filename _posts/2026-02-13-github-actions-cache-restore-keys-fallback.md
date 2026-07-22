@@ -6,6 +6,7 @@ categories: cicd
 order: 5
 tags: [cicd, github-actions, caching, actions-cache]
 excerpt: ""
+description: "Why does `cache-hit: false` still mean your dependencies got restored? `cache-hit` reports `true` only for an exact primary-key match; a `restore-keys..."
 ---
 {% raw %}
 

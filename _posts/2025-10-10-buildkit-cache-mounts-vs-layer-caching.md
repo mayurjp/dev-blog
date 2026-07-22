@@ -5,6 +5,7 @@ date: 2025-10-10 09:00:00 +0530
 categories: docker
 order: 11
 tags: [docker, buildkit, caching, dockerfile]
+description: "Why does `docker build --no-cache` still redownload nothing? A BuildKit cache mount (`RUN --mount=type=cache`) is a persistent scratch directory track..."
 ---
 
 **TL;DR:** Why does `docker build --no-cache` still redownload nothing? A BuildKit cache mount (`RUN --mount=type=cache`) is a persistent scratch directory tracked by mount ID rather than layer digest, so unlike a regular layer's contents it's never baked into an image layer and survives even a `--no-cache` build that discards the entire layer graph.

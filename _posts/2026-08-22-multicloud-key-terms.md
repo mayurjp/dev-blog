@@ -9,6 +9,8 @@ tags: [multicloud, glossary, terraform, crossplane, istio]
 ---
 
 **TL;DR:** This is the shared vocabulary for every multi-cloud post on this blog — provisioning, identity, networking, and portability terms, each defined at the mechanism level so later posts can reference them without re-explaining.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## Provisioning
 

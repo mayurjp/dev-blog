@@ -9,6 +9,8 @@ tags: [architecture, fundamentals, design]
 ---
 
 **TL;DR:** Architecture is not the boxes-and-arrows picture you draw — it's the *direction* your compile-time dependencies point and *where* you let them cross a boundary. Microsoft's real **dotnet/eShop** Ordering service proves it: three projects where `Ordering.Domain` references nothing else, `Ordering.Infrastructure` references `Domain`, and the API wires them — so the database can be swapped without touching business logic.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. What "architecture" actually means
 

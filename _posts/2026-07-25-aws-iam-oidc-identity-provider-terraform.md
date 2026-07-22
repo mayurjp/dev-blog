@@ -5,7 +5,10 @@ order: 6
 domain: multicloud
 source_repo: hashicorp/terraform-provider-aws
 tags: [aws, terraform, oidc, github-actions, identity-federation, iam, no-secrets]
+description: "## TL;DR"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## TL;DR
 

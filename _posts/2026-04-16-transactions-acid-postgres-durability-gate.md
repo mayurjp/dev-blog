@@ -5,9 +5,12 @@ date: 2026-04-16 09:00:00 +0530
 categories: databases
 order: 3
 tags: [databases, acid, transactions, postgresql, c]
+description: "Postgres has a setting that can make a committed transaction not actually durable — why does that setting exist? Durability normally costs a real `fsy..."
 ---
 
 **TL;DR:** Postgres has a setting that can make a committed transaction not actually durable — why does that setting exist? Durability normally costs a real `fsync` flush to disk before the client is told "committed"; when `synchronous_commit` is set to `off`, Postgres skips that flush and returns immediately, trading guaranteed durability for lower write latency on workloads that can tolerate losing the last few transactions in a crash.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 

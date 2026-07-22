@@ -9,6 +9,8 @@ tags: [security, supply-chain, sbom, slsa, sigstore, cosign]
 ---
 
 **TL;DR:** How do you trust that a container image running in production is the exact one your CI pipeline built, and not something swapped in afterward? Cosign signs the image with a certificate issued for a one-time, workload-scoped OIDC identity instead of a long-lived private key, then publishes the signature to Rekor — a public, append-only transparency log — so anyone verifying the image can prove the signature existed at a specific time, was never quietly re-issued, and traces back to a real CI identity, not a stolen key.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`sigstore/cosign`](https://github.com/sigstore/cosign)
 

@@ -9,6 +9,8 @@ tags: [angular, signals, reactivity, dependency-tracking, fine-grained-reactivit
 ---
 
 **TL;DR:** Does a `computed()` signal need an explicit list of the signals it depends on? No — there's no dependency array anywhere in Angular's signal implementation. Dependencies are discovered automatically: whenever any signal is read while a `computed()` is actively recomputing (or an `effect()` is actively running), that read itself records the link. And writing to a signal never eagerly recomputes anything downstream — it only marks dependents dirty, cascading that dirty flag through the graph, while the actual recomputation waits until something genuinely reads the stale value again.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

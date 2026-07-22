@@ -11,6 +11,8 @@ excerpt: ""
 {% raw %}
 
 **TL;DR:** Does a new Angular component need to be declared in an NgModule before anything else can use it, and is a component's `host` metadata just a plain object of string key-values? Neither  standalone is the compiler's *default* (an `@Component` needs `standalone: false` to opt *out*, not `standalone: true` to opt in), and `host`'s key syntax itself  a bare key, `[key]`, `(key)`, or `[attr.key]`  is what tells Angular which of three structurally different binding kinds (attribute, property, event) to compile for that one entry.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

@@ -9,6 +9,8 @@ tags: [mlops, data-drift, psi, kolmogorov-smirnov, evidently, distribution-shift
 ---
 
 **TL;DR:** Data drift detection is not a single algorithm problem — PSI (Population Stability Index) bins both distributions and measures the cumulative divergence in proportions across bins, making it excellent for detecting overall distribution shifts and categorical changes. The Kolmogorov-Smirnov test, by contrast, finds the single point where the two cumulative distribution functions are farthest apart, making it more sensitive to local shape changes in continuous distributions. Evidently auto-selects the right test based on column type and sample size, but understanding when each test is appropriate prevents false negatives in production monitoring.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`evidentlyai/evidently`](https://github.com/evidentlyai/evidently)
 
@@ -187,16 +189,7 @@ def _psi(
     psi_value = np.sum(psi_values)
 
     return psi_value, psi_value >= threshold
-
-
-psi_stat_test = StatTest(
-    name="psi",
-    display_name="PSI",
-    allowed_feature_types=[ColumnType.Categorical, ColumnType.Numerical],
-    default_threshold=0.1,
-)
-
-register_stattest(psi_stat_test, _psi)
+# ... (1 lines omitted)
 ```
 
 And from `src/evidently/legacy/calculations/stattests/ks_stattest.py`:

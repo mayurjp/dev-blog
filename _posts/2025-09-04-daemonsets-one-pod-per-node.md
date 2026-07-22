@@ -6,6 +6,7 @@ categories: kubernetes
 order: 8
 tags: [kubernetes, daemonsets, scheduler, node-agents]
 published: false
+description: "How do you guarantee a Pod runs on every node, not just somewhere in the cluster? A DaemonSet replaces the `replicas` count with a node-matching crite..."
 ---
 
 **TL;DR:** How do you guarantee a Pod runs on every node, not just somewhere in the cluster? A DaemonSet replaces the `replicas` count with a node-matching criterion, ensuring exactly one matching Pod exists on every eligible node — automatically adding one when a node joins and removing it when a node leaves — something a Deployment's fixed replica count can't guarantee.
@@ -148,18 +149,7 @@ spec:
                                                      # evicted under node resource
                                                      # pressure — exactly when you
                                                      # need node metrics most
-      tolerations:
-      - operator: Exists              # blanket toleration: runs on EVERY node,
-                                       # including tainted control-plane nodes
-      volumes:
-      - hostPath: { path: /sys }
-        name: sys
-      - hostPath: { path: / }
-        name: root
-  updateStrategy:
-    rollingUpdate:
-      maxUnavailable: 10%             # across a large fleet, update 10% of nodes'
-    type: RollingUpdate                # Pods at a time, not one-by-one or all-at-once
+# ... (1 lines omitted)
 ```
 
 **What this teaches that a hello-world can't:**

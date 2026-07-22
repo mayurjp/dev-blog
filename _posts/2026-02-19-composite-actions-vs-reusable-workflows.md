@@ -6,10 +6,13 @@ categories: cicd
 order: 8
 tags: [cicd, github-actions, composite-actions, reusable-workflows]
 excerpt: ""
+description: "What's the actual difference between a composite action and a reusable workflow? Composite actions bundle multiple steps into one reusable step that r..."
 ---
 {% raw %}
 
 **TL;DR:** What's the actual difference between a composite action and a reusable workflow? Composite actions bundle multiple steps into one reusable step that runs inside an existing job on the same runner; reusable workflows bundle an entire job invoked as a job, with its own runner, typed inputs, and secrets. The choice comes down to whether the reused logic needs its own runner/environment or just needs to execute within an existing job's step sequence.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 

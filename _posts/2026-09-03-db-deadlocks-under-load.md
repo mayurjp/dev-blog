@@ -9,6 +9,8 @@ tags: [databases, troubleshooting, debugging, postgresql, deadlock, transactions
 ---
 
 **TL;DR:** Two code paths update the same two rows in opposite order. Each holds the row lock the other is waiting on, and because a row lock in Postgres is released only at commit, neither can ever yield — so the deadlock detector kills one of them. Adding a retry makes the error go away without making the collision go away.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

@@ -9,6 +9,8 @@ tags: [genai, function-calling, tool-use, openai, structured-outputs]
 ---
 
 **TL;DR:** Does "function calling" mean the model executes your code when it decides a tool is needed? No — the model emits a structured JSON payload that *names* a function and *supplies* its arguments, and your application code receives that payload, decides whether to actually run the function, executes it separately, and sends the result back as a new message. The model never runs code; it only *requests* that code be run, and the `tool_choice` parameter on the API call controls how aggressively it does so — `"auto"` lets the model decide, `"required"` forces it to pick a tool even when it might prefer to answer directly, and a named choice forces a specific function regardless of the input.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

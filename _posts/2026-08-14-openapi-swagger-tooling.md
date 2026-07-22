@@ -9,6 +9,8 @@ tags: [api-design, openapi, swagger, codegen, contract-first]
 ---
 
 **TL;DR:** How do you stop server and client from drifting apart? Write the OpenAPI contract first, then generate both the server stubs and the client SDK from it — Swagger UI renders the same contract for humans.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [swagger-api/swagger-ui](https://github.com/swagger-api/swagger-ui) — its `SwaggerUI` constructor fetches/merges a spec from `url` or `spec` and drives a plugin-based system that renders OpenAPI 3.0/3.1 documents.
 

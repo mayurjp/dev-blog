@@ -5,7 +5,10 @@ date: 2026-04-12 09:00:00 +0530
 categories: architecture
 order: 12
 tags: [architecture, evolutionary-architecture, fitness-functions, archunit, java]
+description: "## 1. The Engineering Problem: an architecture rule enforced only by human vigilance decays the moment vigilance lapses once"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: an architecture rule enforced only by human vigilance decays the moment vigilance lapses once
 

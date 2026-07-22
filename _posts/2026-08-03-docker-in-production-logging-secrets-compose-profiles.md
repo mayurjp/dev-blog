@@ -9,6 +9,8 @@ tags: [docker, production, logging-drivers, secrets-management, docker-compose, 
 ---
 
 **TL;DR:** Why does the exact `docker-compose.yml` that works fine on a laptop turn into a full disk and an exposed credential in production? Docker's default logging driver (`json-file`) never rotates or caps a container's log file unless `max-size`/`max-file` are set explicitly, environment-variable "secrets" are always visible via `docker inspect` regardless of which compose key set them, and neither problem shows up on a laptop where containers run for minutes and get thrown away — only in production, where the same container runs for weeks.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repos:** [`getsentry/self-hosted`](https://github.com/getsentry/self-hosted), [`moby/moby`](https://github.com/moby/moby)
 

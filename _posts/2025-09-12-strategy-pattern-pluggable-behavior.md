@@ -5,6 +5,7 @@ date: 2025-09-12 09:00:00 +0530
 categories: design-patterns
 order: 1
 tags: [design-patterns, strategy-pattern, polly, dotnet, resilience]
+description: "How does the same `Execute()` call run a retry today and a circuit breaker tomorrow? The pipeline (the context) only ever holds a reference to a minim..."
 ---
 
 **TL;DR:** How does the same `Execute()` call run a retry today and a circuit breaker tomorrow? The pipeline (the context) only ever holds a reference to a minimal abstract `ResilienceStrategy` interface — never a concrete type — so swapping which strategy is injected changes the behavior without changing a single line of caller code.

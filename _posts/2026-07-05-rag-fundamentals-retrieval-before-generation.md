@@ -9,6 +9,8 @@ tags: [genai, rag, retrieval-augmented-generation, langchain, prompt-engineering
 ---
 
 **TL;DR:** Does Retrieval-Augmented Generation mean the model itself somehow reaches out to a database partway through generating a response? No — retrieval happens entirely *before* generation, as a separate, earlier pipeline stage. A retriever fetches relevant documents for the query, their text gets joined into one string, and that string is substituted into the prompt's `{context}` placeholder — the expanded prompt (original question plus pasted-in document text) is the only thing the LLM ever actually sees. The model doesn't retrieve anything; it just receives a longer, more specific prompt than it otherwise would have.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

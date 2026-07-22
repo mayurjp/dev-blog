@@ -9,6 +9,8 @@ tags: [security, api-security, owasp-api-top-10, input-validation, bola]
 ---
 
 **TL;DR:** Why does the OWASP API Security Top 10 rank Broken Object Level Authorization (BOLA) above every injection or input-validation issue? Because an API's URL and request bodies are built entirely around client-supplied object IDs by design — every `GET /posts/{id}` is an implicit trust decision about whether the caller may see *that specific* object, and unlike a web app's server-rendered pages, an API has no UI layer quietly hiding IDs the caller was never shown in the first place.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`OWASP/crAPI`](https://github.com/OWASP/crAPI)
 

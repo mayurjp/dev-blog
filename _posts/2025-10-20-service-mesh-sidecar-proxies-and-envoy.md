@@ -5,9 +5,12 @@ date: 2025-10-20 09:00:00 +0530
 categories: microservices
 order: 10
 tags: [microservices, service-mesh, istio, envoy]
+description: "How do you add mTLS and canary routing to every service without touching its code? A service mesh injects a sidecar proxy (Envoy, via Istio) into ever..."
 ---
 
 **TL;DR:** How do you add mTLS and canary routing to every service without touching its code? A service mesh injects a sidecar proxy (Envoy, via Istio) into every pod that transparently intercepts all traffic, so mesh-wide config controls mutual TLS, retries, and weighted routing without any application code changes.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`istio/istio`](https://github.com/istio/istio)
 

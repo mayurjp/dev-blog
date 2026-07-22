@@ -9,6 +9,8 @@ tags: [observability, tracing, sampling, opentelemetry, tail-sampling]
 ---
 
 **TL;DR:** Can a trace-sampling decision always be made the instant a trace starts? Only for one of the two real approaches — head-based sampling decides immediately, from nothing but a hash of the trace ID, with zero knowledge of how the trace turns out; tail-based sampling can only guarantee "always keep errors and slow traces" by buffering every span belonging to a trace ID and waiting until the trace looks complete before evaluating anything. That buffering isn't an implementation detail — it's the entire reason tail-based sampling can do something head-based structurally cannot.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

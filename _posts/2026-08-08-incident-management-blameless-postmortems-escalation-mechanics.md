@@ -9,6 +9,8 @@ tags: [observability, incident-management, postmortems, pagerduty, on-call]
 ---
 
 **TL;DR:** Does "blameless postmortem" just mean being polite about outages, and does "incident management" just mean having a pager? No — both are concrete mechanisms: an escalation policy is a data structure that defines *who gets notified, in what order, with what delay, and what happens if nobody acknowledges*, and a blameless postmortem is a specific document structure (Timeline, Root Causes, Action Items, "where we got lucky") that forces the same rigor a code review does, minus assigning individual blame.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

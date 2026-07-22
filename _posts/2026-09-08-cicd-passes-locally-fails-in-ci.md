@@ -9,6 +9,8 @@ tags: [cicd, troubleshooting, debugging, github-actions, git, runner-images]
 ---
 
 **TL;DR:** The Linux runner's filesystem is case-sensitive and every developer's macOS or Windows filesystem is not, so an import whose casing does not match the file on disk resolves locally and fails on the runner — and Git's `core.ignoreCase`, which `git clone` sets to `true` on those filesystems, is why "I renamed it and `git status` says clean" is a lie.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

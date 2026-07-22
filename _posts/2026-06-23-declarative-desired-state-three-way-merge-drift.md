@@ -9,6 +9,8 @@ tags: [gitops, argo-cd, kubernetes, drift-detection, three-way-merge]
 ---
 
 **TL;DR:** Does "declarative desired state as the single source of truth" mean a GitOps controller reverts *any* manual change to a resource it manages? No — editing a field the git manifest actually declares gets silently reverted, but adding a field git never mentioned (another controller's label, a manually-added annotation) is often left completely alone. That's not inconsistent behavior — it's the same three-way-merge mechanism `kubectl apply` has always used: a merge patch computed from what was *previously* declared, what's *currently* declared, and what's *live*, which structurally excludes anything that was never declared in the first place.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

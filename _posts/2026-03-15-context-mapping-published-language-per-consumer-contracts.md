@@ -5,7 +5,10 @@ date: 2026-03-15 09:00:00 +0530
 categories: ddd
 order: 9
 tags: [ddd, context-mapping, strategic-ddd, integration-events]
+description: "## 1. The Engineering Problem: once two bounded contexts need to talk, *whose* model governs the shape of what crosses the boundary?"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: once two bounded contexts need to talk, *whose* model governs the shape of what crosses the boundary?
 

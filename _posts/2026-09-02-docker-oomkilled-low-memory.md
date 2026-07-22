@@ -9,6 +9,8 @@ tags: [docker, troubleshooting, debugging, cgroups, memory, jvm]
 ---
 
 **TL;DR:** Three different numbers are being compared as if they were the same number. The app reports *heap*, `docker stats` reports `memory.current` *minus* `inactive_file`, and the kernel enforces `memory.max` against `memory.current` in full — including page cache, slab and kernel stacks. The container is over the limit even though every dashboard says it isn't.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The symptom
 

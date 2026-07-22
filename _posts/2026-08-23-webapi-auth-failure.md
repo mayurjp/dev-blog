@@ -8,6 +8,8 @@ order: 91
 tags: [aspnet-webapi, troubleshooting, debugging, authentication, jwt, middleware]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The symptom
 
 > "Every request to `/api/orders` returns 401 Unauthorized. The JWT token is valid — I verified it against the identity server. Other endpoints in the same app work fine."

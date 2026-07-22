@@ -6,6 +6,7 @@ categories: microservices
 order: 3
 tags: [microservices, service-discovery, eureka, spring-cloud, kubernetes]
 published: false
+description: "Instances get new IPs on every restart. A registry tracks who is alive right now, and callers ask it instead of reading a config file."
 ---
 
 **TL;DR:** Instances get new IPs on every restart. A registry tracks who is alive right now, and callers ask it instead of reading a config file.

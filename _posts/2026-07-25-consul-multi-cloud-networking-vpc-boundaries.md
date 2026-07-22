@@ -9,6 +9,8 @@ tags: [multicloud, consul, service-mesh, networking, multi-cloud, wan-federation
 ---
 
 **TL;DR:** Can a service in an AWS VPC talk to a service in a GCP VPC without opening a single port on either firewall? In HashiCorp Consul it can — but the path from "service registered in dc-us-east-1" to "service reachable from dc-europe-west1" doesn't happen through direct VPC peering or VPN tunnels; it passes through three distinct mechanisms (WAN federation for control-plane gossip, mesh gateways for data-plane traffic, and exported-services config entries for which services are visible across boundaries), each configured through a different layer of Consul's config entry system — and confusing the layers is how multi-cloud meshes break silently in production.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

@@ -5,9 +5,12 @@ date: 2026-01-06 09:00:00 +0530
 categories: design-patterns
 order: 8
 tags: [design-patterns, builder, efcore, fluent-api]
+description: "Why does every EF Core builder method return 'this' instead of void? Returning the same builder instance is what enables fluent chaining like `.UseMod..."
 ---
 
 **TL;DR:** Why does every EF Core builder method return 'this' instead of void? Returning the same builder instance is what enables fluent chaining like `.UseModel(...).UseLoggerFactory(...)`, while underneath, each call actually swaps in a brand-new immutable configuration extension rather than mutating the old one in place.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/efcore`](https://github.com/dotnet/efcore)
 

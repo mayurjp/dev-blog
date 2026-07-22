@@ -9,6 +9,8 @@ tags: [gitops, glossary, argocd, flux, kubernetes]
 ---
 
 **TL;DR:** This is the shared vocabulary for every GitOps post on this blog — read it once, then treat it as a lookup table. Each term is written to stand alone, so you can jump straight to the one you hit in another post.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## Core model
 

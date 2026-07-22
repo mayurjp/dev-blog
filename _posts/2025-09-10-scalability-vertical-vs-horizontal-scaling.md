@@ -5,9 +5,12 @@ date: 2025-09-10 09:00:00 +0530
 categories: system-design
 order: 1
 tags: [system-design, scalability, load-balancing, distributed-systems, dotnet-orleans]
+description: "Does adding a tenth server actually help, or does it just move the bottleneck? Only if placement is load-aware — sampling a subset of nodes and scorin..."
 ---
 
 **TL;DR:** Does adding a tenth server actually help, or does it just move the bottleneck? Only if placement is load-aware — sampling a subset of nodes and scoring them on real-time CPU, memory, and active work count (as Orleans' `ResourceOptimizedPlacementDirector` does) — otherwise naive round-robin placement can leave the new server idle while others still fall over.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/orleans`](https://github.com/dotnet/orleans)
 
@@ -140,14 +143,7 @@ internal sealed class ResourceOptimizedPlacementDirector : IPlacementDirector, I
         if (stats.MaxAvailableMemory > 0)
         {
             score += _weights.MemoryUsageWeight * stats.NormalizedMemoryUsage +
-                     _weights.AvailableMemoryWeight * (1 - stats.NormalizedAvailableMemory) +
-                     _weights.MaxAvailableMemoryWeight * (1 - stats.MaxAvailableMemory / maxMaxAvailableMemory);
-        }
-
-        score += _weights.ActivationCountWeight * (stats.ActivationCount / (float)maxActivationCount);
-        return score; // lower is better: more spare capacity
-    }
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches that a "just add more replicas" diagram can't:

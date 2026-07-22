@@ -5,9 +5,12 @@ date: 2026-03-09 09:00:00 +0530
 categories: ddd
 order: 6
 tags: [ddd, repository-pattern, csharp, entity-framework]
+description: "Why can't a repository fetch just the `OrderItems`, without their `Order`? Because `IOrderRepository` only ever speaks in terms of `Order` — there is ..."
 ---
 
 **TL;DR:** Why can't a repository fetch just the `OrderItems`, without their `Order`? Because `IOrderRepository` only ever speaks in terms of `Order` — there is no `OrderItemRepository` and no method returns an item on its own — so the persistence layer mirrors the same consistency boundary the domain model already enforces, loading and saving the whole aggregate as one unit.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 

@@ -9,6 +9,8 @@ tags: [multicloud, terraform, provider-protocol, state-management, infrastructur
 ---
 
 **TL;DR:** Is Terraform HCL actually portable across clouds, or does switching providers require rewriting everything anyway? The provider protocol is genuinely portable — it's a versioned gRPC interface any provider can implement — but the real lock-in lives in the state file: provider addresses, schema-versioned resource attributes, and opaque private blobs that only the original provider can decode.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 

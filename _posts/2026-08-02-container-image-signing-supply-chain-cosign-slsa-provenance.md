@@ -9,6 +9,8 @@ tags: [docker, cosign, slsa, supply-chain, provenance, attestation, sigstore]
 ---
 
 **TL;DR:** If an attacker compromises a build step (a poisoned dependency, a tampered Makefile target) rather than the signing key itself, a correctly signed image sails through verification — the signature only proves *which identity produced these bytes*, never *what process produced them*. SLSA provenance attestations close that gap by attaching a separate, equally-signed record of the source commit, builder identity, and build invocation to the image, so a deploy-time policy can check the build's inputs, not just its output.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`sigstore/cosign`](https://github.com/sigstore/cosign)
 

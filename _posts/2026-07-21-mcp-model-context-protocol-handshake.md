@@ -8,6 +8,8 @@ order: 18
 tags: [genai, mcp, ai-tools, llm, protocol]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 **Why can't an LLM just call a function on a remote server and get an answer back?**
 
 Because neither side knows what the other supports until they talk. An LLM host might support streaming, structured tool outputs, or subscription-based resource watching. A tool server might expose ten capabilities or two. Without an explicit negotiation phase, the client either over-requests (gets errors) or under-requests (misses features). MCP solves this with a structured handshake that negotiates protocol version, exchanges capability advertisements, and locks the connection to a shared understanding before any tool call is made.
@@ -114,10 +116,7 @@ async def main():
 
     async with stdio.stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, init_options)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+# ... (1 lines omitted)
 ```
 
 The server registers exactly two handler callbacks. The SDK's `Server.__init__` stores them in `_request_handlers` as `HandlerEntry` objects, each pairing a method string with a Pydantic params model for validation:

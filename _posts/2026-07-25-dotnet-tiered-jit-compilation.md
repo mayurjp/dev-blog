@@ -9,6 +9,8 @@ tags: [dotnet, jit, tiered-compilation, ryujit, performance, runtime]
 ---
 
 **TL;DR:** Why does .NET re-compile a method it already has machine code for? Because the first JIT pass (Tier0) trades code quality for startup speed — it generates unoptimized code with no inlining, no loop optimizations, and minimal analysis. Once call counting confirms a method is actually hot (called 30+ times after startup), the runtime kicks off a background thread to re-JIT it with full Tier1 optimizations (inlining, vectorization, dead code elimination). The slow code runs for milliseconds; the optimized code runs for the lifetime of the process.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/runtime`](https://github.com/dotnet/runtime) — the RyuJIT JIT compiler and `TieredCompilationManager`
 
@@ -198,7 +200,7 @@ CORJIT_FLAGS TieredCompilationManager::GetJitFlags(PrepareCodeConfig *config)
             UNREACHABLE();
     }
     return flags;
-}
+# ... (1 lines omitted)
 ```
 
 This teaches that a hello-world can't:

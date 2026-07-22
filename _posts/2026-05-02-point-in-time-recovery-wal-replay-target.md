@@ -5,9 +5,12 @@ date: 2026-05-02 09:00:00 +0530
 categories: databases
 order: 11
 tags: [databases, backups, point-in-time-recovery, postgresql, c]
+description: "A backup ran at midnight, the accident happened at 2:47pm — how does recovery land exactly there? Postgres restores the base backup, then replays ever..."
 ---
 
 **TL;DR:** A backup ran at midnight, the accident happened at 2:47pm — how does recovery land exactly there? Postgres restores the base backup, then replays every WAL record since it in order, checking each one against the configured recovery target (a timestamp, transaction ID, or WAL location), and halts replay the instant a record satisfies the stop condition — landing the database precisely at that point, not at midnight and not at everything since.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`postgres/postgres`](https://github.com/postgres/postgres)
 

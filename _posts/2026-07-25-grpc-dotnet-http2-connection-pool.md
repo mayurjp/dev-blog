@@ -9,6 +9,8 @@ tags: [dotnet, grpc, http2, networking]
 ---
 
 **TL;DR:** Does a single `GrpcChannel` really open just one HTTP/2 connection to a server, and if so, what happens when your concurrent streams exceed that connection's limit?
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

@@ -9,6 +9,8 @@ tags: [platform-engineering, self-service, waypoint, guardrails, infrastructure]
 ---
 
 **TL;DR:** *How do developers get infrastructure without filing a ticket and waiting three days — without also handing them a loaded gun?* Self-service: an abstraction they control, with guardrails the platform enforces underneath.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [hashicorp/waypoint](https://github.com/hashicorp/waypoint)
 

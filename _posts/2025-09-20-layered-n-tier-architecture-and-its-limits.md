@@ -5,9 +5,12 @@ date: 2025-09-20 09:00:00 +0530
 categories: architecture
 order: 1
 tags: [software-architecture, layered-architecture, n-tier, dotnet, dependency-inversion]
+description: "If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because Domain defines the interface it needs (`IOrde..."
 ---
 
 **TL;DR:** If Domain is the innermost layer, why does it get to dictate what Infrastructure must implement? Because Domain defines the interface it needs (`IOrderRepository`) and Infrastructure implements it — compile-time references point inward toward Domain even though runtime calls flow outward to persistence.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **In plain English (30 sec):** You already write `OrderRepository` interfaces in `Domain` projects every day. Infrastructure teams implement them, and the compiler enforces that the implementation references the interface — not the other way around.
 

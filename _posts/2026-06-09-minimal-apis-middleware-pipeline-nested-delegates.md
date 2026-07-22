@@ -9,6 +9,8 @@ tags: [dotnet, aspnetcore, minimal-apis, middleware, request-pipeline]
 ---
 
 **TL;DR:** `app.Use(...)`/`app.MapGet(...)` calls in a Minimal API look like they're building a list the framework walks through per-request, checking "does this middleware apply?" one by one — but ASP.NET Core composes them once, at startup, into a single nested chain of function calls (`RequestDelegate`s wrapping `RequestDelegate`s), registered last-to-first so the *first* `app.Use(...)` call ends up as the *outermost* wrapper. There's no list being iterated at request time — just one function calling the next.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

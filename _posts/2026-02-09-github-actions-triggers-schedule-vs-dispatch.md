@@ -6,10 +6,13 @@ categories: cicd
 order: 3
 tags: [cicd, github-actions, triggers, workflow-dispatch]
 excerpt: ""
+description: "Why does a scheduled workflow have nothing to react to, but a manually-triggered one gets a form? `schedule` is pure time-based with essentially no ev..."
 ---
 {% raw %}
 
 **TL;DR:** Why does a scheduled workflow have nothing to react to, but a manually-triggered one gets a form? `schedule` is pure time-based with essentially no event payload, so the workflow has to independently determine what needs doing on every run; `workflow_dispatch` provides zero automatic event data either, but instead exposes structured, typed, author-defined input fields that become a literal form a human fills in before the run starts.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`hashicorp/terraform`](https://github.com/hashicorp/terraform)
 

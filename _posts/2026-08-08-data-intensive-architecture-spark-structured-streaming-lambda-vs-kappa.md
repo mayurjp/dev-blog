@@ -9,6 +9,8 @@ tags: [architecture, data-intensive-applications, apache-spark, structured-strea
 ---
 
 **TL;DR:** If a system's whole job IS moving and transforming data at scale, does correctness (a precise, complete batch recompute) really require a different codebase than speed (a fast, incremental streaming view)? The Lambda architecture assumed yes and paid for it with two pipelines to build, test, and keep logically in sync. Apache Spark's Structured Streaming engine shows the mechanism that undoes that assumption: the same DataFrame transformation compiles to either a one-shot batch job or a continuously re-triggered micro-batch job, depending only on whether the source was opened with `spark.read` or `spark.readStream` — collapsing Lambda's two layers into the Kappa architecture's one.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`apache/spark`](https://github.com/apache/spark)
 

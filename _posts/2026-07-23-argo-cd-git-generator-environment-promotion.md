@@ -10,6 +10,8 @@ source: argoproj/argo-cd
 source_url: https://github.com/argoproj/argo-cd
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 Argo CD's Git generator reads files or directories from a Git repository and produces an `Application` per entry automatically. Environment promotion becomes a Git commit—edit a version file in `env/`, push, and Argo CD reconciles the changed environment. No scripts, no CI runs, no manual approvals outside Git.

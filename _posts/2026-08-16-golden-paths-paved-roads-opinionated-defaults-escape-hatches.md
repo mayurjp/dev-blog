@@ -9,6 +9,8 @@ tags: [platform-engineering, golden-paths, paved-roads, backstage, scaffolder]
 ---
 
 **TL;DR:** *How do you make the right way to build a service also the easiest way, without forbidding the exceptions?* A golden path: opinionated defaults baked into a template, with an escape hatch for when the default genuinely doesn't fit.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [backstage/backstage](https://github.com/backstage/backstage)
 

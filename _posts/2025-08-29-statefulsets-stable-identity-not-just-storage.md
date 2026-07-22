@@ -6,9 +6,12 @@ categories: kubernetes
 order: 7
 tags: [kubernetes, statefulsets, sharding, controller]
 published: false
+description: "What do you do when your replicas can't be interchangeable? Use a StatefulSet — it gives each replica a fixed ordinal identity (`-0`, `-1`, `-2`...) w..."
 ---
 
 **TL;DR:** What do you do when your replicas can't be interchangeable? Use a StatefulSet — it gives each replica a fixed ordinal identity (`-0`, `-1`, `-2`...) with stable DNS and, optionally, its own persistent volume, both of which are re-issued to the same ordinal across every reschedule instead of the random names a Deployment's Pods get.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`argoproj/argo-cd`](https://github.com/argoproj/argo-cd)
 

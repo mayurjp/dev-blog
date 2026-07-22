@@ -5,6 +5,7 @@ date: 2025-07-30 09:00:00 +0530
 categories: docker
 order: 1
 tags: [docker, images, layers, buildkit, overlay2, caching]
+description: "Every Dockerfile line makes a cached layer. Change one line, and every layer after it rebuilds. Instruction order decides fast builds vs slow ones."
 ---
 
 **TL;DR:** Every Dockerfile line makes a cached layer. Change one line, and every layer after it rebuilds. Instruction order decides fast builds vs slow ones.

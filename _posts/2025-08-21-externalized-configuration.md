@@ -6,6 +6,7 @@ categories: microservices
 order: 5
 tags: [microservices, spring-cloud-config, configuration, twelve-factor]
 published: false
+description: "You already code locally with `.env` files. Externalized configuration moves settings out of the artifact — a dedicated config server keyed by app nam..."
 ---
 
 **TL;DR:** You already code locally with `.env` files. Externalized configuration moves settings out of the artifact — a dedicated config server keyed by app name and profile serves config from git (or another store), and services fetch it over the network at startup instead of shipping it inside the JAR.

@@ -5,9 +5,12 @@ date: 2026-05-04 09:00:00 +0530
 categories: databases
 order: 12
 tags: [databases, polyglot-persistence, redis, postgresql, csharp]
+description: "One service gets Redis, four others get Postgres — what decided that, and where is it written down? The choice is made explicitly in the application's..."
 ---
 
 **TL;DR:** One service gets Redis, four others get Postgres — what decided that, and where is it written down? The choice is made explicitly in the application's own orchestration file: `Basket.API` is wired to Redis because its cart data is ephemeral and key-value shaped, while `Catalog`, `Ordering`, `Identity`, and `Webhooks` each get their own separate Postgres database because their data needs relational integrity and querying — the decision is literal, inspectable configuration, not an unwritten convention.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 

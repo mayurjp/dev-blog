@@ -5,9 +5,12 @@ date: 2025-09-16 09:00:00 +0530
 categories: cicd
 order: 1
 tags: [cicd, github-actions, ci, dotnet, automation]
+description: "What actually happens between `git push` and 'All checks have passed'? GitHub Actions matches the push/PR event against a workflow's trigger, provisio..."
 ---
 
 **TL;DR:** What actually happens between `git push` and "All checks have passed"? GitHub Actions matches the push/PR event against a workflow's trigger, provisions a fresh ephemeral runner, executes the defined steps (checkout, install toolchain, build, test) in that clean environment, and reports the pass/fail result back onto the commit or PR as a status check.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 

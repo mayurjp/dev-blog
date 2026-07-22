@@ -9,6 +9,8 @@ tags: [networking, load-balancer, l4, l7, health-check, draining]
 ---
 
 **TL;DR:** How does a load balancer spread load without breaking sessions? L4 routes on IP/port (fast, opaque), L7 routes on HTTP semantics; both use health checks to evict bad backends and **connection draining** to retire live ones without dropping in-flight requests.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [envoyproxy/envoy](https://github.com/envoyproxy/envoy) — its `HealthCheckerFactory` supports HTTP, TCP, and gRPC health checks, and [nginx/nginx](https://github.com/nginx/nginx) shows weighted round-robin peer selection with `max_conns` caps.
 

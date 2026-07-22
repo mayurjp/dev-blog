@@ -8,6 +8,8 @@ order: 5
 tags: [mlops, model-registry, mlflow, versioning, model-lifecycle]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 **Q:** How do you know which model version is serving traffic right now without grepping log files or querying a separate CMDB?
@@ -153,11 +155,7 @@ mv2 = client.transition_model_version_stage(
     archive_existing_versions=True,  # v1 → Archived automatically
 )
 print(f"v2 stage: {mv2.current_stage}")  # Production
-
-# 7. Verify: only v2 is in Production now
-versions = client.get_latest_versions("fraud-detector", stages=["production"])
-assert len(versions) == 1
-assert versions[0].version == "2"
+# ... (1 lines omitted)
 ```
 
 ---
@@ -217,16 +215,7 @@ def transition_model_version_stage(self, name, version, stage, archive_existing_
         )
         sql_model_version.current_stage = get_canonical_stage(stage)
         sql_model_version.last_updated_time = last_updated_time
-
-        # Update the parent registered model's timestamp too
-        sql_registered_model = sql_model_version.registered_model
-        sql_registered_model.last_updated_time = last_updated_time
-
-        # Single atomic commit: archive old + promote new
-        session.add_all([*model_versions, sql_model_version, sql_registered_model])
-        return self._populate_model_version_aliases(
-            session, name, sql_model_version.to_mlflow_entity()
-        )
+# ... (1 lines omitted)
 ```
 
 Key production details to notice:

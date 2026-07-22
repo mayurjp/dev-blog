@@ -5,7 +5,10 @@ date: 2026-05-18 09:00:00 +0530
 categories: observability
 order: 7
 tags: [observability, slo, sli, error-budget, prometheus, go]
+description: "## 1. The Engineering Problem: an error budget is only useful if you know how fast it's being spent, not just whether it's gone"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: an error budget is only useful if you know how fast it's being spent, not just whether it's gone
 

@@ -5,6 +5,7 @@ date: 2025-11-05 09:00:00 +0530
 categories: microservices
 order: 18
 tags: [microservices, saga, choreography, orchestration, masstransit]
+description: "Who decides what happens next in a multi-step process — everyone, or one coordinator?"
 ---
 
 **TL;DR:** Who decides what happens next in a multi-step process — everyone, or one coordinator?

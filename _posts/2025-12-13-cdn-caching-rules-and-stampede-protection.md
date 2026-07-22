@@ -5,6 +5,7 @@ date: 2025-12-13 09:00:00 +0530
 categories: system-design
 order: 7
 tags: [system-design, cdn, varnish, caching]
+description: "Why does adding one cookie header silently turn off your CDN's caching? Because Varnish's default rules bypass the cache entirely for any request carr..."
 ---
 
 **TL;DR:** Why does adding one cookie header silently turn off your CDN's caching? Because Varnish's default rules bypass the cache entirely for any request carrying a Cookie or Authorization header (and mark a response uncacheable if the origin's reply sets a cookie or is `no-store`/`private`) — a deliberate safety default against leaking one user's response to another, not a bug — while "hit-for-miss" caches that uncacheable state briefly to prevent a stampede of repeated origin fetches.

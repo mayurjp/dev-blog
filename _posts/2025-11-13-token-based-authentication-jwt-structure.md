@@ -5,6 +5,7 @@ date: 2025-11-13 09:00:00 +0530
 categories: security
 order: 3
 tags: [security, jwt, tokens, hmac]
+description: "What actually stops someone from editing their own JWT to become admin? The signature is computed over the entire header-plus-payload using a secret o..."
 ---
 
 **TL;DR:** What actually stops someone from editing their own JWT to become admin? The signature is computed over the entire header-plus-payload using a secret or private key only the issuer holds, so changing even one character makes the recomputed signature fail to match and the token gets rejected.

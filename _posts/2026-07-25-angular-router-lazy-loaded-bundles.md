@@ -8,6 +8,8 @@ order: 6
 tags: [angular, routing, lazy-loading, code-splitting, bundle-size, webpack, performance]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## TL;DR
 
 **Q:** Why does using `loadChildren` in Angular Router reduce initial bundle size?
@@ -177,19 +179,7 @@ export class RouterConfigLoader {
     const loader = (async () => {
       try {
         const result = await loadChildren(
-          route, this.compiler, parentInjector, this.onLoadEndListener,
-        );
-        route._loadedRoutes = result.routes;
-        route._loadedInjector = result.injector;
-        return result;
-      } finally {
-        this.childrenLoaders.delete(route);
-      }
-    })();
-    this.childrenLoaders.set(route, loader);
-    return loader;
-  }
-}
+# ... (1 lines omitted)
 ```
 
 ---

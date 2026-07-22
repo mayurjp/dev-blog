@@ -9,6 +9,8 @@ tags: [gitops, statefulset, databases, postgresql, sealed-secrets, persistence, 
 ---
 
 **TL;DR:** How do you GitOps a database when "reconcile by recreating the pod" would wipe your data? Use StatefulSets with stable identities and PersistentVolumeClaims, gate secrets with SealedSecrets, and treat the data volume as something the reconciler must never delete.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [bitnami-labs/sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) and [bitnami/charts](https://github.com/bitnami/charts) (PostgreSQL StatefulSet).
 

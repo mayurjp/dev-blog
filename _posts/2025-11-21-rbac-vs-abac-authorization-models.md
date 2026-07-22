@@ -5,6 +5,7 @@ date: 2025-11-21 09:00:00 +0530
 categories: security
 order: 7
 tags: [security, rbac, abac, authorization, casbin]
+description: "Why does 'can Alice edit this file' sometimes need more than a role check? RBAC checks whether a subject holds a role that's been granted a permission..."
 ---
 
 **TL;DR:** Why does "can Alice edit this file" sometimes need more than a role check? RBAC checks whether a subject holds a role that's been granted a permission — a static, enumerable lookup — while ABAC evaluates an expression over live attributes of the subject and resource (like "is the requester the resource's owner"), covering every case without a new policy row per resource.
@@ -284,15 +285,7 @@ func main() {
     // ABAC uses no policy rows - matcher depends on resource attributes
     // Runtime evaluation sees full resource object (including Owner field)
     // Example check
-    request := []string{"bob", "document#42", "edit"}
-    result := abacEnforcer.Enforce(request...)
-    // Result true if bob is document#42.Owner, false otherwise
-
-    // kubectl alternative for Kubernetes RBAC in Kubernetes clusters
-    kubectl create clusterrolebinding owner-access \
-        --clusterrole=edit \
-        --user=alice
-}
+# ... (1 lines omitted)
 ```
 
 **Python alternative:**

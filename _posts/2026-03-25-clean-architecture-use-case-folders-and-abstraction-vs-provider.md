@@ -5,9 +5,12 @@ date: 2026-03-25 09:00:00 +0530
 categories: architecture
 order: 3
 tags: [architecture, clean-architecture, csharp, mediatr]
+description: "Why does the Application layer reference EF Core at all, if Infrastructure owns the database? Application references only the base, provider-agnostic ..."
 ---
 
 **TL;DR:** Why does the Application layer reference EF Core at all, if Infrastructure owns the database? Application references only the base, provider-agnostic EF Core package to describe abstractions like `DbSet<TodoItem>` in its own interface — the actual database provider packages (PostgreSQL, SQL Server, SQLite) are referenced exclusively from Infrastructure, so the dependency rule separates the *shape* of persistence from the specific *provider*.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`jasontaylordev/CleanArchitecture`](https://github.com/jasontaylordev/CleanArchitecture)
 

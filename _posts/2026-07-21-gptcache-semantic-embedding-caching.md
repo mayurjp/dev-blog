@@ -4,6 +4,7 @@ date: 2026-07-21 09:00:00 +0530
 categories: [genai]
 tags: [gptcache, llm-caching, embedding-similarity, cost-optimization, semantic-cache, rag-cost]
 order: 17
+description: "> In plain English (30 sec): Memoization you already do: check Map first, only call DB on miss."
 ---
 > **In plain English (30 sec):** Memoization you already do: check Map first, only call DB on miss.
 

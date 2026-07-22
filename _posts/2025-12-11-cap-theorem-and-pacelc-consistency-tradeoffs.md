@@ -5,9 +5,12 @@ date: 2025-12-11 09:00:00 +0530
 categories: system-design
 order: 6
 tags: [system-design, cap-theorem, pacelc, cockroachdb, consistency]
+description: "Why does 'consistent' sometimes mean 'wait a little longer,' even when nothing is broken? Because PACELC extends CAP theorem to the non-partition case..."
 ---
 
 **TL;DR:** Why does "consistent" sometimes mean "wait a little longer," even when nothing is broken? Because PACELC extends CAP theorem to the non-partition case: CockroachDB's closed timestamps let a follower serve a read locally once it holds a promise that no more writes will land below a given timestamp, trading a computed lead time of staleness for lower latency and availability, while reads that need the absolute latest write still go to the leaseholder.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`cockroachdb/cockroach`](https://github.com/cockroachdb/cockroach)
 

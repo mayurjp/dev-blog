@@ -9,6 +9,8 @@ tags: [genai, llm-evals, evaluation, openai, testing]
 ---
 
 **TL;DR:** Does a single accuracy score tell you whether your LLM is safe, factually grounded, and stylistically appropriate? No — it tells you the average across a batch, hiding exactly which categories fail and why. OpenAI's `openai/evals` framework replaces the "one number" approach with a **registry of named evals**, each backed by a JSONL dataset, a scoring template, and a version identifier — so you can run `oaieval gpt-4 my-eval.dev.v0`, see accuracy per eval, compare across model versions, and use a separate model to grade open-ended responses when a simple string match won't do.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

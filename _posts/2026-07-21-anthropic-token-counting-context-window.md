@@ -9,6 +9,8 @@ tags: [genai, context-window, tokenization, anthropic, claude, prompt-caching]
 ---
 
 **TL;DR:** You cannot use tiktoken to count Claude's tokens -- tiktoken implements OpenAI's BPE tokenizer, which produces different token boundaries than Claude's. A character count divided by four is a rough English heuristic that breaks on code, multilingual text, and structured JSON. The only reliable source of token counts for Claude is the `Usage` object returned in every API response, which includes `input_tokens`, `output_tokens`, and -- if you use prompt caching -- `cache_creation_input_tokens` and `cache_read_input_tokens`. The Anthropic SDK accumulates these counts incrementally during streaming so you can monitor context window consumption in real time.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -149,12 +151,7 @@ for question in questions:
     # Log actual consumption
     print(f"Input: {response.usage.input_tokens} tokens")
     print(f"Output: {response.usage.output_tokens} tokens")
-    print(f"Cache read: {response.usage.cache_read_input_tokens or 0}")
-
-    conversation.append({
-        "role": "assistant",
-        "content": response.content[0].text,
-    })
+# ... (1 lines omitted)
 ```
 
 This pattern uses the API itself as the tokenizer -- no tiktoken, no character counting, no guessing.

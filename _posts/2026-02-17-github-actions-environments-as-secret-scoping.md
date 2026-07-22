@@ -6,6 +6,7 @@ categories: cicd
 order: 7
 tags: [cicd, github-actions, secrets, environments]
 excerpt: ""
+description: "Why do some secrets need their own GitHub Environment instead of just being a repo secret? A repo secret is visible to every workflow and job in the r..."
 ---
 {% raw %}
 

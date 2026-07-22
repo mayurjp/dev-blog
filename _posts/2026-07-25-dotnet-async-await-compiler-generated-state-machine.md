@@ -9,6 +9,8 @@ tags: [dotnet, async-await, task, state-machine, compiler]
 ---
 
 **TL;DR:** Does `async/await` spin up a new thread for each await? No — the compiler rewrites your method into a heap-allocated state machine that runs synchronously on the current thread up to the first await, then suspends and resumes later via a callback when the awaited task completes, with no thread-per-await cost at all.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

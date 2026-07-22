@@ -5,9 +5,12 @@ date: 2025-09-08 09:00:00 +0530
 categories: security
 order: 1
 tags: [security, authentication, aspnetcore, identity, password-hashing, pbkdf2]
+description: "When a database breach exposes the Users table, does the attacker walk away with usable passwords or garbage? A production password hasher salts each ..."
 ---
 
 **TL;DR:** When a database breach exposes the Users table, does the attacker walk away with usable passwords or garbage? A production password hasher salts each password uniquely and runs it through a deliberately slow, versioned hash (like PBKDF2) so every guess costs real time, and old and new hashes can both still be verified.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/aspnetcore`](https://github.com/dotnet/aspnetcore)
 
@@ -144,40 +147,7 @@ public class PasswordHasher<TUser> : IPasswordHasher<TUser> where TUser : class
         }
         switch (decodedHashedPassword[0])
         {
-            case 0x01:
-                if (VerifyHashedPasswordV3(decodedHashedPassword, providedPassword, out int embeddedIterCount, out KeyDerivationPrf prf))
-                {
-                    // If this hasher was configured with a higher iteration count, change the entry now.
-                    if (embeddedIterCount < _iterCount)
-                    {
-                        return PasswordVerificationResult.SuccessRehashNeeded;
-                    }
-
-                    // V3 now requires SHA512. If the old PRF is SHA1 or SHA256, upgrade to SHA512 and rehash.
-                    if (prf == KeyDerivationPrf.HMACSHA1 || prf == KeyDerivationPrf.HMACSHA256)
-                    {
-                        return PasswordVerificationResult.SuccessRehashNeeded;
-                    }
-
-                    return PasswordVerificationResult.Success;
-                }
-                else
-                {
-                    return PasswordVerificationResult.Failed;
-                }
-
-            default:
-                return PasswordVerificationResult.Failed; // unknown format marker
-        }
-    }
-
-    private static bool VerifyHashedPasswordV3(byte[] hashedPassword, string password, out int iterCount, out KeyDerivationPrf prf)
-    {
-        // ... reads prf, iterCount, saltLength, salt, subkey back out of the byte layout ...
-        byte[] actualSubkey = KeyDerivation.Pbkdf2(password, salt, prf, iterCount, subkeyLength);
-        return CryptographicOperations.FixedTimeEquals(actualSubkey, expectedSubkey);
-    }
-}
+# ... (1 lines omitted)
 ```
 
 What this teaches that a hello-world "just call bcrypt" example can't:

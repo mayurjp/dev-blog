@@ -9,6 +9,8 @@ tags: [observability, apm, profiling, aspire, opentelemetry]
 ---
 
 **TL;DR:** Can a single dashboard truly correlate your traces, metrics, and logs without forcing engineers to copy trace IDs between three different UIs and re-derive context each time? Yes — if all three signals are ingested through one OTLP endpoint, stored in a single `TelemetryRepository`, and linked by shared `TraceId`/`SpanId` keys that the viewer can navigate across tabs.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

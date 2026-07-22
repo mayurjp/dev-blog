@@ -5,7 +5,10 @@ date: 2026-03-17 09:00:00 +0530
 categories: ddd
 order: 10
 tags: [ddd, event-sourcing, csharp]
+description: "## 1. The Engineering Problem: keeping only 'current state' throws away the history a lot of real questions need"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## 1. The Engineering Problem: keeping only "current state" throws away the history a lot of real questions need
 

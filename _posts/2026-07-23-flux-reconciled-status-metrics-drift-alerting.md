@@ -9,6 +9,8 @@ tags: [gitops, flux, observability, drift-detection, prometheus, kube-state-metr
 ---
 
 **TL;DR:** Did Flux break your drift alerts in v2.6? Not exactly — but it removed the shortcut. `gotk_reconcile_condition` no longer exists as a controller-emitted metric, and `gotk_reconcile_duration_seconds_count` no longer carries a `result` label. If your Prometheus alerts counted "error reconciliations" by filtering on that label, they now fire on nothing. The actual signal was never in the controller's metric output — it's in the Kubernetes status conditions on the Kustomization object itself, which kube-state-metrics can surface as `gotk_resource_info` with the `ready` label, or more precisely via custom `customResourceState` config that reads `status.conditions`.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The Engineering Problem
 
@@ -136,8 +138,7 @@ func (r *Recorder) RecordCondition(ref corev1.ObjectReference, condition metav1.
 			ref.Kind, ref.Name, ref.Namespace,
 			condition.Type, string(status),
 		).Set(value)
-	}
-}
+# ... (1 lines omitted)
 ```
 
 The gauge supports five labels — `kind`, `name`, `namespace`, `type` (which condition), and `status` (True/False/Unknown). A healthy Kustomization would set `gotk_reconcile_condition{kind="Kustomization", type="Ready", status="True"}` to `1` and the `False` and `Unknown` variants to `0`. A drifted resource would flip those values. This is exactly the signal drift alerting needs — but the controllers stopped calling `RecordCondition` in the reconcile loop. Only `RecordDuration` is called from the deferred function:

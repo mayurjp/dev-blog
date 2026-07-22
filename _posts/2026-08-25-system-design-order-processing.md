@@ -8,6 +8,8 @@ order: 3
 tags: [aspnet-webapi, system-design, architecture, event-driven, messaging]
 ---
 
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
+
 ## The problem
 
 Design an order processing system that:

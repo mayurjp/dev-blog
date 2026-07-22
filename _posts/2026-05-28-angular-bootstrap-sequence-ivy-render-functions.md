@@ -11,6 +11,8 @@ excerpt: ""
 {% raw %}
 
 **TL;DR:** When you call `bootstrapApplication(AppComponent)`, what actually turns that one function call into a rendered page? Angular builds a root `EnvironmentInjector` and an `ApplicationRef` first  with no `NgModule` anywhere in the path  then calls `ApplicationRef.bootstrap()`, which creates the root component's view by invoking its Ivy-compiled template function: a plain JavaScript function full of `??elementStart`/`??advance`/`??property` instruction calls, not a virtual-DOM diff.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem: a component class and a template string aren't runnable code
 
@@ -364,17 +366,7 @@ export function ??defineComponent<T>(
   return noSideEffects(() => {
     const baseDef = getNgDirectiveDef(componentDefinition as DirectiveDefinition<T>);
     const def: Writable<ComponentDef<T>> = {
-      ...baseDef,
-      decls: componentDefinition.decls,
-      vars: componentDefinition.vars,
-      template: componentDefinition.template,
-      consts: componentDefinition.consts || null,
-      // ... onPush, directiveDefs, pipeDefs, encapsulation, styles, schemas elided ...
-    };
-    initFeatures(def);
-    return def;
-  });
-}
+# ... (1 lines omitted)
 ```
 
 That's the wrapper. Here's what the compiler actually generates as the `template` value it gets handed  a real golden-test fixture from Angular's own compiler compliance suite, compiled from a component with three levels of nested `*ngFor`:

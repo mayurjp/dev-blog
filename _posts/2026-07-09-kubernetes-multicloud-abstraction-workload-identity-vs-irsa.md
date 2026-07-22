@@ -9,6 +9,8 @@ tags: [multicloud, kubernetes, gke, eks, workload-identity, irsa]
 ---
 
 **TL;DR:** Does "Kubernetes is the multi-cloud abstraction layer" mean a ServiceAccount that grants a pod cloud IAM permissions works identically on GKE and EKS? The Kubernetes-side object is genuinely the same — a `ServiceAccount` with an annotation — but what happens on the cloud side of that annotation is structurally different. GKE's Workload Identity is a *bidirectional* binding: a separate GCP service account, plus an explicit IAM policy grant naming the exact Kubernetes ServiceAccount allowed to impersonate it. AWS's IRSA is a *unilateral* trust policy: the IAM role itself trusts any token whose subject claim matches a specific `namespace:name` string, issued by a per-cluster OIDC provider. Same Kubernetes API surface, genuinely different security architecture underneath.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 

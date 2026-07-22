@@ -9,6 +9,8 @@ tags: [gitops, flux, pull-based, reconciliation, kustomize, server-side-apply]
 ---
 
 **TL;DR:** In a push-based CI/CD pipeline, your CI runner needs cluster credentials and runs `kubectl apply` from outside. In Flux's pull-based model, an in-cluster controller polls Git on a fixed interval, fetches the artifact, builds the Kustomize overlay, applies with server-side apply, prunes orphans, and runs health checks — all without any external system holding a kubeconfig. Git is the only source of truth, and the controller is the only thing touching the cluster.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## The Engineering Problem
 
@@ -242,8 +244,7 @@ func (r *KustomizationReconciler) reconcile(
 	// Step 7: Mark as ready
 	conditions.MarkTrue(obj, meta.ReadyCondition, meta.ReconciliationSucceededReason,
 		"Applied revision: %s", revision)
-	return nil
-}
+# ... (1 lines omitted)
 ```
 
 The inventory is critical: it's a snapshot of every resource the controller has applied. On the next reconcile, the controller diffs the old inventory against the new one to find stale resources — those that were in the old set but not the new set. Those get pruned. This is how `prune: true` actually works: it's not comparing Git to cluster, it's comparing *this revision's applied set* against *the previous revision's applied set*.
@@ -345,7 +346,7 @@ func Generate(options Options) (*manifestgen.Manifest, error) {
 		Path:    kfile,
 		Content: string(kd),
 	}, nil
-}
+# ... (1 lines omitted)
 ```
 
 This is used by the `flux create kustomization` CLI command — not by the controller itself at runtime. The controller expects a `kustomization.yaml` (or equivalent) to already exist in the artifact. The generator is a convenience for bootstrapping.

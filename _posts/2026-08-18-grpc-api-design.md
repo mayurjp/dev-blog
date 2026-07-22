@@ -9,6 +9,8 @@ tags: [api-design, grpc, protobuf, schema-evolution, wire-format]
 ---
 
 **TL;DR:** How do you change a gRPC/protobuf message without breaking old clients? Never reuse a field number, never change a field's type tag, and treat every field as add/remove-only — the wire format keys on numbers, not names.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [grpc/grpc-go](https://github.com/grpc/grpc-go) — its `encoding/proto` codec marshals/unmarshals messages via `google.golang.org/protobuf/proto`, the canonical wire-format implementation.
 

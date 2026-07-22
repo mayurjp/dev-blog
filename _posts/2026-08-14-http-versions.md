@@ -9,6 +9,8 @@ tags: [networking, http, http2, http3, quic, multiplexing, hpack]
 ---
 
 **TL;DR:** Why are there three HTTP wire versions? HTTP/1.1 serializes poorly (one request per TCP stream → head-of-line blocking), HTTP/2 multiplexes streams over one TCP connection with HPACK, and HTTP/3 runs those same streams over QUIC (UDP) to kill TCP-level HOL blocking and enable 0-RTT.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [curl/curl](https://github.com/curl/curl) — its connection-matching logic shows exactly how a client negotiates and reuses h1/h2/h3 connections via ALPN and `http_neg.allowed`.
 

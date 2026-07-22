@@ -9,6 +9,8 @@ tags: [angular, signals, computed, effect, state-management, reactivity]
 ---
 
 **TL;DR:** Why does `computed()` wait to calculate until something reads it, while `effect()` fires the instant it's created? Because computed values derive state — they produce nothing until someone asks for the result, and computing eagerly would waste cycles on values nobody reads. Effects produce side effects — their entire purpose is to *do* something, so deferring them would mean missing the initial trigger they were registered to observe. Angular implements both on the same reactive graph node, but the scheduling hook differs: `producerMustRecompute` returns `true` on a `computed` whose value is `UNSET`, while an `effect`'s `consumerMarkedDirty` immediately schedules itself with the `ChangeDetectionScheduler`.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -194,10 +196,7 @@ const COMPUTED_NODE = (() => {
       }
 
       node.value = newValue;
-      node.version++;
-    },
-  };
-})();
+# ... (1 lines omitted)
 ```
 
 The getter returned by `createComputed` shows the read-gated entry point — `producerUpdateValueVersion` only re-runs the computation if the dirty/epoch checks say it's necessary, and `producerAccessed` only records the dependency if a consumer is active:

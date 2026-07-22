@@ -9,6 +9,8 @@ tags: [kubernetes, operators, crd, controller-runtime, kubebuilder]
 ---
 
 **TL;DR:** Kubernetes' control loops only know how to reconcile the object kinds baked into the API server — `Deployment`, `Service`, `Pod` — so how do you get the same self-healing behavior for your own domain object, like "a Memcached cluster" or "a Postgres replica set"? A `CustomResourceDefinition` (CRD) registers the new kind with the API server, and a `controller-runtime`-based Operator runs its own `Reconcile` loop against it — the exact same pattern `kube-controller-manager` uses internally for `Deployment`/`ReplicaSet`, just running as your own binary. From `operator-framework/operator-sdk`'s real Kubebuilder-scaffolded controller source.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. The Engineering Problem
 
@@ -197,17 +199,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// the next pass re-reads real state instead of trusting this branch.
 		return ctrl.Result{RequeueAfter: time.Minute}, nil
 	}
-
-	size := memcached.Spec.Size
-	if *found.Spec.Replicas != size {
-		found.Spec.Replicas = &size
-		if err = r.Update(ctx, found); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{Requeue: true}, nil
-	}
-	return ctrl.Result{}, nil
-}
+# ... (1 lines omitted)
 ```
 
 The watch registration, which is what turns "create once" into "keep converged":

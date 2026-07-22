@@ -144,7 +144,7 @@ internal sealed class SyntaxStore
             }
         }
     }
-}
+# ... (1 lines omitted)
 ```
 
 What this reveals: the **first check** is reference equality on the Compilation itself (`_compilation == _previous._compilation`). If the Compilation reference is the same object — which `CompilationCache` guarantees when inputs are unchanged — the entire syntax input table is reused without touching a single syntax tree. This is why `CompilationCache` preserving the reference is so important: it is the fast path that short-circuits everything below it.

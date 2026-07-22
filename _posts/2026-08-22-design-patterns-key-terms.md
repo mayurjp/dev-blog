@@ -9,6 +9,8 @@ tags: [design-patterns, glossary, oop]
 ---
 
 **TL;DR:** This is the reference page for the object-oriented and architectural vocabulary used throughout this blog's design-patterns posts. Every term below is defined standalone — no prior post required — and each points to the post that takes it deeper.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 The posts in this domain assume you already know what a Strategy or a Repository is. If a term lands cold, find it here first. The list is grouped by theme (Creational, Structural, Behavioral, Principles, Concurrency, Architectural), not alphabetically, because these concepts build on each other.
 

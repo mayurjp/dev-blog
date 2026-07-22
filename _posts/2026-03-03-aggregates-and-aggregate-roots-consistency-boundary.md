@@ -5,9 +5,12 @@ date: 2026-03-03 09:00:00 +0530
 categories: ddd
 order: 3
 tags: [ddd, aggregates, aggregate-root, csharp]
+description: "Why can't you just call `orderItems.Add()` directly on an order's item list? Because the aggregate root (`Order`) is the only object in the cluster re..."
 ---
 
 **TL;DR:** Why can't you just call `orderItems.Add()` directly on an order's item list? Because the aggregate root (`Order`) is the only object in the cluster reachable from outside it — the item collection is exposed only as read-only, so every mutation must go through `Order`'s own methods (like `AddOrderItem`), which is what lets the root enforce business rules and keep the whole graph consistent.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 **Real repo:** [`dotnet/eShop`](https://github.com/dotnet/eShop)
 

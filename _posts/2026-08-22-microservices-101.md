@@ -9,6 +9,8 @@ tags: [microservices, fundamentals, architecture]
 ---
 
 **TL;DR:** A microservice is one deployable unit that owns one job and its own data, and talks to others over the network. Google's real **Online Boutique** demo is 11 such services (cart, checkout, payment, shipping…) in 5 languages — a perfect worked example. The hard part isn't splitting the code; it's that every call can fail, every service owns its own database, and one purchase now spans five network hops.
+> **In plain English (30 sec):** Think of this like concepts you already use, but in a production system at scale.
+
 
 ## 1. What is a microservice (and what it isn't)
 

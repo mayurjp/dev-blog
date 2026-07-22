@@ -10,7 +10,10 @@ source_files:
   - packages/forms/src/directives/shared.ts
   - packages/forms/src/validators.ts
   - packages/forms/src/directives/reactive_directives/form_control_directive.ts
+description: "## TL;DR"
 ---
+
+> **In plain English (30 sec):** A focused deep-dive on a specific mechanism or problem pattern.
 
 ## TL;DR
 
@@ -282,22 +285,7 @@ export class FormControlDirective extends NgControl implements OnChanges, OnDest
       this.form.setValue(this.model);
       this.viewModel = this.model;
     }
-  }
-
-  ngOnDestroy() {
-    if (this.form) {
-      cleanUpControl(this.form, this, false);
-    }
-  }
-
-  ɵngControlCreate(host: ControlDirectiveHost): void {
-    super.ngControlCreate(host);
-  }
-
-  ɵngControlUpdate(host: ControlDirectiveHost): void {
-    super.ngControlUpdate(host, true);
-  }
-}
+# ... (1 lines omitted)
 ```
 
 The directive calls `setUpControlValueAccessor()` which in turn calls `setUpValidators()` -- the same merge function shown earlier. When the directive is destroyed, `cleanUpControl()` reverses the wiring. None of this touches the `AbstractControl` signal internals; it only manipulates the validator function lists and value accessor callbacks.
